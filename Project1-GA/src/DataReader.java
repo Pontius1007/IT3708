@@ -1,56 +1,60 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DataReader {
     private int number_of_vehicles_per_depot;
     private int number_of_costumers;
     private int number_of_depots;
 
-    public DataReader() {
+    private Map<Integer, Vehicle> vehicle_dict = new HashMap<Integer, Vehicle>();
+    private Map<Integer, Customer> customer_dict = new HashMap<Integer, Customer>();
+    private Map<Integer, Depot> depot_dict = new HashMap<Integer, Depot>();
+
+    private DataReader() {
     }
 
 
-    private String readFile(String name_of_file) throws IOException {
+    //TODO: Create print for each dict
+    private void readFile(String name_of_file) throws IOException {
         BufferedReader br = new BufferedReader(new FileReader(name_of_file));
         try {
             String line = br.readLine();
-            int line_number = 1;
+            String[] splitStr = line.trim().split("\\s+");
 
-            while (line != null) {
-                //System.out.println(line);
-                String[] splitStr = line.trim().split("\\s+");
-                // Reads the first line and stores information
-                if (line_number == 1) {
-                    this.number_of_vehicles_per_depot = Integer.parseInt(splitStr[0]);
-                    this.number_of_costumers = Integer.parseInt(splitStr[1]);
-                    this.number_of_depots = Integer.parseInt(splitStr[2]);
-                }
-                // Have enough information to create the vehicles after reading line two
-                if (line_number == 2) {
-                    for (int depot=0; depot < this.number_of_depots; depot++) {
-                        for(int vehicle=0; vehicle < this.number_of_vehicles_per_depot; vehicle++) {
-                            //Kaller lage bil
-                        }
-                    }
-                }
+            // Reads the first line and stores information
+            this.number_of_vehicles_per_depot = Integer.parseInt(splitStr[0]);
+            this.number_of_costumers = Integer.parseInt(splitStr[1]);
+            this.number_of_depots = Integer.parseInt(splitStr[2]);
 
-                // Create the customers
-                if (line_number > this.number_of_depots+1 && line_number < this.number_of_costumers + (this.number_of_depots+2)) {
-                    //Call create customer
-                    //System.out.println(" "+splitStr[0] + " " + splitStr[1] + " " + splitStr[2] + " " + splitStr[3] + " " + splitStr[4]);
-                }
-
-                // Create depots
-                if (line_number > this.number_of_costumers + (this.number_of_depots+1)) {
-                    System.out.println(" "+splitStr[0] + " " + splitStr[1] + " " + splitStr[2]);
-                }
-
-
-                line_number += 1;
+            // Have enough information to create the vehicles after reading line two
+            for (int depot = 0; depot < this.number_of_depots; depot++) {
                 line = br.readLine();
+                splitStr = line.trim().split("\\s+");
+                int maxDuration = Integer.parseInt(splitStr[0]);
+                int maxLoad = Integer.parseInt(splitStr[1]);
+                for (int vehicle = 0; vehicle < this.number_of_vehicles_per_depot; vehicle++) {
+                    int veID = (depot * this.number_of_vehicles_per_depot + vehicle) + 1;
+                    vehicle_dict.put(veID, new Vehicle(depot, veID, maxDuration, maxLoad));
+                }
             }
-            return "Finito";
+
+            // Create the customers
+            for (int customer_id = 1; customer_id <= this.number_of_costumers; customer_id++) {
+                line = br.readLine();
+                splitStr = line.trim().split("\\s+");
+                customer_dict.put(Integer.parseInt(splitStr[0]), new Customer(Integer.parseInt(splitStr[1]),
+                        Integer.parseInt(splitStr[2]), Integer.parseInt(splitStr[3]), Integer.parseInt(splitStr[4])));
+            }
+
+            // Create depots
+            for (int depot_id = 1; depot_id <= this.number_of_depots; depot_id++) {
+                line = br.readLine();
+                splitStr = line.trim().split("\\s+");
+                depot_dict.put(depot_id, new Depot(Integer.parseInt(splitStr[1]), Integer.parseInt(splitStr[2])));
+            }
         } finally {
             br.close();
         }
@@ -58,7 +62,7 @@ public class DataReader {
 
     public static void main(String[] args) throws IOException {
         DataReader dr = new DataReader();
-        dr.readFile("src/p01");
+        dr.readFile("data/Data Files/p01");
     }
 
 }

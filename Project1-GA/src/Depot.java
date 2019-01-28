@@ -1,5 +1,3 @@
-package src;
-
 public class Depot {
     private int x;
     private int y;

@@ -1,15 +1,14 @@
-package src;
-
 public class Vehicle {
     private int depotID;
     private int vehicleID;
     private int maxDuration;
     private int maxLoad;
 
-    public Vehicle(int depotID, int svehicleID, int maxDuration, int maxLoad) {
+    public Vehicle(int depotID, int vehicleID, int maxDuration, int maxLoad) {
         this.depotID = depotID;
         this.maxDuration = maxDuration;
         this.maxLoad = maxLoad;
+        this.vehicleID = vehicleID;
     }
 
     public int getDepotID() {
@@ -27,4 +26,5 @@ public class Vehicle {
     public int getMaxLoad() {
         return maxLoad;
     }
+
 }

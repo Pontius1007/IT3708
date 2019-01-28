@@ -1,5 +1,3 @@
-package src;
-
 public class Customer {
     private int x;
     private int y;
