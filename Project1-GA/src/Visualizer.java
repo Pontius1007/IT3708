@@ -45,7 +45,7 @@ public class Visualizer extends JFrame{
 
             // x*this.getWidth()/100 and this.getHeight()-y*this.getHeight()/100
             // to transform from 0-100 coordinates to screen coordinates
-            g.fillOval(x*this.getWidth()/100, this.getHeight()-y*this.getHeight()/100, size, size);
+            g.fillOval((x+100)*this.getWidth()/200, this.getHeight()-(y+100)*this.getHeight()/200, size, size);
         }
 
         private void drawLine(Graphics g, int x1, int y1, int x2, int y2, Color color) {
@@ -53,8 +53,8 @@ public class Visualizer extends JFrame{
 
             // x*this.getWidth()/100 and this.getHeight()-y*this.getHeight()/100
             // to transform from 0-100 coordinates to screen coordinates
-            g.drawLine(x1*this.getWidth()/100, this.getHeight()-y1*this.getHeight()/100,
-                    x2*this.getWidth()/100, this.getHeight()-y2*this.getHeight()/100);
+            g.drawLine((x1+100)*this.getWidth()/200, this.getHeight()-(y1+100)*this.getHeight()/200,
+                    (x2+100)*this.getWidth()/200, this.getHeight()-(y2+100)*this.getHeight()/200);
         }
 
         @Override
