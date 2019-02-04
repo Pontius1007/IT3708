@@ -22,6 +22,7 @@ public class Visualizer extends JFrame{
         setVisible(true);
     }
 
+    //TODO Make dynamic
     private class MyCanvas extends Canvas{
 
         private Map<Integer, Depot> depot_dict;

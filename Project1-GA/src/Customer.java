@@ -1,14 +1,16 @@
 public class Customer {
+    private int customerID;
     private int x;
     private int y;
     private int serviceDuration;
-    private int demand;
+    private int weight;
 
-    public Customer(int x, int y, int serviceDuration, int demand) {
+    public Customer(int x, int y, int serviceDuration, int weight, int customerID) {
         this.x = x;
         this.y = y;
         this.serviceDuration = serviceDuration;
-        this.demand = demand;
+        this.weight = weight;
+        this.customerID = customerID;
     }
 
     public int getX() {
@@ -23,7 +25,11 @@ public class Customer {
         return serviceDuration;
     }
 
-    public int getDemand() {
-        return demand;
+    public int getWeight() {
+        return weight;
+    }
+
+    public int getCustomerID() {
+        return customerID;
     }
 }
