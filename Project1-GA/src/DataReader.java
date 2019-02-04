@@ -3,6 +3,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class DataReader {
     private int number_of_vehicles_per_depot;
@@ -105,11 +106,17 @@ public class DataReader {
         }
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         DataReader dr = new DataReader();
         dr.readFile("data/Data Files/p01");
-        Visualizer vis = new Visualizer(dr.depot_dict, dr.customer_dict);
         DNA dna = new DNA(dr.vehicle_dict, dr.depot_dict, dr.customer_dict);
+        Visualizer vis = new Visualizer(dr.depot_dict, dr.customer_dict, dr.vehicle_dict, dna.getDNAString());
+        TimeUnit.SECONDS.sleep(6);
+        DNA dna2 = new DNA(dr.vehicle_dict, dr.depot_dict, dr.customer_dict);
+        vis.setVisible(false);
+        vis.dispose();
+        vis = new Visualizer(dr.depot_dict, dr.customer_dict, dr.vehicle_dict, dna2.getDNAString());
+
     }
 }
 

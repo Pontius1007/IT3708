@@ -1,16 +1,20 @@
 import java.awt.*;
 import java.sql.SQLOutput;
-import java.util.Map;
+import java.util.*;
+import java.util.List;
 import javax.swing.*;
 
-public class Visualizer extends JFrame{
+public class Visualizer extends JFrame {
 
     private MyCanvas canvas = new MyCanvas();
 
 
-    public Visualizer(Map<Integer, Depot> depot_dict, Map<Integer, Customer> customer_dict){
+    public Visualizer(Map<Integer, Depot> depot_dict, Map<Integer, Customer> customer_dict,
+                      Map<Integer, Vehicle> vehicle_dict, List<List<Integer>> DNAString) {
         canvas.setCustomer_dict(customer_dict);
         canvas.setDepot_dict(depot_dict);
+        canvas.setVehicle_dict(vehicle_dict);
+        canvas.setDNA(DNAString);
         setLayout(new BorderLayout());
         setSize(720, 720);
         setTitle("Visualization");
@@ -22,31 +26,42 @@ public class Visualizer extends JFrame{
         setVisible(true);
     }
 
+    public void changeDNA(List<List<Integer>> DNAString){
+        canvas.setDNA(DNAString);
+    }
+
     //TODO Make dynamic
-    private class MyCanvas extends Canvas{
+    private class MyCanvas extends Canvas {
 
         private Map<Integer, Depot> depot_dict;
         private Map<Integer, Customer> customer_dict;
-        private DNA dna;
+        private Map<Integer, Vehicle> vehicle_dict;
+        private List<List<Integer>> DNAString;
+        List<Color> depotColours = new ArrayList<Color>(Arrays.asList(
+                Color.blue, Color.red, Color.green, Color.yellow, Color.black, Color.pink, Color.cyan, Color.magenta, Color.orange, Color.lightGray));
 
-        public void setDepot_dict(Map<Integer, Depot> depot_dict){
+        public void setDepot_dict(Map<Integer, Depot> depot_dict) {
             this.depot_dict = depot_dict;
         }
 
-        public void setCustomer_dict(Map<Integer, Customer> customer_dict){
+        public void setCustomer_dict(Map<Integer, Customer> customer_dict) {
             this.customer_dict = customer_dict;
         }
 
-        public void setDNA(DNA dna){
-            this.dna = dna;
+        public void setVehicle_dict(Map<Integer, Vehicle> vehicle_dict) {
+            this.vehicle_dict = vehicle_dict;
         }
 
-        private void drawPoint(Graphics g, int x, int y, Color color, int size){
+        public void setDNA(List<List<Integer>> dna) {
+            this.DNAString = dna;
+        }
+
+        private void drawPoint(Graphics g, int x, int y, Color color, int size) {
             g.setColor(color);
 
             // x*this.getWidth()/100 and this.getHeight()-y*this.getHeight()/100
             // to transform from 0-100 coordinates to screen coordinates
-            g.fillOval((x+100)*this.getWidth()/200, this.getHeight()-(y+100)*this.getHeight()/200, size, size);
+            g.fillOval((x + 100) * this.getWidth() / 200-size/2, this.getHeight() - (y + 100) * this.getHeight() / 200 - size/2, size, size);
         }
 
         private void drawLine(Graphics g, int x1, int y1, int x2, int y2, Color color) {
@@ -54,18 +69,41 @@ public class Visualizer extends JFrame{
 
             // x*this.getWidth()/100 and this.getHeight()-y*this.getHeight()/100
             // to transform from 0-100 coordinates to screen coordinates
-            g.drawLine((x1+100)*this.getWidth()/200, this.getHeight()-(y1+100)*this.getHeight()/200,
-                    (x2+100)*this.getWidth()/200, this.getHeight()-(y2+100)*this.getHeight()/200);
+            g.drawLine((x1 + 100) * this.getWidth() / 200, this.getHeight() - (y1 + 100) * this.getHeight() / 200,
+                    (x2 + 100) * this.getWidth() / 200, this.getHeight() - (y2 + 100) * this.getHeight() / 200);
         }
 
         @Override
-        public void paint(Graphics g){
-            for(Depot depot: depot_dict.values()){
+        public void paint(Graphics g) {
+            for (Depot depot : depot_dict.values()) {
                 drawPoint(g, depot.getX(), depot.getY(), Color.gray, 13);
             }
-            for(Customer customer: this.customer_dict.values()){
-                drawPoint(g, customer.getX(), customer.getY(), Color.black, 10);
+            for (int i = 0; i < this.DNAString.size(); i++){
+                Vehicle currentVehicle = vehicle_dict.get(i);
+                List<Integer> currentRoute = this.DNAString.get(i);
+
+                int startDepotId = currentVehicle.getDepotID();
+                Color currentColor = depotColours.get(startDepotId);
+                Depot startDepot = depot_dict.get(startDepotId);
+                Depot endDepot = depot_dict.get(currentRoute.get(currentRoute.size()-1));
+                Customer nextCustomer = customer_dict.get(currentRoute.get(0)-1);
+                Customer lastCustomer;
+                drawLine(g, startDepot.getX(), startDepot.getY(), nextCustomer.getX(), nextCustomer.getY(), currentColor);
+                drawPoint(g, nextCustomer.getX(), nextCustomer.getY(), currentColor, 10);
+                for(int j = 1; j < currentRoute.size()-2; j++){
+                    lastCustomer = nextCustomer;
+                    nextCustomer = customer_dict.get(currentRoute.get(j)-1);
+                    drawLine(g, lastCustomer.getX(), lastCustomer.getY(), nextCustomer.getX(), nextCustomer.getY(), currentColor);
+                    drawPoint(g, nextCustomer.getX(), nextCustomer.getY(), currentColor, 10);
+                }
+                    lastCustomer = nextCustomer;
+                    drawLine(g, lastCustomer.getX(), lastCustomer.getY(), endDepot.getX(), endDepot.getY(), currentColor);
             }
+        }
+
+        public void changeDNA(List<List<Integer>> DNAString) {
+            this.DNAString = DNAString;
+            repaint();
         }
     }
 }

@@ -96,4 +96,8 @@ public class DNA {
         distance += neightbourMatrix.get(previous).get(current);
         return distance;
     }
+
+    public List<List<Integer>> getDNAString() {
+        return DNAString;
+    }
 }
