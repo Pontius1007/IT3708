@@ -62,8 +62,8 @@ public class DataReader {
 
     public static void main(String[] args) throws IOException {
         DataReader dr = new DataReader();
-        dr.readFile("data/Data Files/p01");
+        dr.readFile("data/Data Files/p04");
+        Visualizer vis = new Visualizer(dr.depot_dict, dr.customer_dict);
     }
-
 }
 
