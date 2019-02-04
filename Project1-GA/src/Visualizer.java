@@ -10,11 +10,12 @@ public class Visualizer extends JFrame {
 
 
     public Visualizer(Map<Integer, Depot> depot_dict, Map<Integer, Customer> customer_dict,
-                      Map<Integer, Vehicle> vehicle_dict, List<List<Integer>> DNAString) {
-        canvas.setCustomer_dict(customer_dict);
-        canvas.setDepot_dict(depot_dict);
-        canvas.setVehicle_dict(vehicle_dict);
-        canvas.setDNA(DNAString);
+                      Map<Integer, Vehicle> vehicle_dict, List<List<Integer>> DNAString, double maxCoordinate) {
+        canvas.customer_dict = customer_dict;
+        canvas.depot_dict = depot_dict;
+        canvas.vehicle_dict = vehicle_dict;
+        canvas.DNAString = DNAString;
+        canvas.maxCoordinate = maxCoordinate;
         setLayout(new BorderLayout());
         setSize(720, 720);
         setTitle("Visualization");
@@ -37,20 +38,10 @@ public class Visualizer extends JFrame {
         private Map<Integer, Customer> customer_dict;
         private Map<Integer, Vehicle> vehicle_dict;
         private List<List<Integer>> DNAString;
+        private double maxCoordinate;
         List<Color> depotColours = new ArrayList<Color>(Arrays.asList(
                 Color.blue, Color.red, Color.green, Color.yellow, Color.black, Color.pink, Color.cyan, Color.magenta, Color.orange, Color.lightGray));
 
-        public void setDepot_dict(Map<Integer, Depot> depot_dict) {
-            this.depot_dict = depot_dict;
-        }
-
-        public void setCustomer_dict(Map<Integer, Customer> customer_dict) {
-            this.customer_dict = customer_dict;
-        }
-
-        public void setVehicle_dict(Map<Integer, Vehicle> vehicle_dict) {
-            this.vehicle_dict = vehicle_dict;
-        }
 
         public void setDNA(List<List<Integer>> dna) {
             this.DNAString = dna;
@@ -61,7 +52,7 @@ public class Visualizer extends JFrame {
 
             // x*this.getWidth()/100 and this.getHeight()-y*this.getHeight()/100
             // to transform from 0-100 coordinates to screen coordinates
-            g.fillOval((x + 100) * this.getWidth() / 200-size/2, this.getHeight() - (y + 100) * this.getHeight() / 200 - size/2, size, size);
+            g.fillOval((x + (int)(maxCoordinate+10)) * this.getWidth() / (int)(2*(maxCoordinate+10))-size/2, this.getHeight() - (y + (int)(maxCoordinate+10)) * this.getHeight() / (int)(2*(maxCoordinate+10)) - size/2, size, size);
         }
 
         private void drawLine(Graphics g, int x1, int y1, int x2, int y2, Color color) {
@@ -69,8 +60,8 @@ public class Visualizer extends JFrame {
 
             // x*this.getWidth()/100 and this.getHeight()-y*this.getHeight()/100
             // to transform from 0-100 coordinates to screen coordinates
-            g.drawLine((x1 + 100) * this.getWidth() / 200, this.getHeight() - (y1 + 100) * this.getHeight() / 200,
-                    (x2 + 100) * this.getWidth() / 200, this.getHeight() - (y2 + 100) * this.getHeight() / 200);
+            g.drawLine((x1 + (int)(maxCoordinate+10)) * this.getWidth() / (int)(2*(maxCoordinate+10)), this.getHeight() - (y1 + (int)(maxCoordinate+10)) * this.getHeight() / (int)(2*(maxCoordinate+10)),
+                    (x2 + (int)(maxCoordinate+10)) * this.getWidth() / (int)(2*(maxCoordinate+10)), this.getHeight() - (y2 + (int)(maxCoordinate+10)) * this.getHeight() / (int)(2*(maxCoordinate+10)));
         }
 
         @Override

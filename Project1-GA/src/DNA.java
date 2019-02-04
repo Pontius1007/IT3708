@@ -8,6 +8,7 @@ public class DNA {
     private List<List<Integer>> DNAString;
     private List<Integer> vehicleWeights;
     private List<Integer> vehicleDistance;
+    private double fitness;
 
     public static List<List<Double>> neightbourMatrix;
 
@@ -28,12 +29,14 @@ public class DNA {
         for (Customer customer: customers.values()) {
             addCustomer(customer, customers, vehicles, possibleVehicles);
         }
-        printMatrix(this.DNAString);
+        this.fitness = this.calculateFitness(vehicles, customers.size());
+        System.out.println(this.fitness);
     }
 
     private void addCustomer(Customer customer, Map<Integer, Customer> customers, Map<Integer, Vehicle> vehicles, List<Integer> possibleVehicles){
+        //TODO: serparate exeption from weight and lenght capacity
         if(possibleVehicles.size() == 0){
-            throw new IllegalStateException("No more room in any vehicles");
+            throw new IllegalStateException("No more room in any vehicles or exceeded length");
         }
         int randomVehicleIdx = ThreadLocalRandom.current().nextInt(0, possibleVehicles.size());
         int randomVehicle = possibleVehicles.get(randomVehicleIdx);
@@ -59,6 +62,14 @@ public class DNA {
     }
 
 
+    private double calculateFitness(Map<Integer, Vehicle> vehicles, int customerSize){
+        double fitness = 0;
+        for(int i = 0; i < this.DNAString.size(); i++){
+            List<Integer> route = this.DNAString.get(i);
+            fitness += calculateRouteLength(route, vehicles.get(i).getDepotID(), customerSize);
+        }
+        return fitness;
+    }
 
     private double calculateRouteLength(List<Integer> route, int startDepotId, int customerSize) {
         double distance = 0;
@@ -72,7 +83,7 @@ public class DNA {
         }
         //Adds distance from last customer to end depot
         int current = customerSize-1 + route.get(route.size()-1);
-        distance += neightbourMatrix.get(previous).get(current);
+            distance += neightbourMatrix.get(previous).get(current);
         return distance;
     }
 
