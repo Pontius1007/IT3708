@@ -37,6 +37,7 @@ public class DNA {
         for (Customer customer: customers.values()) {
             addCustomer(customer, customers, vehicles, possibleVehicles);
         }
+
         //add closest ending depot for each vehicle
         for(int routeID = 0; routeID < DNAString.size(); routeID++){
             List<Integer> route = this.DNAString.get(routeID);

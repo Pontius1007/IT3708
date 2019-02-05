@@ -1,4 +1,5 @@
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -9,20 +10,21 @@ public class DataReader {
     private int number_of_vehicles_per_depot;
     private int number_of_costumers;
     private int number_of_depots;
+    private double targetFitness;
 
-    private Map<Integer, Vehicle> vehicle_dict = new HashMap<Integer, Vehicle>();
-    private Map<Integer, Customer> customer_dict = new HashMap<Integer, Customer>();
-    private Map<Integer, Depot> depot_dict = new HashMap<Integer, Depot>();
-    private List<List<Double>> neighBourMatrix = new ArrayList<>();
-    private double maxCoordinate = 0;
-    private double minCoordinate = 0;
+    public Map<Integer, Vehicle> vehicle_dict = new HashMap<Integer, Vehicle>();
+    public Map<Integer, Customer> customer_dict = new HashMap<Integer, Customer>();
+    public Map<Integer, Depot> depot_dict = new HashMap<Integer, Depot>();
+    public List<List<Double>> neighBourMatrix = new ArrayList<>();
+    public double maxCoordinate = 0;
+    public double minCoordinate = 0;
 
-    private DataReader() {
+    public DataReader() {
     }
 
 
     //TODO: Create print for each dict
-    private void readFile(String name_of_file) throws IOException {
+    public void readFile(String name_of_file) throws IOException {
         BufferedReader br = new BufferedReader(new FileReader(name_of_file));
         try {
             String line = br.readLine();
@@ -71,6 +73,16 @@ public class DataReader {
             this.createNeighbourMatrix();
             DNA.neightbourMatrix = this.neighBourMatrix;
         }
+    }
+
+    public double resultReader (String name_of_file) throws IOException {
+        try (BufferedReader br = new BufferedReader(new FileReader(name_of_file))) {
+            String line = br.readLine();
+            String[] splitStr = line.trim().split("\\s+");
+            this.targetFitness = Double.parseDouble(splitStr[0]);
+        }
+        return this.targetFitness;
+
     }
 
     private void createNeighbourMatrix() {
