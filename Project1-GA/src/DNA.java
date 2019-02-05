@@ -30,7 +30,7 @@ public class DNA {
             addCustomer(customer, customers, vehicles, possibleVehicles);
         }
         this.fitness = this.calculateFitness(vehicles, customers.size());
-        System.out.println(this.fitness);
+        //System.out.println(this.fitness);
     }
 
     private void addCustomer(Customer customer, Map<Integer, Customer> customers, Map<Integer, Vehicle> vehicles, List<Integer> possibleVehicles){
