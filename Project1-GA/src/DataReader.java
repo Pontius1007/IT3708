@@ -15,6 +15,7 @@ public class DataReader {
     private Map<Integer, Depot> depot_dict = new HashMap<Integer, Depot>();
     private List<List<Double>> neighBourMatrix = new ArrayList<>();
     private double maxCoordinate = 0;
+    private double minCoordinate = 0;
 
     private DataReader() {
     }
@@ -50,9 +51,10 @@ public class DataReader {
                 splitStr = line.trim().split("\\s+");
                 Customer currentCustomer = new Customer(Integer.parseInt(splitStr[1]),
                         Integer.parseInt(splitStr[2]), Integer.parseInt(splitStr[3]), Integer.parseInt(splitStr[4]),
-                        Integer.parseInt(splitStr[0]));
+                        customer_id);
                 customer_dict.put(customer_id, currentCustomer);
-                this.maxCoordinate = Math.max(this.maxCoordinate, Math.max(Math.pow(currentCustomer.getX(), 2), Math.pow(currentCustomer.getY(), 2)));
+                this.maxCoordinate = Math.max(this.maxCoordinate, Math.max(currentCustomer.getX(), currentCustomer.getY()));
+                this.minCoordinate = Math.min(this.minCoordinate, Math.min(currentCustomer.getX(), currentCustomer.getY()));
             }
 
             // Create depots
@@ -61,7 +63,8 @@ public class DataReader {
                 splitStr = line.trim().split("\\s+");
                 Depot currentDepot = new Depot(Integer.parseInt(splitStr[1]), Integer.parseInt(splitStr[2]));
                 depot_dict.put(depot_id, currentDepot);
-                this.maxCoordinate = Math.max(this.maxCoordinate, Math.max(Math.pow(currentDepot.getX(), 2), Math.pow(currentDepot.getY(), 2)));
+                this.maxCoordinate = Math.max(this.maxCoordinate, Math.max(currentDepot.getX(), currentDepot.getY()));
+                this.minCoordinate = Math.min(this.minCoordinate, Math.min(currentDepot.getX(), currentDepot.getY()));
             }
         } finally {
             br.close();
@@ -113,14 +116,14 @@ public class DataReader {
 
     public static void main(String[] args) throws IOException, InterruptedException {
         DataReader dr = new DataReader();
-        dr.readFile("data/Data Files/p02");
+        dr.readFile("data/Data Files/p01");
         DNA dna = new DNA(dr.vehicle_dict, dr.depot_dict, dr.customer_dict);
-        Visualizer vis = new Visualizer(dr.depot_dict, dr.customer_dict, dr.vehicle_dict, dna.getDNAString(), Math.sqrt(dr.maxCoordinate));
+        Visualizer vis = new Visualizer(dr.depot_dict, dr.customer_dict, dr.vehicle_dict, dna.getDNAString(), dr.maxCoordinate, dr.minCoordinate);
         TimeUnit.SECONDS.sleep(6);
         DNA dna2 = new DNA(dr.vehicle_dict, dr.depot_dict, dr.customer_dict);
         vis.setVisible(false);
         vis.dispose();
-        vis = new Visualizer(dr.depot_dict, dr.customer_dict, dr.vehicle_dict, dna2.getDNAString(), Math.sqrt(dr.maxCoordinate));
+        vis = new Visualizer(dr.depot_dict, dr.customer_dict, dr.vehicle_dict, dna2.getDNAString(), dr.maxCoordinate, dr.minCoordinate);
 
     }
 }

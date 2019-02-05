@@ -10,12 +10,14 @@ public class Visualizer extends JFrame {
 
 
     public Visualizer(Map<Integer, Depot> depot_dict, Map<Integer, Customer> customer_dict,
-                      Map<Integer, Vehicle> vehicle_dict, List<List<Integer>> DNAString, double maxCoordinate) {
+                      Map<Integer, Vehicle> vehicle_dict, List<List<Integer>> DNAString, double maxCoordinate,
+                      double minCoordinate) {
         canvas.customer_dict = customer_dict;
         canvas.depot_dict = depot_dict;
         canvas.vehicle_dict = vehicle_dict;
         canvas.DNAString = DNAString;
         canvas.maxCoordinate = maxCoordinate;
+        canvas.minCoordinate = minCoordinate;
         setLayout(new BorderLayout());
         setSize(720, 720);
         setTitle("Visualization");
@@ -39,6 +41,8 @@ public class Visualizer extends JFrame {
         private Map<Integer, Vehicle> vehicle_dict;
         private List<List<Integer>> DNAString;
         private double maxCoordinate;
+        private double minCoordinate;
+        private double boarder = 5;
         List<Color> depotColours = new ArrayList<Color>(Arrays.asList(
                 Color.blue, Color.red, Color.green, Color.yellow, Color.black, Color.pink, Color.cyan, Color.magenta, Color.orange, Color.lightGray));
 
@@ -50,9 +54,12 @@ public class Visualizer extends JFrame {
         private void drawPoint(Graphics g, int x, int y, Color color, int size) {
             g.setColor(color);
 
-            // x*this.getWidth()/100 and this.getHeight()-y*this.getHeight()/100
-            // to transform from 0-100 coordinates to screen coordinates
-            g.fillOval((x + (int)(maxCoordinate+10)) * this.getWidth() / (int)(2*(maxCoordinate+10))-size/2, this.getHeight() - (y + (int)(maxCoordinate+10)) * this.getHeight() / (int)(2*(maxCoordinate+10)) - size/2, size, size);
+            // transform from min-max point coordinates to screen coordinates
+            // - size/2 to get the center of the point at the coordinate
+            g.fillOval((x + (int)(-minCoordinate+boarder)) * this.getWidth() / (int)(maxCoordinate-minCoordinate+2*boarder)-size/2,
+                    this.getHeight() - (y + (int)(-minCoordinate+boarder)) * this.getHeight() / (int)(maxCoordinate-minCoordinate+2*boarder) - size/2,
+                    size,
+                    size);
         }
 
         private void drawLine(Graphics g, int x1, int y1, int x2, int y2, Color color) {
@@ -60,8 +67,10 @@ public class Visualizer extends JFrame {
 
             // x*this.getWidth()/100 and this.getHeight()-y*this.getHeight()/100
             // to transform from 0-100 coordinates to screen coordinates
-            g.drawLine((x1 + (int)(maxCoordinate+10)) * this.getWidth() / (int)(2*(maxCoordinate+10)), this.getHeight() - (y1 + (int)(maxCoordinate+10)) * this.getHeight() / (int)(2*(maxCoordinate+10)),
-                    (x2 + (int)(maxCoordinate+10)) * this.getWidth() / (int)(2*(maxCoordinate+10)), this.getHeight() - (y2 + (int)(maxCoordinate+10)) * this.getHeight() / (int)(2*(maxCoordinate+10)));
+            g.drawLine((x1 + (int)(-minCoordinate+boarder)) * this.getWidth() / (int)(maxCoordinate-minCoordinate+2*boarder),
+                    this.getHeight() - (y1 + (int)(-minCoordinate+boarder)) * this.getHeight() / (int)(maxCoordinate-minCoordinate+2*boarder),
+                    (x2 + (int)(-minCoordinate+boarder)) * this.getWidth() / (int)(maxCoordinate-minCoordinate+2*boarder),
+                    this.getHeight() - (y2 + (int)(-minCoordinate+boarder)) * this.getHeight() / (int)(maxCoordinate-minCoordinate+2*boarder));
         }
 
         @Override
@@ -77,18 +86,20 @@ public class Visualizer extends JFrame {
                 Color currentColor = depotColours.get(startDepotId);
                 Depot startDepot = depot_dict.get(startDepotId);
                 Depot endDepot = depot_dict.get(currentRoute.get(currentRoute.size()-1));
-                Customer nextCustomer = customer_dict.get(currentRoute.get(0)-1);
-                Customer lastCustomer;
-                drawLine(g, startDepot.getX(), startDepot.getY(), nextCustomer.getX(), nextCustomer.getY(), currentColor);
-                drawPoint(g, nextCustomer.getX(), nextCustomer.getY(), currentColor, 10);
-                for(int j = 1; j < currentRoute.size()-2; j++){
-                    lastCustomer = nextCustomer;
-                    nextCustomer = customer_dict.get(currentRoute.get(j)-1);
-                    drawLine(g, lastCustomer.getX(), lastCustomer.getY(), nextCustomer.getX(), nextCustomer.getY(), currentColor);
+                if(currentRoute.size()>1) {
+                    Customer nextCustomer = customer_dict.get(currentRoute.get(0));
+                    Customer lastCustomer;
+                    drawLine(g, startDepot.getX(), startDepot.getY(), nextCustomer.getX(), nextCustomer.getY(), currentColor);
                     drawPoint(g, nextCustomer.getX(), nextCustomer.getY(), currentColor, 10);
-                }
+                    for(int j = 1; j < currentRoute.size()-2; j++){
+                        lastCustomer = nextCustomer;
+                        nextCustomer = customer_dict.get(currentRoute.get(j));
+                        drawLine(g, lastCustomer.getX(), lastCustomer.getY(), nextCustomer.getX(), nextCustomer.getY(), currentColor);
+                        drawPoint(g, nextCustomer.getX(), nextCustomer.getY(), currentColor, 10);
+                    }
                     lastCustomer = nextCustomer;
                     drawLine(g, lastCustomer.getX(), lastCustomer.getY(), endDepot.getX(), endDepot.getY(), currentColor);
+                }
             }
         }
 
