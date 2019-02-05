@@ -14,9 +14,9 @@ public class DNA {
     private double punnishmentRate = 100;
 
     public static List<List<Double>> neightbourMatrix;
-    private static Map<Integer, Vehicle> vehicles;
-    private static Map<Integer, Depot> depots;
-    private static Map<Integer, Customer> customers;
+    public static Map<Integer, Vehicle> vehicles;
+    public static Map<Integer, Depot> depots;
+    public static Map<Integer, Customer> customers;
 
     public DNA() {
         this.DNAString = new ArrayList<>();
@@ -60,21 +60,17 @@ public class DNA {
                 }
             }
             route.add(closestDepotId);
-            this.punnishment += Math.max(0, calculateRouteLength(route, this.vehicles.get(routeID).getDepotID(), this.customers.size())-this.vehicles.get(routeID).getMaxDuration());
         }
-        this.punnishment *= this.punnishmentRate;
-        this.totalDistance = this.calculateFitness(this.vehicles, this.customers.size());
-        this.fitness = this.totalDistance + this.punnishment;
+        this.updateFitness();
     }
 
     public void updateFitness(){
         for(int routeID = 0; routeID < DNAString.size(); routeID++){
             List<Integer> route = this.DNAString.get(routeID);
-            this.punnishment += Math.max(0, calculateRouteLength(route, this.vehicles.get(routeID).getDepotID(),
-                    this.customers.size())-this.vehicles.get(routeID).getMaxDuration());
+            this.punnishment += Math.max(0, calculateRouteLength(route, this.vehicles.get(routeID).getDepotID())-this.vehicles.get(routeID).getMaxDuration());
         }
         this.punnishment *= this.punnishmentRate;
-        this.totalDistance = this.calculateFitness(vehicles, customers.size());
+        this.totalDistance = this.calculateFitness();
         this.fitness = this.totalDistance + this.punnishment;
     }
 
