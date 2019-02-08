@@ -1,3 +1,5 @@
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +44,19 @@ public class DNA {
         }
 
         //add closest ending depot for each vehicle
+        this.addEndDepots();
+    }
+
+
+    public void updateEndDepots(){
+        for(List<Integer> route: this.getDNAString()){
+            route.remove(route.size()-1);
+        }
+        this.addEndDepots();
+    }
+
+
+    public void addEndDepots(){
         for(int routeID = 0; routeID < this.DNAString.size(); routeID++){
             List<Integer> route = this.DNAString.get(routeID);
             int closestDepotId = 0;
@@ -82,7 +97,7 @@ public class DNA {
         int randomVehicleIdx = ThreadLocalRandom.current().nextInt(0, possibleVehicles.size());
         int randomVehicle = possibleVehicles.get(randomVehicleIdx);
         double routeWeight = this.testRouteWeight(this.DNAString.get(randomVehicle), customer);
-        if (customer.getWeight() < vehicleWeights.get(randomVehicle)) {
+        if (routeWeight < vehicleWeights.get(randomVehicle)) {
             this.DNAString.get(randomVehicle).add(customer.getCustomerID());
         }
         else{
