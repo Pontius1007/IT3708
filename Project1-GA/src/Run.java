@@ -11,7 +11,7 @@ public class Run {
     private int initialPopulation = 200;
     private double crossoverRate = 1;
     private double mutationRate = 1;
-    private int maxGenerationNumber = 200;
+    private int maxGenerationNumber = 20;
     private double targetFitness = 0;
     private int elites = 180;
     private int participantNr = 6;
@@ -38,9 +38,9 @@ public class Run {
         for (int i = 0; i < dr.customer_dict.size(); i++){
             customerIndexes.add(i);
         }
-        System.out.println(currentBestFitness);
         System.out.println(targetFitness);
         while (this.generationNumber <= this.maxGenerationNumber && currentBestFitness > targetFitness*1.05){
+            //Creates a list containing numbers from 0 to the size of the population.
             this.individualIndexes = IntStream.rangeClosed(0, this.population.size()-1)
                     .boxed().collect(Collectors.toList());
             sortPopulationfFitness(this.population);
@@ -61,7 +61,7 @@ public class Run {
                 //returns two fittest in participants
                 List<DNA> winners = this.playTurnament(participants);
 
-                //Crossover the two winners to create two parents and add them to the new population
+                //Crossover the two winners to create one child and add them to the new population
                 List<DNA> children = this.crossover(winners);
                 newPopulation.addAll(children);
             }
@@ -91,12 +91,67 @@ public class Run {
     }
 
     private List<DNA> crossover(List<DNA> parents){
+        //Trying out Route Based Crossover
+        double parent1Share = 0.6;
+        int minimumRoute = 2;
+        int numberOfRoutes = parents.get(0).getDNAString().size();
+        int parentMaxCrossIndex = (int)Math.round(parent1Share*numberOfRoutes) ;
+        if((double) ThreadLocalRandom.current().nextInt(0, 100) /100 < this.crossoverRate) {
+            int crossIndex = ThreadLocalRandom.current().nextInt(minimumRoute, parentMaxCrossIndex);
+            List<List<Integer>> NewDNAString = new ArrayList<>();
+            //Add route from parent 1
+            for (int route = 0; route < crossIndex; route++) {
+                NewDNAString.add(parents.get(0).getDNAString().get(route));
+            }
+            //Add routes from parent 2
+            for (int route = crossIndex; route < numberOfRoutes; route++) {
+                NewDNAString.add(parents.get(1).getDNAString().get(route));
+            }
+
+
+            //TODO: ADD repair function to add missing customers and remove duplicates
+            //TODO: Then create new DNA-object for the new child. Need new constructor
+            //NewDNAString = repairRoute(NewDNAStringTest);
+
+        }
         return parents;
+    }
+
+    private List<List<Integer>> repairRoute(List<List<Integer>> DNAString) {
+        //Remove depots from DNA-string
+        for (List<Integer> route : DNAString) {
+            int depotIndex = route.size() - 1;
+            if (route.size() >= 1) {
+                route.remove(depotIndex);
+            }
+        }
+
+        //Remove duplicate customers
+        List<Integer> visitedCustomers = new ArrayList<>();
+        for (List<Integer> route : DNAString) {
+            //Looping backwards to avoid indexing issues when deleting element in list
+            for (int customer = route.size()-1; customer >= 0; customer--) {
+                if (visitedCustomers.contains(route.get(customer))) {
+                    //Removes customer from list
+                    //Kanskje dette vil gi skeive resulteter siden vi alltid fjerner kunden fra den siste ruten? Burde vi
+                    //Gjøre denne smartere/random?
+                    route.remove(customer);
+                } else {
+                    visitedCustomers.add(route.get(customer));
+                }
+            }
+        }
+
+        //Find missing customers 
+
+
+
+        return DNAString;
     }
 
     private void mutatePopulation(List<DNA> population){
         for(DNA individual: population){
-            if( Double.valueOf(ThreadLocalRandom.current().nextInt(0, 100))/100 < this.mutationRate){
+            if((double) ThreadLocalRandom.current().nextInt(0, 100) /100 < this.mutationRate){
                 mutateIndividual(individual);
             }
         }
