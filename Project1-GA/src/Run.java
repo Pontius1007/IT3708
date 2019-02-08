@@ -184,8 +184,7 @@ public class Run {
         int tempFirst = DNAString.get(firstPosRow).get(firstPosCol);
         DNAString.get(firstPosRow).set(firstPosCol, DNAString.get(secondPosRow).get(secondPosCol));
         DNAString.get(secondPosRow).set(secondPosCol, tempFirst);
-        individual.updateFitness();
-        //TODO: update end depot
+        individual.updateEndDepots();
     }
 
     public static void main(String[] args) throws IOException {
