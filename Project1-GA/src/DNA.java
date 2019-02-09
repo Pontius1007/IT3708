@@ -94,7 +94,6 @@ public class DNA {
             }
             route.add(closestDepotId);
         }
-        this.printMatrix(this.getDNAString());
         this.updateFitness();
     }
 

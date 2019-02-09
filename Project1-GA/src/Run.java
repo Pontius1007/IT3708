@@ -118,7 +118,7 @@ public class Run {
             //TODO: ADD repair function to add missing customers and remove duplicates
             //TODO: Then create new DNA-object for the new child. Need new constructor
             child = new DNA(NewDNAString);
-            //repairRoute(child);
+            repairRoute(child);
 
         }
         else{
@@ -150,25 +150,22 @@ public class Run {
                 } else {
                     visitedCustomers.add(route.get(customer));
                 }
+                customerSize++;
             }
-            customerSize++;
+
         }
 
         Collections.sort(visitedCustomers);
         List<Integer> missingCustomers = new ArrayList<>();
         //Finds missing customers
+        System.out.println(customerSize);
         for(int i = 0; i < customerSize; i++){
-            if(visitedCustomers.size() == 0){
-                break;
-            }
-            if(visitedCustomers.get(0) != i){
+            if(!visitedCustomers.contains(i)){
                 missingCustomers.add(i);
-            }
-            else{
-                visitedCustomers.remove(0);
             }
         }
 
+        System.out.println(missingCustomers);
         for(int missingCus: missingCustomers){
             child.addCustomer(missingCus, this.possibleVehicles);
         }
