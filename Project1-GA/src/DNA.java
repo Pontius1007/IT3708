@@ -23,10 +23,6 @@ public class DNA {
         this.DNAString = new ArrayList<>();
         this.vehicleWeights = new ArrayList<>();
         initializeDnaRandomly();
-        /* System.out.println("Distance: ");
-        System.out.println(this.totalDistance);
-        System.out.println("Fitness: ");
-        System.out.println(this.fitness); */
     }
 
 
@@ -114,7 +110,7 @@ public class DNA {
         if (possibleVehicles.size() == 0) {
             throw new IllegalStateException("No more room in any vehicles (No room for weight in any vehicle)");
         }
-        int randomVehicleIdx = ThreadLocalRandom.current().nextInt(0, possibleVehicles.size());
+        int randomVehicleIdx = ThreadLocalRandom.current().nextInt(0, possibleVehicles.size()-1);
         int randomVehicle = possibleVehicles.get(randomVehicleIdx);
         double routeWeight = this.testRouteWeight(this.DNAString.get(randomVehicle), customer);
         if (routeWeight < vehicleWeights.get(randomVehicle)) {

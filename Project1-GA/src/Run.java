@@ -21,7 +21,9 @@ public class Run {
     private List<Integer> individualIndexes;
     private List<Integer> customerIndexes = new ArrayList<>();
     private List<DNA> population = new ArrayList<>();
-    private List<Integer> possibleVehicles = new ArrayList<>();
+
+    private int customerSize;
+    private int vehicleSize;
 
 
     private void runItBaby(String fileName) throws IOException {
@@ -36,13 +38,11 @@ public class Run {
             DNA dna = new DNA();
             this.population.add(dna);
         }
+        this.customerSize = dr.customer_dict.size();
+        this.vehicleSize = dr.vehicle_dict.size();
         for (int i = 0; i < dr.customer_dict.size(); i++){
             customerIndexes.add(i);
         }
-        for (int i = 0; i < dr.vehicle_dict.size(); i++){
-            possibleVehicles.add(i);
-        }
-        //System.out.println(targetFitness);
         while (this.generationNumber <= this.maxGenerationNumber && currentBestFitness > targetFitness*1.05){
             //Creates a list containing numbers from 0 to the size of the population.
             this.individualIndexes = IntStream.rangeClosed(0, this.population.size()-1)
@@ -79,7 +79,6 @@ public class Run {
         }
         Visualizer vis = new Visualizer(dr.depot_dict, dr.customer_dict, dr.vehicle_dict,
                 this.population.get(0).getDNAString(), dr.maxCoordinate, dr.minCoordinate);
-        population.get(0).printMatrix(population.get(0).getDNAString());
     }
 
     private void sortPopulationfFitness(List<DNA> population) {
@@ -136,7 +135,6 @@ public class Run {
                 route.remove(depotIndex);
             }
         }
-        int customerSize = 0;
         //Remove duplicate customers
         List<Integer> visitedCustomers = new ArrayList<>();
         for (List<Integer> route : DNAString) {
@@ -150,24 +148,22 @@ public class Run {
                 } else {
                     visitedCustomers.add(route.get(customer));
                 }
-                customerSize++;
             }
 
         }
 
         Collections.sort(visitedCustomers);
         List<Integer> missingCustomers = new ArrayList<>();
-        //Finds missing customers
-        System.out.println(customerSize);
-        for(int i = 0; i < customerSize; i++){
+        for(int i = 0; i < this.customerSize; i++){
             if(!visitedCustomers.contains(i)){
                 missingCustomers.add(i);
             }
         }
 
-        System.out.println(missingCustomers);
+        List<Integer> possibleVehicles = IntStream.rangeClosed(0, this.vehicleSize)
+                .boxed().collect(Collectors.toList());
         for(int missingCus: missingCustomers){
-            child.addCustomer(missingCus, this.possibleVehicles);
+            child.addCustomer(missingCus, possibleVehicles);
         }
         child.addEndDepots();
     }
