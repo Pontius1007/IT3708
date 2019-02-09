@@ -6,11 +6,11 @@ import java.util.stream.IntStream;
 
 public class Run {
     private int initialPopulation = 1000;
-    private double crossoverRate = 0;
-    private double mutationRate = 1;
+    private double crossoverRate = 0.55;
+    private double mutationRate = 0.35;
     private int maxGenerationNumber = 1000;
     private double targetFitness = 0;
-    private int elites = 180;
+    private int elites = 150;
     private int participantNr = 6;
 
     private int generationNumber = 0;
@@ -46,6 +46,8 @@ public class Run {
                     .boxed().collect(Collectors.toList());
             sortPopulationfFitness(this.population);
 
+
+            System.out.println("This is generation: " + generationNumber);
             System.out.println(this.population.get(0).getFitness());
             System.out.println("---------------------");
 
@@ -105,16 +107,21 @@ public class Run {
             List<List<Integer>> NewDNAString = new ArrayList<>();
             //Add route from parent 1
             for (int route = 0; route < crossIndex; route++) {
-                NewDNAString.add(parents.get(0).getDNAString().get(route));
+                List<Integer> newRoute = new ArrayList<>();
+                for(int customer: parents.get(0).getDNAString().get(route)) {
+                    newRoute.add(customer);
+                }
+                NewDNAString.add(newRoute);
             }
             //Add routes from parent 2
             for (int route = crossIndex; route < numberOfRoutes; route++) {
-                NewDNAString.add(parents.get(1).getDNAString().get(route));
+                List<Integer> newRoute = new ArrayList<>();
+                for(int customer: parents.get(1).getDNAString().get(route)) {
+                    newRoute.add(customer);
+                }
+                NewDNAString.add(newRoute);
             }
 
-
-            //TODO: ADD repair function to add missing customers and remove duplicates
-            //TODO: Then create new DNA-object for the new child. Need new constructor
             child = new DNA(NewDNAString);
             repairRoute(child);
 
