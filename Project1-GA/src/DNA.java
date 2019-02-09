@@ -36,7 +36,6 @@ public class DNA {
         for (int x = 0; x < this.vehicles.size(); x++) {
             this.vehicleWeights.add(this.vehicles.get(x).getMaxLoad());
         }
-        this.addEndDepots();
     }
 
 
@@ -75,9 +74,9 @@ public class DNA {
             for (int i = 0; i < this.depots.size(); i++) {
                 //if there are no customers in the route, add startdepot as enddepot
                 if (route.size() == 0) {
-                    /*closestDepotId = this.vehicles.get(routeID).getDepotID();
+                    closestDepotId = this.vehicles.get(routeID).getDepotID();
                     closestDepotDistance = 0;
-                    */
+
                     /*double currentDistance = neightbourMatrix.get(this.customers.size() + this.vehicles.get(routeID).getDepotID()).get(this.customers.size() + i);
                     if (currentDistance < closestDepotDistance) {
                         closestDepotId = i;
@@ -95,6 +94,7 @@ public class DNA {
             }
             route.add(closestDepotId);
         }
+        this.printMatrix(this.getDNAString());
         this.updateFitness();
     }
 

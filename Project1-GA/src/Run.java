@@ -118,7 +118,7 @@ public class Run {
             //TODO: ADD repair function to add missing customers and remove duplicates
             //TODO: Then create new DNA-object for the new child. Need new constructor
             child = new DNA(NewDNAString);
-            repairRoute(child);
+            //repairRoute(child);
 
         }
         else{
@@ -172,7 +172,7 @@ public class Run {
         for(int missingCus: missingCustomers){
             child.addCustomer(missingCus, this.possibleVehicles);
         }
-
+        child.addEndDepots();
     }
 
     private void mutatePopulation(List<DNA> population){
@@ -217,8 +217,6 @@ public class Run {
         Run run = new Run();
         run.runItBaby("p01");
     }
-
-
 
 
 
