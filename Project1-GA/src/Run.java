@@ -9,9 +9,9 @@ import java.util.stream.IntStream;
 
 public class Run {
     private int initialPopulation = 1000;
-    private double crossoverRate = 1;
-    private double mutationRate = 0.35;
-    private int maxGenerationNumber = 10000;
+    private double crossoverRate = 0;
+    private double mutationRate = 1;
+    private int maxGenerationNumber = 1000;
     private double targetFitness = 0;
     private int elites = 180;
     private int participantNr = 6;
@@ -121,7 +121,16 @@ public class Run {
 
         }
         else{
-            child = parents.get(0);
+            List<List<Integer>> DNAString = parents.get(0).getDNAString();
+            List<List<Integer>> newDNAString = new ArrayList<>();
+            for(List<Integer> route: DNAString){
+                List<Integer> newRoute = new ArrayList<>();
+                for(int customer: route){
+                    newRoute.add(customer);
+                }
+                newDNAString.add(newRoute);
+            }
+            child = new DNA(newDNAString);
         }
         return child;
     }
@@ -160,7 +169,7 @@ public class Run {
             }
         }
 
-        List<Integer> possibleVehicles = IntStream.rangeClosed(0, this.vehicleSize)
+        List<Integer> possibleVehicles = IntStream.rangeClosed(0, this.vehicleSize-1)
                 .boxed().collect(Collectors.toList());
         for(int missingCus: missingCustomers){
             child.addCustomer(missingCus, possibleVehicles);

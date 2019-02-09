@@ -44,7 +44,7 @@ public class Visualizer extends JFrame {
         private double minCoordinate;
         private double boarder = 5;
         List<Color> depotColours = new ArrayList<Color>(Arrays.asList(
-                Color.blue, Color.red, Color.green, Color.yellow, Color.black, Color.pink, Color.cyan, Color.magenta, Color.orange, Color.lightGray));
+                Color.blue, Color.red, Color.green, Color.black, Color.yellow, Color.pink, Color.cyan, Color.magenta, Color.orange, Color.lightGray));
 
 
         public void setDNA(List<List<Integer>> dna) {

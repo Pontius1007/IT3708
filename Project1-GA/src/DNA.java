@@ -108,7 +108,7 @@ public class DNA {
         if (possibleVehicles.size() == 0) {
             throw new IllegalStateException("No more room in any vehicles (No room for weight in any vehicle)");
         }
-        int randomVehicleIdx = ThreadLocalRandom.current().nextInt(0, possibleVehicles.size()-1);
+        int randomVehicleIdx = ThreadLocalRandom.current().nextInt(0, possibleVehicles.size());
         int randomVehicle = possibleVehicles.get(randomVehicleIdx);
         double routeWeight = this.testRouteWeight(this.DNAString.get(randomVehicle), customer);
         if (routeWeight < vehicleWeights.get(randomVehicle)) {
