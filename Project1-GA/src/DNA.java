@@ -29,6 +29,17 @@ public class DNA {
         System.out.println(this.fitness); */
     }
 
+
+    public DNA(List<List<Integer>> DNAString){
+        this.DNAString = DNAString;
+        this.vehicleWeights = new ArrayList<>();
+        for (int x = 0; x < this.vehicles.size(); x++) {
+            this.vehicleWeights.add(this.vehicles.get(x).getMaxLoad());
+        }
+        this.addEndDepots();
+    }
+
+
     public void initializeDnaRandomly() {
         List<Integer> possibleVehicles = new ArrayList<>();
         for (int x = 0; x < this.vehicles.size(); x++) {
@@ -64,8 +75,14 @@ public class DNA {
             for (int i = 0; i < this.depots.size(); i++) {
                 //if there are no customers in the route, add startdepot as enddepot
                 if (route.size() == 0) {
-                    closestDepotId = this.vehicles.get(routeID).getDepotID();
+                    /*closestDepotId = this.vehicles.get(routeID).getDepotID();
                     closestDepotDistance = 0;
+                    */
+                    double currentDistance = neightbourMatrix.get(this.customers.size() + this.vehicles.get(routeID).getDepotID()).get(this.customers.size() + i);
+                    if (currentDistance < closestDepotDistance) {
+                        closestDepotId = i;
+                        closestDepotDistance = currentDistance;
+                    }
                 }
                 //else find the closest depot to the last vehicle in the route
                 else {

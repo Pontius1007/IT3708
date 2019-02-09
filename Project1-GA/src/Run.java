@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Run {
-    private int initialPopulation = 200;
+    private int initialPopulation = 1000;
     private double crossoverRate = 1;
     private double mutationRate = 1;
     private int maxGenerationNumber = 20;
@@ -62,8 +62,8 @@ public class Run {
                 List<DNA> winners = this.playTurnament(participants);
 
                 //Crossover the two winners to create one child and add them to the new population
-                List<DNA> children = this.crossover(winners);
-                newPopulation.addAll(children);
+                DNA child = this.crossover(winners);
+                newPopulation.add(child);
             }
             for(int l = 0; l < this.elites; l++){
                 newPopulation.add(population.get(l));
@@ -75,6 +75,7 @@ public class Run {
         }
         Visualizer vis = new Visualizer(dr.depot_dict, dr.customer_dict, dr.vehicle_dict,
                 this.population.get(0).getDNAString(), dr.maxCoordinate, dr.minCoordinate);
+        population.get(0).printMatrix(population.get(0).getDNAString());
     }
 
     private void sortPopulationfFitness(List<DNA> population) {
@@ -90,12 +91,13 @@ public class Run {
         return winners;
     }
 
-    private List<DNA> crossover(List<DNA> parents){
+    private DNA crossover(List<DNA> parents){
         //Trying out Route Based Crossover
         double parent1Share = 0.6;
         int minimumRoute = 2;
         int numberOfRoutes = parents.get(0).getDNAString().size();
         int parentMaxCrossIndex = (int)Math.round(parent1Share*numberOfRoutes) ;
+        DNA child;
         if((double) ThreadLocalRandom.current().nextInt(0, 100) /100 < this.crossoverRate) {
             int crossIndex = ThreadLocalRandom.current().nextInt(minimumRoute, parentMaxCrossIndex);
             List<List<Integer>> NewDNAString = new ArrayList<>();
@@ -111,17 +113,20 @@ public class Run {
 
             //TODO: ADD repair function to add missing customers and remove duplicates
             //TODO: Then create new DNA-object for the new child. Need new constructor
-            //NewDNAString = repairRoute(NewDNAStringTest);
-
+            NewDNAString = repairRoute(NewDNAString);
+            child = new DNA(NewDNAString);
         }
-        return parents;
+        else{
+            child = parents.get(0);
+        }
+        return child;
     }
 
     private List<List<Integer>> repairRoute(List<List<Integer>> DNAString) {
         //Remove depots from DNA-string
         for (List<Integer> route : DNAString) {
             int depotIndex = route.size() - 1;
-            if (route.size() >= 1) {
+            if (route.size() >= 0) {
                 route.remove(depotIndex);
             }
         }
@@ -142,8 +147,7 @@ public class Run {
             }
         }
 
-        //Find missing customers 
-
+        //Find missing customers
 
 
         return DNAString;
