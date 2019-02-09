@@ -1,8 +1,5 @@
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -80,6 +77,7 @@ public class Run {
         Visualizer vis = new Visualizer(dr.depot_dict, dr.customer_dict, dr.vehicle_dict,
                 this.population.get(0).getDNAString(), dr.maxCoordinate, dr.minCoordinate);
         this.population.get(0).printMatrix(this.population.get(0).getDNAString());
+
     }
 
     private void sortPopulationfFitness(List<DNA> population) {
@@ -169,6 +167,8 @@ public class Run {
                 missingCustomers.add(i);
             }
         }
+
+
 
         List<Integer> possibleVehicles = IntStream.rangeClosed(0, this.vehicleSize-1)
                 .boxed().collect(Collectors.toList());

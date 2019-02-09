@@ -30,6 +30,7 @@ public class DNA {
         for (int x = 0; x < this.vehicles.size(); x++) {
             this.vehicleWeights.add(this.vehicles.get(x).getMaxLoad());
         }
+        this.updateFitness();
     }
 
 
@@ -139,23 +140,29 @@ public class DNA {
         return fitness;
     }
 
-    private double calculateRouteLength(List<Integer> route, int startDepotId) {
-        double distance = 0;
-        //This is the index of the starting depot in the neighbour matrix
-        int previous = this.customers.size() - 1 + startDepotId;
-        //Adds distance between all customers
-        for (int i = 0; i < route.size() - 1; i++) {
-            int current = route.get(i);
+    public double calculateRouteLength(List<Integer> route, int startDepotId) {
+        if(route.size()> 1){
+            double distance = 0;
+            //This is the index of the starting depot in the neighbour matrix
+            int previous = this.customers.size() + startDepotId;
+            //Adds distance between all customers
+            for (int i = 0; i < route.size() - 1; i++) {
+                int current = route.get(i);
+                distance += neightbourMatrix.get(previous).get(current);
+                previous = current;
+            }
+            //Adds distance from last customer to end depot
+            int current = this.customers.size() + route.get(route.size() - 1);
             distance += neightbourMatrix.get(previous).get(current);
-            previous = current;
+            return distance;
         }
-        //Adds distance from last customer to end depot
-        int current = this.customers.size() - 1 + route.get(route.size() - 1);
-        distance += neightbourMatrix.get(previous).get(current);
-        return distance;
+        else{
+            return 0;
+        }
+
     }
 
-    private double calculateRouteLength2(List<Integer> route, int startDepotId){
+    public double calculateRouteLength2(List<Integer> route, int startDepotId){
         double distance = 0;
         //This is the index of the starting depot in the neighbour matrix
         int previousx = depots.get(startDepotId).getX();
@@ -170,7 +177,9 @@ public class DNA {
             previousy = currenty;
         }
         //Adds distance from last customer to end depot
-        int current = this.customers.size() - 1 + route.get(route.size() - 1);
+        int currentx = depots.get(route.get(route.size() - 1)).getX();
+        int currenty = depots.get(route.get(route.size() - 1)).getY();
+        distance += calculateDistance(currentx, currenty, previousx, previousy);
         return distance;
     }
 
@@ -179,7 +188,7 @@ public class DNA {
 
         double distance = 0;
         //This is the index of the starting depot in the neighbour matrix
-        int previous = this.customers.size() - 1 + startDepotId;
+        int previous = this.customers.size() + startDepotId;
         //Calculates the distance from start depot to the new customer
         int current = newCustomer;
         distance += neightbourMatrix.get(previous).get(current);
@@ -218,4 +227,5 @@ public class DNA {
     private double calculateDistance(int x1, int y1, int x2, int y2){
         return Math.sqrt(Math.pow(x1-x2,2)+Math.pow(y1-y2,2));
     }
+
 }
