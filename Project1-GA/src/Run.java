@@ -21,6 +21,7 @@ public class Run {
     private List<Integer> individualIndexes;
     private List<Integer> customerIndexes = new ArrayList<>();
     private List<DNA> population = new ArrayList<>();
+    private List<Integer> possibleVehicles = new ArrayList<>();
 
 
     private void runItBaby(String fileName) throws IOException {
@@ -38,7 +39,10 @@ public class Run {
         for (int i = 0; i < dr.customer_dict.size(); i++){
             customerIndexes.add(i);
         }
-        System.out.println(targetFitness);
+        for (int i = 0; i < dr.vehicle_dict.size(); i++){
+            possibleVehicles.add(i);
+        }
+        //System.out.println(targetFitness);
         while (this.generationNumber <= this.maxGenerationNumber && currentBestFitness > targetFitness*1.05){
             //Creates a list containing numbers from 0 to the size of the population.
             this.individualIndexes = IntStream.rangeClosed(0, this.population.size()-1)
@@ -113,8 +117,9 @@ public class Run {
 
             //TODO: ADD repair function to add missing customers and remove duplicates
             //TODO: Then create new DNA-object for the new child. Need new constructor
-            NewDNAString = repairRoute(NewDNAString);
             child = new DNA(NewDNAString);
+            repairRoute(child);
+
         }
         else{
             child = parents.get(0);
@@ -122,15 +127,16 @@ public class Run {
         return child;
     }
 
-    private List<List<Integer>> repairRoute(List<List<Integer>> DNAString) {
+    private void repairRoute(DNA child) {
         //Remove depots from DNA-string
+        List<List<Integer>> DNAString = child.getDNAString();
         for (List<Integer> route : DNAString) {
             int depotIndex = route.size() - 1;
             if (route.size() >= 0) {
                 route.remove(depotIndex);
             }
         }
-
+        int customerSize = 0;
         //Remove duplicate customers
         List<Integer> visitedCustomers = new ArrayList<>();
         for (List<Integer> route : DNAString) {
@@ -145,12 +151,28 @@ public class Run {
                     visitedCustomers.add(route.get(customer));
                 }
             }
+            customerSize++;
         }
 
-        //Find missing customers
+        Collections.sort(visitedCustomers);
+        List<Integer> missingCustomers = new ArrayList<>();
+        //Finds missing customers
+        for(int i = 0; i < customerSize; i++){
+            if(visitedCustomers.size() == 0){
+                break;
+            }
+            if(visitedCustomers.get(0) != i){
+                missingCustomers.add(i);
+            }
+            else{
+                visitedCustomers.remove(0);
+            }
+        }
 
+        for(int missingCus: missingCustomers){
+            child.addCustomer(missingCus, this.possibleVehicles);
+        }
 
-        return DNAString;
     }
 
     private void mutatePopulation(List<DNA> population){

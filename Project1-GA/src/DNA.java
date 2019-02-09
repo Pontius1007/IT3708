@@ -48,8 +48,8 @@ public class DNA {
             possibleVehicles.add(x);
         }
         //add all customers randomly to a vehicle
-        for (Customer customer : this.customers.values()) {
-            addCustomer(customer, possibleVehicles);
+        for (int i = 0; i < customers.size(); i++) {
+            addCustomer(i, possibleVehicles);
         }
 
         //add closest ending depot for each vehicle
@@ -78,11 +78,11 @@ public class DNA {
                     /*closestDepotId = this.vehicles.get(routeID).getDepotID();
                     closestDepotDistance = 0;
                     */
-                    double currentDistance = neightbourMatrix.get(this.customers.size() + this.vehicles.get(routeID).getDepotID()).get(this.customers.size() + i);
+                    /*double currentDistance = neightbourMatrix.get(this.customers.size() + this.vehicles.get(routeID).getDepotID()).get(this.customers.size() + i);
                     if (currentDistance < closestDepotDistance) {
                         closestDepotId = i;
                         closestDepotDistance = currentDistance;
-                    }
+                    }*/
                 }
                 //else find the closest depot to the last vehicle in the route
                 else {
@@ -110,7 +110,8 @@ public class DNA {
     }
 
 
-    private void addCustomer(Customer customer, List<Integer> possibleVehicles) {
+    public void addCustomer(int customerId, List<Integer> possibleVehicles) {
+        Customer customer = customers.get(customerId);
         if (possibleVehicles.size() == 0) {
             throw new IllegalStateException("No more room in any vehicles (No room for weight in any vehicle)");
         }
@@ -121,7 +122,7 @@ public class DNA {
             this.DNAString.get(randomVehicle).add(customer.getCustomerID());
         } else {
             possibleVehicles.remove(randomVehicleIdx);
-            addCustomer(customer, possibleVehicles);
+            addCustomer(customerId, possibleVehicles);
         }
     }
 
