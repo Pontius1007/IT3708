@@ -155,6 +155,26 @@ public class DNA {
         return distance;
     }
 
+    private double calculateRouteLength2(List<Integer> route, int startDepotId){
+        double distance = 0;
+        //This is the index of the starting depot in the neighbour matrix
+        int previousx = depots.get(startDepotId).getX();
+        int previousy = depots.get(startDepotId).getY();
+        //Adds distance between all customers
+        for (int i = 0; i < route.size() - 1; i++) {
+            int current = route.get(i);
+            int currentx = customers.get(i).getX();
+            int currenty = customers.get(i).getY();
+            distance += calculateDistance(currentx, currenty, previousx, previousy);
+            previousx = currentx;
+            previousy = currenty;
+        }
+        //Adds distance from last customer to end depot
+        int current = this.customers.size() - 1 + route.get(route.size() - 1);
+        return distance;
+    }
+
+
     private double testRouteLength(List<Integer> route, int startDepotId, int newCustomer) {
 
         double distance = 0;
@@ -193,5 +213,9 @@ public class DNA {
 
     public double getFitness() {
         return this.fitness;
+    }
+
+    private double calculateDistance(int x1, int y1, int x2, int y2){
+        return Math.sqrt(Math.pow(x1-x2,2)+Math.pow(y1-y2,2));
     }
 }

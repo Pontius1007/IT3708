@@ -79,6 +79,7 @@ public class Run {
         }
         Visualizer vis = new Visualizer(dr.depot_dict, dr.customer_dict, dr.vehicle_dict,
                 this.population.get(0).getDNAString(), dr.maxCoordinate, dr.minCoordinate);
+        this.population.get(0).printMatrix(this.population.get(0).getDNAString());
     }
 
     private void sortPopulationfFitness(List<DNA> population) {
