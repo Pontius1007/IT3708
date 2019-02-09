@@ -10,8 +10,8 @@ import java.util.stream.IntStream;
 public class Run {
     private int initialPopulation = 1000;
     private double crossoverRate = 1;
-    private double mutationRate = 1;
-    private int maxGenerationNumber = 20;
+    private double mutationRate = 0.35;
+    private int maxGenerationNumber = 10000;
     private double targetFitness = 0;
     private int elites = 180;
     private int participantNr = 6;
@@ -69,10 +69,10 @@ public class Run {
                 DNA child = this.crossover(winners);
                 newPopulation.add(child);
             }
+            this.mutatePopulation(newPopulation);
             for(int l = 0; l < this.elites; l++){
                 newPopulation.add(population.get(l));
             }
-            this.mutatePopulation(newPopulation);
             this.population = newPopulation;
 
             this.generationNumber += 1;
