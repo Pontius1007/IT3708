@@ -127,6 +127,7 @@ public class DataReader {
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
+        /*
         DataReader dr = new DataReader();
         dr.readFile("data/Data Files/p01");
         DNA dna = new DNA(dr.vehicle_dict, dr.depot_dict, dr.customer_dict);
@@ -136,6 +137,7 @@ public class DataReader {
         vis.setVisible(false);
         vis.dispose();
         vis = new Visualizer(dr.depot_dict, dr.customer_dict, dr.vehicle_dict, dna2.getDNAString(), dr.maxCoordinate, dr.minCoordinate);
+        */
 
     }
 }
