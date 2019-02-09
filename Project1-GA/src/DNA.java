@@ -30,6 +30,7 @@ public class DNA {
         for (int x = 0; x < this.vehicles.size(); x++) {
             this.vehicleWeights.add(this.vehicles.get(x).getMaxLoad());
         }
+        this.updateFitness();
     }
 
 
