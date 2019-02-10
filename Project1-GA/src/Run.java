@@ -5,15 +5,15 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Run {
-    private int initialPopulation = 1000;
+    private int initialPopulation = 400;
 
-    private double crossoverRate = 1;
+    private double crossoverRate = 0.6;
     private double mutationRate = 1;
-    private int maxGenerationNumber = 4000;
+    private int maxGenerationNumber = 1000;
 
     private double targetFitness = 0;
-    private int elites = 20;
-    private int participantNr = 8;
+    private int elites = 10;
+    private int participantNr = 5;
 
     private int generationNumber = 0;
     private double currentBestFitness = Double.MAX_VALUE;
@@ -88,6 +88,7 @@ public class Run {
         this.population.get(0).updateEndDepots();
         System.out.println(this.population.get(0).getFitness());
         this.population.get(0).printMatrix(this.population.get(0).getDNAString());
+        this.printSolution(this.population.get(0));
 
 
 
@@ -304,9 +305,30 @@ public class Run {
         individual.updateEndDepots();
     }
 
-
-    public void readSolution(String fileName) throws IOException{
-
+    private void printSolution(DNA solution){
+        System.out.println(solution.getTotalDistance());
+        int vehilcleIdxInDepot = 0;
+        int lastDepot = 0;
+        for(int i = 0; i < solution.getDNAString().size(); i++){
+            List<Integer> route = solution.getDNAString().get(i);
+            int startDepot = DNA.vehicles.get(i).getDepotID();
+            if(startDepot != lastDepot){
+                vehilcleIdxInDepot = 0;
+            }
+            if(route.size() > 1){
+                String printString = "";
+                printString += (startDepot + "  ");
+                printString += ((vehilcleIdxInDepot+1) + "  ");
+                printString += (String.format("%.2f", solution.calculateRouteLength(route, startDepot)) + "  ");
+                printString += (solution.calculateRouteWeight(route) + "  ");
+                for(int j = 0; j < route.size()-1; j++){
+                    printString += (route.get(j) + " ");
+                }
+                System.out.println(printString);
+            }
+            vehilcleIdxInDepot++;
+            lastDepot = startDepot;
+        }
     }
 
     public static void main(String[] args) throws IOException {
