@@ -46,6 +46,7 @@ public class DNA {
         for (int i = 0; i < customers.size(); i++) {
             addCustomer(i, possibleVehicles);
         }
+
         //add closest ending depot for each vehicle
         this.addEndDepots();
     }
@@ -162,15 +163,15 @@ public class DNA {
             route.remove(route.size() - 1);
         }
         Customer customer = customers.get(customerId);
-        //System.out.println(possibleVehicles);
-        //printMatrix(getDNAString());
         if (possibleVehicles.size() == 0) {
-            int randomVehicleIdx = ThreadLocalRandom.current().nextInt(0, vehicles.size()-1);
+            int randomVehicleIdx = ThreadLocalRandom.current().nextInt(0, vehicles.size());
             if(this.DNAString.get(randomVehicleIdx).size()==0){
-                this.DNAString.get(randomVehicleIdx).add(customer.getCustomerID());
+                this.DNAString.get(randomVehicleIdx).add(0, customer.getCustomerID());
             }
-            this.DNAString.get(randomVehicleIdx).add(
-                    ThreadLocalRandom.current().nextInt(0, this.DNAString.get(randomVehicleIdx).size()+1), customer.getCustomerID());
+            else{
+                this.DNAString.get(randomVehicleIdx).add(
+                        ThreadLocalRandom.current().nextInt(0, this.DNAString.get(randomVehicleIdx).size()), customer.getCustomerID());
+            }
         }
         else{
             int randomVehicleIdx = ThreadLocalRandom.current().nextInt(0, possibleVehicles.size());
@@ -182,7 +183,7 @@ public class DNA {
                 }
                 else{
                     this.DNAString.get(randomVehicle).add(
-                            ThreadLocalRandom.current().nextInt(0, this.DNAString.get(randomVehicleIdx).size()+1), customer.getCustomerID());
+                            ThreadLocalRandom.current().nextInt(0, this.DNAString.get(randomVehicleIdx).size()), customer.getCustomerID());
                 }
             } else {
                 possibleVehicles.remove(randomVehicleIdx);

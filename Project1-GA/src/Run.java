@@ -5,14 +5,14 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Run {
-    private int initialPopulation = 400;
+    private int initialPopulation = 20;
 
-    private double crossoverRate = 0.6;
+    private double crossoverRate = 1;
     private double mutationRate = 1;
-    private int maxGenerationNumber = 10000;
+    private int maxGenerationNumber = 1000;
 
     private double targetFitness = 0;
-    private int elites = 35;
+    private int elites = 10;
     private int participantNr = 5;
 
     private int generationNumber = 0;
@@ -88,6 +88,9 @@ public class Run {
         }
 
         sortPopulationfFitness(this.population);
+        if(this.bestLegal == null){
+            this.bestLegal = this.population.get(0);
+        }
         Visualizer vis = new Visualizer(dr.depot_dict, dr.customer_dict, dr.vehicle_dict,
                 this.bestLegal.getDNAString(), dr.maxCoordinate, dr.minCoordinate);
         System.out.println("Distance: "+ this.bestLegal.getTotalDistance());
@@ -204,14 +207,10 @@ public class Run {
         for(DNA individual: population){
             if((double) ThreadLocalRandom.current().nextInt(0, 100) < this.mutationRate * 100){
                 double rand = (double) ThreadLocalRandom.current().nextInt(0, 100);
-                if(rand > 75){
+                if(rand > 66){
                     mutateIndividualMove(individual);
                 }
-                else if(rand > 50){
-                    mutateIndividual(individual);
-                }
-                else if(rand > 25){
-                    //mutateIndividualShuffle(individual);
+                else if(rand > 33){
                     mutateIndividual(individual);
                 }
                 else{
@@ -330,6 +329,9 @@ public class Run {
                 }
                 System.out.println(printString);
             }
+            else{
+                vehilcleIdxInDepot--;
+            }
             vehilcleIdxInDepot++;
             lastDepot = startDepot;
         }
@@ -337,6 +339,6 @@ public class Run {
 
     public static void main(String[] args) throws IOException {
         Run run = new Run();
-        run.runItBaby("p08");
+        run.runItBaby("p01");
     }
 }
