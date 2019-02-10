@@ -6,8 +6,8 @@ import java.util.stream.IntStream;
 
 public class Run {
     private int initialPopulation = 300;
-    private double crossoverRate = 0.9;
-    private double mutationRate = 0.8;
+    private double crossoverRate = 0.8;
+    private double mutationRate = 0.35;
     private double moveMutationRate = 0.5;
     private int maxGenerationNumber = 20000;
 
@@ -42,7 +42,7 @@ public class Run {
         for (int i = 0; i < dr.customer_dict.size(); i++){
             customerIndexes.add(i);
         }
-        while (this.generationNumber < this.maxGenerationNumber && currentBestFitness > targetFitness*1.1){
+        while (this.generationNumber < this.maxGenerationNumber && currentBestFitness > targetFitness*1.05){
             //Creates a list containing numbers from 0 to the size of the population.
             this.individualIndexes = IntStream.rangeClosed(0, this.population.size()-1)
                     .boxed().collect(Collectors.toList());
@@ -187,12 +187,14 @@ public class Run {
             }
         }
 
-
-
-        List<Integer> possibleVehicles = IntStream.rangeClosed(0, this.vehicleSize-1)
-                .boxed().collect(Collectors.toList());
         for(int missingCus: missingCustomers){
-            child.addCustomer(missingCus, possibleVehicles);
+            Customer customer = DNA.customers.get(missingCus);
+            int closestDepot = customer.getClosestDepotID();
+            int vehiclesPerDepot = DNA.vehicles.size()/DNA.depots.size();
+            int start = closestDepot*vehiclesPerDepot;
+            int end = ((closestDepot+1)*vehiclesPerDepot)-1;
+            List<Integer> possibleVehiclesSmart = IntStream.rangeClosed(start, end).boxed().collect(Collectors.toList());
+            child.addSmartCustomer(missingCus, possibleVehiclesSmart, closestDepot, vehiclesPerDepot);
         }
         child.addEndDepots();
     }
@@ -272,6 +274,6 @@ public class Run {
 
     public static void main(String[] args) throws IOException {
         Run run = new Run();
-        run.runItBaby("p22");
+        run.runItBaby("p01");
     }
 }
