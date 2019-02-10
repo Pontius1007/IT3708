@@ -10,7 +10,7 @@ public class DNA {
     private double totalDistance;
     private double fitness;
     private double punnishment;
-    private double punnishmentRate = 100;
+    private double punnishmentRate = 20;
 
     public static List<List<Double>> neightbourMatrix;
     public static Map<Integer, Vehicle> vehicles;
@@ -93,10 +93,13 @@ public class DNA {
     }
 
     public void updateFitness() {
+        this.punnishment = 0;
         for (int routeID = 0; routeID < DNAString.size(); routeID++) {
             List<Integer> route = this.DNAString.get(routeID);
             this.punnishment += Math.max(0,
                     calculateRouteLength(route, this.vehicles.get(routeID).getDepotID()) - this.vehicles.get(routeID).getMaxDuration());
+            this.punnishment += Math.max(0,
+                    calculateRouteWeight(route) - this.vehicles.get(routeID).getMaxLoad());
         }
         this.punnishment *= this.punnishmentRate;
         this.totalDistance = this.calculateFitness();
@@ -106,18 +109,59 @@ public class DNA {
 
     public void addCustomer(int customerId, List<Integer> possibleVehicles) {
         Customer customer = customers.get(customerId);
+        //System.out.println(possibleVehicles);
+        //printMatrix(getDNAString());
         if (possibleVehicles.size() == 0) {
-            throw new IllegalStateException("No more room in any vehicles (No room for weight in any vehicle)");
+            int randomVehicleIdx = ThreadLocalRandom.current().nextInt(0, vehicles.size()-1);
+            this.DNAString.get(randomVehicleIdx).add(customer.getCustomerID());
         }
-        int randomVehicleIdx = ThreadLocalRandom.current().nextInt(0, possibleVehicles.size());
-        int randomVehicle = possibleVehicles.get(randomVehicleIdx);
-        double routeWeight = this.testRouteWeight(this.DNAString.get(randomVehicle), customer);
-        if (routeWeight < vehicleWeights.get(randomVehicle)) {
-            this.DNAString.get(randomVehicle).add(customer.getCustomerID());
-        } else {
-            possibleVehicles.remove(randomVehicleIdx);
-            addCustomer(customerId, possibleVehicles);
+        else{
+            int randomVehicleIdx = ThreadLocalRandom.current().nextInt(0, possibleVehicles.size());
+            int randomVehicle = possibleVehicles.get(randomVehicleIdx);
+            double routeWeight = this.testRouteWeight(this.DNAString.get(randomVehicle), customer);
+            double routeLength = this.testRouteLength(this.DNAString.get(randomVehicle), vehicles.get(randomVehicle).getDepotID(), randomVehicle);
+            if (routeWeight < vehicleWeights.get(randomVehicle) && routeLength < vehicles.get(randomVehicle).getMaxDuration()) {
+                this.DNAString.get(randomVehicle).add(customer.getCustomerID());
+            } else {
+                possibleVehicles.remove(randomVehicleIdx);
+                addCustomer(customerId, possibleVehicles);
+            }
         }
+    }
+
+    public void insertCustomer(int customerId, List<Integer> possibleVehicles) {
+        for (List<Integer> route : this.getDNAString()) {
+            route.remove(route.size() - 1);
+        }
+        Customer customer = customers.get(customerId);
+        //System.out.println(possibleVehicles);
+        //printMatrix(getDNAString());
+        if (possibleVehicles.size() == 0) {
+            int randomVehicleIdx = ThreadLocalRandom.current().nextInt(0, vehicles.size()-1);
+            if(this.DNAString.get(randomVehicleIdx).size()==0){
+                this.DNAString.get(randomVehicleIdx).add(customer.getCustomerID());
+            }
+            this.DNAString.get(randomVehicleIdx).add(
+                    ThreadLocalRandom.current().nextInt(0, this.DNAString.get(randomVehicleIdx).size()+1), customer.getCustomerID());
+        }
+        else{
+            int randomVehicleIdx = ThreadLocalRandom.current().nextInt(0, possibleVehicles.size());
+            int randomVehicle = possibleVehicles.get(randomVehicleIdx);
+            double routeWeight = this.testRouteWeight(this.DNAString.get(randomVehicle), customer);
+            if (routeWeight < vehicleWeights.get(randomVehicle)) {
+                if(this.DNAString.get(randomVehicleIdx).size()==0){
+                    this.DNAString.get(randomVehicle).add(0, customer.getCustomerID());
+                }
+                else{
+                    this.DNAString.get(randomVehicle).add(
+                            ThreadLocalRandom.current().nextInt(0, this.DNAString.get(randomVehicleIdx).size()+1), customer.getCustomerID());
+                }
+            } else {
+                possibleVehicles.remove(randomVehicleIdx);
+                addCustomer(customerId, possibleVehicles);
+            }
+        }
+        this.addEndDepots();
     }
 
     public void printMatrix(List<List<Integer>> mat) {
@@ -162,27 +206,6 @@ public class DNA {
 
     }
 
-    public double calculateRouteLength2(List<Integer> route, int startDepotId){
-        double distance = 0;
-        //This is the index of the starting depot in the neighbour matrix
-        int previousx = depots.get(startDepotId).getX();
-        int previousy = depots.get(startDepotId).getY();
-        //Adds distance between all customers
-        for (int i = 0; i < route.size() - 1; i++) {
-            int current = route.get(i);
-            int currentx = customers.get(i).getX();
-            int currenty = customers.get(i).getY();
-            distance += calculateDistance(currentx, currenty, previousx, previousy);
-            previousx = currentx;
-            previousy = currenty;
-        }
-        //Adds distance from last customer to end depot
-        int currentx = depots.get(route.get(route.size() - 1)).getX();
-        int currenty = depots.get(route.get(route.size() - 1)).getY();
-        distance += calculateDistance(currentx, currenty, previousx, previousy);
-        return distance;
-    }
-
 
     private double testRouteLength(List<Integer> route, int startDepotId, int newCustomer) {
 
@@ -190,16 +213,25 @@ public class DNA {
         //This is the index of the starting depot in the neighbour matrix
         int previous = this.customers.size() + startDepotId;
         //Calculates the distance from start depot to the new customer
-        int current = newCustomer;
-        distance += neightbourMatrix.get(previous).get(current);
-        previous = current;
+        int current;
         //Calutes distances between all alread added customers
         for (int i = 0; i < route.size() - 1; i++) {
             current = route.get(i);
             distance += neightbourMatrix.get(previous).get(current);
             previous = current;
         }
+        current = newCustomer;
+        distance += neightbourMatrix.get(previous).get(current);
         return distance;
+    }
+
+    public double calculateRouteWeight(List<Integer> route){
+        double totalWeight = 0;
+        for (int i = 0; i < route.size()-1; i++) {
+            double weight = this.customers.get(route.get(i)).getWeight();
+            totalWeight += weight;
+        }
+        return totalWeight;
     }
 
     private double testRouteWeight(List<Integer> route, Customer newCustomer) {
@@ -222,10 +254,6 @@ public class DNA {
 
     public double getFitness() {
         return this.fitness;
-    }
-
-    private double calculateDistance(int x1, int y1, int x2, int y2){
-        return Math.sqrt(Math.pow(x1-x2,2)+Math.pow(y1-y2,2));
     }
 
 }
