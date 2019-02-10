@@ -6,9 +6,9 @@ import java.util.stream.IntStream;
 
 public class Run {
     private int initialPopulation = 300;
-    private double crossoverRate = 0.8;
-    private double mutationRate = 0.35;
-    private double moveMutationRate = 0.5;
+
+    private double crossoverRate = 0.9;
+    private double mutationRate = 0.8;
     private int maxGenerationNumber = 20000;
 
     private double targetFitness = 0;
@@ -202,11 +202,15 @@ public class Run {
     private void mutatePopulation(List<DNA> population){
         for(DNA individual: population){
             if((double) ThreadLocalRandom.current().nextInt(0, 100) < this.mutationRate * 100){
-                if((double) ThreadLocalRandom.current().nextInt(0, 100) < this.moveMutationRate * 100){
+                double rand = (double) ThreadLocalRandom.current().nextInt(0, 100);
+                if(rand > 66){
                     mutateIndividualMove(individual);
                 }
-                else{
+                else if(rand < 33){
                     mutateIndividual(individual);
+                }
+                else{
+                    mutateIndividualShuffle(individual);
                 }
             }
         }
@@ -265,6 +269,23 @@ public class Run {
         List<Integer> possibleVehicles = IntStream.rangeClosed(0, this.vehicleSize-1)
                 .boxed().collect(Collectors.toList());
         individual.insertCustomer(tempValue, possibleVehicles);
+        individual.updateEndDepots();
+    }
+
+    private void mutateIndividualShuffle(DNA individual){
+        int routeID = ThreadLocalRandom.current().nextInt(0, vehicleSize);
+        //amounts of replacements
+        int replacementCount = 5;
+        List<Integer> route = individual.getDNAString().get(routeID);
+        if(route.size() > 2){
+            for(int i = 0; i < replacementCount; i++){
+                int replaceIndex = ThreadLocalRandom.current().nextInt(0, route.size()-1);
+                int tmpValue = route.get(replaceIndex);
+                route.remove(replaceIndex);
+                int newIndex = ThreadLocalRandom.current().nextInt(0, route.size()-1);
+                route.add(newIndex, tmpValue);
+            }
+        }
         individual.updateEndDepots();
     }
 
