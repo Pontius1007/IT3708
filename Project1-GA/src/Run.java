@@ -5,15 +5,15 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Run {
-    private int initialPopulation = 200;
+    private int initialPopulation = 500;
     private double crossoverRate = 0.9;
     private double mutationRate = 1;
-    private double moveMutationRate = 0.3;
-    private int maxGenerationNumber = 40000;
+    private double moveMutationRate = 0.1;
+    private int maxGenerationNumber = 1000;
 
     private double targetFitness = 0;
-    private int elites = 10;
-    private int participantNr = 5;
+    private int elites = 150;
+    private int participantNr = 10;
 
     private int generationNumber = 0;
     private double currentBestFitness = Double.MAX_VALUE;
@@ -42,7 +42,7 @@ public class Run {
         for (int i = 0; i < dr.customer_dict.size(); i++){
             customerIndexes.add(i);
         }
-        while (this.generationNumber < this.maxGenerationNumber && currentBestFitness > targetFitness*1.3){
+        while (this.generationNumber < this.maxGenerationNumber && currentBestFitness > targetFitness*1.1){
             //Creates a list containing numbers from 0 to the size of the population.
             this.individualIndexes = IntStream.rangeClosed(0, this.population.size()-1)
                     .boxed().collect(Collectors.toList());
@@ -272,6 +272,6 @@ public class Run {
 
     public static void main(String[] args) throws IOException {
         Run run = new Run();
-        run.runItBaby("p05");
+        run.runItBaby("p01");
     }
 }

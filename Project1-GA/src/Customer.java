@@ -4,6 +4,7 @@ public class Customer {
     private int y;
     private int serviceDuration;
     private int weight;
+    private int closestDepotID;
 
     public Customer(int x, int y, int serviceDuration, int weight, int customerID) {
         this.x = x;
@@ -31,5 +32,13 @@ public class Customer {
 
     public int getCustomerID() {
         return customerID;
+    }
+
+    public int getClosestDepotID() {
+        return closestDepotID;
+    }
+
+    public void setClosestDepotID(int closestDepotID) {
+        this.closestDepotID = closestDepotID;
     }
 }

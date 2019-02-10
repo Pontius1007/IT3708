@@ -50,6 +50,10 @@ public class DNA {
         this.addEndDepots();
     }
 
+    public void initialzeSmart(){
+
+    }
+
 
     public void updateEndDepots() {
         //remove old end depots
@@ -63,31 +67,13 @@ public class DNA {
 
     public void addEndDepots() {
         for (int routeID = 0; routeID < this.DNAString.size(); routeID++) {
-            List<Integer> route = this.DNAString.get(routeID);
-            int closestDepotId = 0;
-            double closestDepotDistance = Double.MAX_VALUE;
-            for (int i = 0; i < this.depots.size(); i++) {
-                //if there are no customers in the route, add startdepot as enddepot
-                if (route.size() == 0) {
-                    closestDepotId = this.vehicles.get(routeID).getDepotID();
-                    closestDepotDistance = 0;
-
-                    /*double currentDistance = neightbourMatrix.get(this.customers.size() + this.vehicles.get(routeID).getDepotID()).get(this.customers.size() + i);
-                    if (currentDistance < closestDepotDistance) {
-                        closestDepotId = i;
-                        closestDepotDistance = currentDistance;
-                    }*/
-                }
-                //else find the closest depot to the last vehicle in the route
-                else {
-                    double currentDistance = neightbourMatrix.get(route.get(route.size() - 1)).get(this.customers.size() + i);
-                    if (currentDistance < closestDepotDistance) {
-                        closestDepotId = i;
-                        closestDepotDistance = currentDistance;
-                    }
-                }
+            List<Integer> route = DNAString.get(routeID);
+            if(route.size() == 0){
+                route.add(vehicles.get(routeID).getDepotID());
             }
-            route.add(closestDepotId);
+            else{
+                route.add(customers.get(route.get(route.size()-1)).getClosestDepotID());
+            }
         }
         this.updateFitness();
     }
