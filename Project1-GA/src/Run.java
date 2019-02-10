@@ -5,15 +5,15 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Run {
-    private int initialPopulation = 1000;
+    private int initialPopulation = 400;
 
-    private double crossoverRate = 1;
+    private double crossoverRate = 0.6;
     private double mutationRate = 1;
-    private int maxGenerationNumber = 4000;
+    private int maxGenerationNumber = 40000;
 
     private double targetFitness = 0;
-    private int elites = 20;
-    private int participantNr = 8;
+    private int elites = 35;
+    private int participantNr = 5;
 
     private int generationNumber = 0;
     private double currentBestFitness = Double.MAX_VALUE;
@@ -52,7 +52,8 @@ public class Run {
             }
 
             System.out.println("This is generation: " + generationNumber);
-            System.out.println(this.population.get(0).getFitness());
+            System.out.println("Distance: "+this.population.get(0).getTotalDistance());
+            System.out.println("Fitness: "+this.population.get(0).getFitness());
             System.out.println("---------------------");
 
             //Logic for playing tournaments
@@ -210,7 +211,8 @@ public class Run {
                     mutateIndividual(individual);
                 }
                 else if(rand > 25){
-                    mutateIndividualShuffle(individual);
+                    //mutateIndividualShuffle(individual);
+                    mutateIndividual(individual);
                 }
                 else{
                     mutateIndividualReverse(individual);
@@ -311,6 +313,6 @@ public class Run {
 
     public static void main(String[] args) throws IOException {
         Run run = new Run();
-        run.runItBaby("p01");
+        run.runItBaby("p08");
     }
 }
