@@ -82,8 +82,8 @@ public class DataReader {
             this.targetFitness = Double.parseDouble(splitStr[0]);
         }
         return this.targetFitness;
-
     }
+
 
     private void createNeighbourMatrix() {
         DecimalFormat df = new DecimalFormat("#.00");

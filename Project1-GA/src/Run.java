@@ -1,3 +1,5 @@
+import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
+
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
@@ -5,13 +7,15 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Run {
-    private int initialPopulation = 1000;
-    private double crossoverRate = 0.55;
-    private double mutationRate = 0.35;
-    private int maxGenerationNumber = 1000;
+    private int initialPopulation = 200;
+    private double crossoverRate = 0.9;
+    private double mutationRate = 1;
+    private double moveMutationRate = 0.3;
+    private int maxGenerationNumber = 40000;
+
     private double targetFitness = 0;
-    private int elites = 150;
-    private int participantNr = 6;
+    private int elites = 10;
+    private int participantNr = 5;
 
     private int generationNumber = 0;
     private double currentBestFitness = Double.MAX_VALUE;
@@ -40,12 +44,14 @@ public class Run {
         for (int i = 0; i < dr.customer_dict.size(); i++){
             customerIndexes.add(i);
         }
-        while (this.generationNumber <= this.maxGenerationNumber && currentBestFitness > targetFitness*1.05){
+        while (this.generationNumber < this.maxGenerationNumber && currentBestFitness > targetFitness*1.3){
             //Creates a list containing numbers from 0 to the size of the population.
             this.individualIndexes = IntStream.rangeClosed(0, this.population.size()-1)
                     .boxed().collect(Collectors.toList());
             sortPopulationfFitness(this.population);
-
+            if(this.population.get(0).getFitness() < currentBestFitness){
+                currentBestFitness = this.population.get(0).getFitness();
+            }
 
             System.out.println("This is generation: " + generationNumber);
             System.out.println(this.population.get(0).getFitness());
@@ -73,12 +79,20 @@ public class Run {
                 newPopulation.add(population.get(l));
             }
             this.population = newPopulation;
-
             this.generationNumber += 1;
         }
+
+        sortPopulationfFitness(this.population);
         Visualizer vis = new Visualizer(dr.depot_dict, dr.customer_dict, dr.vehicle_dict,
                 this.population.get(0).getDNAString(), dr.maxCoordinate, dr.minCoordinate);
+        System.out.println("Distance: "+this.population.get(0).getTotalDistance());
+        System.out.println("Fitness: "+this.population.get(0).getFitness());
+        this.population.get(0).updateEndDepots();
+        System.out.println(this.population.get(0).getFitness());
         this.population.get(0).printMatrix(this.population.get(0).getDNAString());
+
+
+
 
     }
 
@@ -187,12 +201,18 @@ public class Run {
 
     private void mutatePopulation(List<DNA> population){
         for(DNA individual: population){
-            if((double) ThreadLocalRandom.current().nextInt(0, 100) /100 < this.mutationRate){
-                mutateIndividual(individual);
+            if((double) ThreadLocalRandom.current().nextInt(0, 100) < this.mutationRate * 100){
+                if((double) ThreadLocalRandom.current().nextInt(0, 100) < this.moveMutationRate * 100){
+                    mutateIndividualMove(individual);
+                }
+                else{
+                    mutateIndividual(individual);
+                }
             }
         }
     }
 
+    //swaps two positions in DNA
     private void mutateIndividual(DNA individual){
         Collections.shuffle(this.customerIndexes);
         int firstCustomerIdx = customerIndexes.get(0);
@@ -220,14 +240,40 @@ public class Run {
         int tempFirst = DNAString.get(firstPosRow).get(firstPosCol);
         DNAString.get(firstPosRow).set(firstPosCol, DNAString.get(secondPosRow).get(secondPosCol));
         DNAString.get(secondPosRow).set(secondPosCol, tempFirst);
+    }
+
+    private void mutateIndividualMove(DNA individual){
+        Collections.shuffle(this.customerIndexes);
+        int firstCustomer = customerIndexes.get(0);
+        int customerCol = 0;
+        int customerRow = 0;
+
+        List<List<Integer>> DNAString = individual.getDNAString();
+        int customerCount = 0;
+        for(int rowIdx = 0; rowIdx < DNAString.size(); rowIdx++){
+            List<Integer> row = DNAString.get(rowIdx);
+            for(int colIdx = 0; colIdx < row.size()-1; colIdx++){
+                if(customerCount == firstCustomer){
+                    customerRow = rowIdx;
+                    customerCol = colIdx;
+                }
+                customerCount++;
+            }
+        }
+        int tempValue = DNAString.get(customerRow).get(customerCol);
+        DNAString.get(customerRow).remove(customerCol);
+        List<Integer> possibleVehicles = IntStream.rangeClosed(0, this.vehicleSize-1)
+                .boxed().collect(Collectors.toList());
+        individual.insertCustomer(tempValue, possibleVehicles);
         individual.updateEndDepots();
+    }
+
+    public void readSolution(String fileName) throws IOException{
+
     }
 
     public static void main(String[] args) throws IOException {
         Run run = new Run();
-        run.runItBaby("p01");
+        run.runItBaby("p05");
     }
-
-
-
 }
