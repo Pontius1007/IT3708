@@ -9,7 +9,7 @@ public class Run {
 
     private double crossoverRate = 0.6;
     private double mutationRate = 1;
-    private int maxGenerationNumber = 40000;
+    private int maxGenerationNumber = 10000;
 
     private double targetFitness = 0;
     private int elites = 35;
@@ -20,6 +20,8 @@ public class Run {
     private List<Integer> individualIndexes;
     private List<Integer> customerIndexes = new ArrayList<>();
     private List<DNA> population = new ArrayList<>();
+
+    private DNA bestLegal;
 
     private int customerSize;
     private int vehicleSize;
@@ -33,6 +35,7 @@ public class Run {
         DNA.vehicles = dr.vehicle_dict;
         DNA.depots = dr.depot_dict;
         DNA.customers = dr.customer_dict;
+        this.bestLegal = null;
         for (int i = 0; i < this.initialPopulation; i++) {
             DNA dna = new DNA();
             this.population.add(dna);
@@ -42,12 +45,15 @@ public class Run {
         for (int i = 0; i < dr.customer_dict.size(); i++){
             customerIndexes.add(i);
         }
-        while (this.generationNumber < this.maxGenerationNumber && currentBestFitness > targetFitness*1.05){
+        while (this.generationNumber < this.maxGenerationNumber && (currentBestFitness > targetFitness*1.05 ||  this.bestLegal == null)){
             //Creates a list containing numbers from 0 to the size of the population.
             this.individualIndexes = IntStream.rangeClosed(0, this.population.size()-1)
                     .boxed().collect(Collectors.toList());
             sortPopulationfFitness(this.population);
             if(this.population.get(0).getFitness() < currentBestFitness){
+                if(this.population.get(0).getFitness() == this.population.get(0).getTotalDistance()){
+                    this.bestLegal = this.population.get(0);
+                }
                 currentBestFitness = this.population.get(0).getFitness();
             }
 
@@ -83,17 +89,10 @@ public class Run {
 
         sortPopulationfFitness(this.population);
         Visualizer vis = new Visualizer(dr.depot_dict, dr.customer_dict, dr.vehicle_dict,
-                this.population.get(0).getDNAString(), dr.maxCoordinate, dr.minCoordinate);
-        System.out.println("Distance: "+this.population.get(0).getTotalDistance());
-        System.out.println("Fitness: "+this.population.get(0).getFitness());
-        this.population.get(0).updateEndDepots();
-        System.out.println(this.population.get(0).getFitness());
-        this.population.get(0).printMatrix(this.population.get(0).getDNAString());
-        this.printSolution(this.population.get(0));
-
-
-
-
+                this.bestLegal.getDNAString(), dr.maxCoordinate, dr.minCoordinate);
+        System.out.println("Distance: "+ this.bestLegal.getTotalDistance());
+        System.out.println("Fitness: "+this.bestLegal.getFitness());
+        this.printSolution(this.bestLegal);
     }
 
     private void sortPopulationfFitness(List<DNA> population) {
@@ -250,6 +249,7 @@ public class Run {
         int tempFirst = DNAString.get(firstPosRow).get(firstPosCol);
         DNAString.get(firstPosRow).set(firstPosCol, DNAString.get(secondPosRow).get(secondPosCol));
         DNAString.get(secondPosRow).set(secondPosCol, tempFirst);
+        individual.updateEndDepots();
     }
 
     private void mutateIndividualMove(DNA individual){
@@ -308,7 +308,8 @@ public class Run {
     }
 
     private void printSolution(DNA solution){
-        System.out.println(solution.getTotalDistance());
+        System.out.println("Solution: ");
+        System.out.println(String.format("%.2f", solution.getTotalDistance()));
         int vehilcleIdxInDepot = 0;
         int lastDepot = 0;
         for(int i = 0; i < solution.getDNAString().size(); i++){
@@ -319,12 +320,13 @@ public class Run {
             }
             if(route.size() > 1){
                 String printString = "";
-                printString += (startDepot + "  ");
-                printString += ((vehilcleIdxInDepot+1) + "  ");
-                printString += (String.format("%.2f", solution.calculateRouteLength(route, startDepot)) + "  ");
-                printString += (solution.calculateRouteWeight(route) + "  ");
+                printString += ((startDepot+1) + "   ");
+                printString += ((vehilcleIdxInDepot+1) + "   ");
+                printString += (String.format("%.2f", solution.calculateRouteLength(route, startDepot)) + "   ");
+                printString += ((int)solution.calculateRouteWeight(route) + "   ");
+                printString += ((route.get(route.size()-1)+1)+ "  ");
                 for(int j = 0; j < route.size()-1; j++){
-                    printString += (route.get(j) + " ");
+                    printString += ((route.get(j)+1) + " ");
                 }
                 System.out.println(printString);
             }

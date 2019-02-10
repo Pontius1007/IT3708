@@ -127,7 +127,7 @@ public class DataReader {
         for(Customer customer: customer_dict.values()){
             int closestDepotId = 0;
             double closestDistance = Double.MAX_VALUE;
-            for(int depotID: depot_dict.keySet()){
+            for(int depotID = 0; depotID < depot_dict.size(); depotID++){
                 double currentDistance = this.neighBourMatrix.get(customer.getCustomerID()).get(customer_dict.size()+depotID);
                 if(currentDistance < closestDistance){
                     closestDepotId = depotID;

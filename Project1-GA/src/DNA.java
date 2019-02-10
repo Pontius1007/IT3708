@@ -46,7 +46,6 @@ public class DNA {
         for (int i = 0; i < customers.size(); i++) {
             addCustomer(i, possibleVehicles);
         }
-
         //add closest ending depot for each vehicle
         this.addEndDepots();
     }
