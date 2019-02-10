@@ -5,15 +5,15 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Run {
-    private int initialPopulation = 500;
+    private int initialPopulation = 300;
     private double crossoverRate = 0.9;
-    private double mutationRate = 1;
-    private double moveMutationRate = 0.1;
-    private int maxGenerationNumber = 1000;
+    private double mutationRate = 0.8;
+    private double moveMutationRate = 0.5;
+    private int maxGenerationNumber = 20000;
 
     private double targetFitness = 0;
-    private int elites = 150;
-    private int participantNr = 10;
+    private int elites = 20;
+    private int participantNr = 8;
 
     private int generationNumber = 0;
     private double currentBestFitness = Double.MAX_VALUE;
@@ -272,6 +272,6 @@ public class Run {
 
     public static void main(String[] args) throws IOException {
         Run run = new Run();
-        run.runItBaby("p01");
+        run.runItBaby("p22");
     }
 }

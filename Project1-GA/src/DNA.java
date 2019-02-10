@@ -20,7 +20,8 @@ public class DNA {
     public DNA() {
         this.DNAString = new ArrayList<>();
         this.vehicleWeights = new ArrayList<>();
-        initializeDnaRandomly();
+        //initializeDnaRandomly();
+        initialzeSmart();
     }
 
 
@@ -51,7 +52,49 @@ public class DNA {
     }
 
     public void initialzeSmart(){
+        //Loope over kunder, sjekke for vekt og legge til
+        for (int x = 0; x < this.vehicles.size(); x++) {
+            this.DNAString.add(new ArrayList<>());
+            this.vehicleWeights.add(this.vehicles.get(x).getMaxLoad());
+        }
 
+        //Adds all customers to a vehicle
+        for (int i = 0; i < customers.size(); i++) {
+            List<Integer> possibleVehiclesSmart = new ArrayList<>();
+            Customer customer = customers.get(i);
+            int closestDepot = customer.getClosestDepotID();
+            int vehiclesPerDepot = this.vehicles.size()/this.depots.size();
+            for (int x = closestDepot*vehiclesPerDepot; x < (closestDepot+1)*vehiclesPerDepot; x++) {
+                possibleVehiclesSmart.add(x);
+            }
+            addSmartCustomer(i, possibleVehiclesSmart, closestDepot, vehiclesPerDepot);
+        }
+
+        this.addEndDepots();
+        /*for (Integer intest: this.vehicleWeights) {
+            System.out.println(intest);
+        }*/
+    }
+
+    public void addSmartCustomer(int customerId, List<Integer> possibleVehiclesSmart, int closestDepot, int vehiclesPerDepot) {
+
+        if (possibleVehiclesSmart.size() == 0) {
+            int randomVehicleIdxInClosestDepot = ThreadLocalRandom.current().nextInt(closestDepot*vehiclesPerDepot, (closestDepot+1)*vehiclesPerDepot);
+            this.DNAString.get(randomVehicleIdxInClosestDepot).add(customerId);
+        }
+        else {
+            int randomVehicleIdx = ThreadLocalRandom.current().nextInt(0, possibleVehiclesSmart.size());
+            int randomVehicle = possibleVehiclesSmart.get(randomVehicleIdx);
+            Customer customer = customers.get(customerId);
+            double routeWeight = this.testRouteWeight(this.DNAString.get(randomVehicle), customer);
+            double routeLength = this.testRouteLength(this.DNAString.get(randomVehicle), vehicles.get(randomVehicle).getDepotID(), randomVehicle);
+            if (routeWeight < vehicleWeights.get(randomVehicle) && routeLength < vehicles.get(randomVehicle).getMaxDuration()) {
+                this.DNAString.get(randomVehicle).add(customerId);
+            } else {
+                possibleVehiclesSmart.remove(randomVehicleIdx);
+                addSmartCustomer(customerId, possibleVehiclesSmart, closestDepot, vehiclesPerDepot);
+            }
+        }
     }
 
 
