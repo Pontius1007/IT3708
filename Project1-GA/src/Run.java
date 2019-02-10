@@ -5,11 +5,11 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Run {
-    private int initialPopulation = 300;
+    private int initialPopulation = 1000;
 
-    private double crossoverRate = 0.9;
-    private double mutationRate = 0.8;
-    private int maxGenerationNumber = 20000;
+    private double crossoverRate = 1;
+    private double mutationRate = 1;
+    private int maxGenerationNumber = 4000;
 
     private double targetFitness = 0;
     private int elites = 20;
@@ -203,14 +203,17 @@ public class Run {
         for(DNA individual: population){
             if((double) ThreadLocalRandom.current().nextInt(0, 100) < this.mutationRate * 100){
                 double rand = (double) ThreadLocalRandom.current().nextInt(0, 100);
-                if(rand > 66){
+                if(rand > 75){
                     mutateIndividualMove(individual);
                 }
-                else if(rand < 33){
+                else if(rand > 50){
                     mutateIndividual(individual);
                 }
-                else{
+                else if(rand > 25){
                     mutateIndividualShuffle(individual);
+                }
+                else{
+                    mutateIndividualReverse(individual);
                 }
             }
         }
@@ -275,19 +278,32 @@ public class Run {
     private void mutateIndividualShuffle(DNA individual){
         int routeID = ThreadLocalRandom.current().nextInt(0, vehicleSize);
         //amounts of replacements
-        int replacementCount = 5;
+        int replacementCount = 4;
         List<Integer> route = individual.getDNAString().get(routeID);
         if(route.size() > 2){
             for(int i = 0; i < replacementCount; i++){
-                int replaceIndex = ThreadLocalRandom.current().nextInt(0, route.size()-1);
+                int replaceIndex = ThreadLocalRandom.current().nextInt(0, route.size());
                 int tmpValue = route.get(replaceIndex);
                 route.remove(replaceIndex);
-                int newIndex = ThreadLocalRandom.current().nextInt(0, route.size()-1);
+                int newIndex = ThreadLocalRandom.current().nextInt(0, route.size());
                 route.add(newIndex, tmpValue);
             }
         }
         individual.updateEndDepots();
     }
+
+    private void mutateIndividualReverse(DNA individual){
+        int routeID = ThreadLocalRandom.current().nextInt(0, vehicleSize);
+        List<Integer> route = individual.getDNAString().get(routeID);
+        List<Integer> newRoute = new ArrayList<>();
+        for(int i = route.size()-2; i>=0; i--){
+            newRoute.add(route.get(i));
+        }
+        newRoute.add(route.get(route.size()-1));
+        individual.getDNAString().set(routeID, newRoute);
+        individual.updateEndDepots();
+    }
+
 
     public void readSolution(String fileName) throws IOException{
 
