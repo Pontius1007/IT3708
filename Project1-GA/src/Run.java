@@ -89,6 +89,7 @@ public class Run {
         this.population.get(0).updateEndDepots();
         System.out.println(this.population.get(0).getFitness());
         this.population.get(0).printMatrix(this.population.get(0).getDNAString());
+        this.printSolution(this.population.get(0));
 
 
 
@@ -306,9 +307,30 @@ public class Run {
         individual.updateEndDepots();
     }
 
-
-    public void readSolution(String fileName) throws IOException{
-
+    private void printSolution(DNA solution){
+        System.out.println(solution.getTotalDistance());
+        int vehilcleIdxInDepot = 0;
+        int lastDepot = 0;
+        for(int i = 0; i < solution.getDNAString().size(); i++){
+            List<Integer> route = solution.getDNAString().get(i);
+            int startDepot = DNA.vehicles.get(i).getDepotID();
+            if(startDepot != lastDepot){
+                vehilcleIdxInDepot = 0;
+            }
+            if(route.size() > 1){
+                String printString = "";
+                printString += (startDepot + "  ");
+                printString += ((vehilcleIdxInDepot+1) + "  ");
+                printString += (String.format("%.2f", solution.calculateRouteLength(route, startDepot)) + "  ");
+                printString += (solution.calculateRouteWeight(route) + "  ");
+                for(int j = 0; j < route.size()-1; j++){
+                    printString += (route.get(j) + " ");
+                }
+                System.out.println(printString);
+            }
+            vehilcleIdxInDepot++;
+            lastDepot = startDepot;
+        }
     }
 
     public static void main(String[] args) throws IOException {
