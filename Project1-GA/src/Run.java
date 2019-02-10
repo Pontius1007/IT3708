@@ -7,15 +7,15 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Run {
-    private int initialPopulation = 1000;
-    private double crossoverRate = 1;
+    private int initialPopulation = 200;
+    private double crossoverRate = 0.9;
     private double mutationRate = 1;
     private double moveMutationRate = 0.3;
-    private int maxGenerationNumber = 10000;
+    private int maxGenerationNumber = 40000;
 
     private double targetFitness = 0;
-    private int elites = 500;
-    private int participantNr = 8;
+    private int elites = 10;
+    private int participantNr = 5;
 
     private int generationNumber = 0;
     private double currentBestFitness = Double.MAX_VALUE;
@@ -87,6 +87,8 @@ public class Run {
                 this.population.get(0).getDNAString(), dr.maxCoordinate, dr.minCoordinate);
         System.out.println("Distance: "+this.population.get(0).getTotalDistance());
         System.out.println("Fitness: "+this.population.get(0).getFitness());
+        this.population.get(0).updateEndDepots();
+        System.out.println(this.population.get(0).getFitness());
         this.population.get(0).printMatrix(this.population.get(0).getDNAString());
 
 
@@ -272,6 +274,6 @@ public class Run {
 
     public static void main(String[] args) throws IOException {
         Run run = new Run();
-        run.runItBaby("p13");
+        run.runItBaby("p05");
     }
 }
