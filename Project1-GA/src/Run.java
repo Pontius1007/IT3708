@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Run {
-    private int initialPopulation = 20;
+    private int initialPopulation = 200;
 
     private double crossoverRate = 1;
     private double mutationRate = 1;
@@ -45,7 +45,12 @@ public class Run {
         for (int i = 0; i < dr.customer_dict.size(); i++){
             customerIndexes.add(i);
         }
-        while (this.generationNumber < this.maxGenerationNumber && (currentBestFitness > targetFitness*1.05 ||  this.bestLegal == null)){
+        while (this.generationNumber < this.maxGenerationNumber){
+            if(this.bestLegal != null){
+                if(currentBestFitness < targetFitness*1.05){
+                    break;
+                }
+            }
             //Creates a list containing numbers from 0 to the size of the population.
             this.individualIndexes = IntStream.rangeClosed(0, this.population.size()-1)
                     .boxed().collect(Collectors.toList());
