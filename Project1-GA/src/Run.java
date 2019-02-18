@@ -5,14 +5,14 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Run {
-    private int initialPopulation = 200;
+    private int initialPopulation = 500;
 
-    private double crossoverRate = 1;
-    private double mutationRate = 1;
-    private int maxGenerationNumber = 1000;
+    private double crossoverRate = 0.3;
+    private double mutationRate = 0.6;
+    private int maxGenerationNumber = 6000;
 
     private double targetFitness = 0;
-    private int elites = 10;
+    private int elites = 65;
     private int participantNr = 5;
 
     private int generationNumber = 0;
@@ -47,7 +47,7 @@ public class Run {
         }
         while (this.generationNumber < this.maxGenerationNumber){
             if(this.bestLegal != null){
-                if(currentBestFitness < targetFitness*1.05){
+                if(currentBestFitness < targetFitness*1.3){
                     break;
                 }
             }
@@ -344,6 +344,6 @@ public class Run {
 
     public static void main(String[] args) throws IOException {
         Run run = new Run();
-        run.runItBaby("p01");
+        run.runItBaby("3");
     }
 }

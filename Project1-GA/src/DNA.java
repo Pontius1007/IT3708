@@ -10,7 +10,7 @@ public class DNA {
     private double totalDistance;
     private double fitness;
     private double punnishment;
-    private double punnishmentRate = 3;
+    private double punnishmentRate = 6;
 
     public static List<List<Double>> neightbourMatrix;
     public static Map<Integer, Vehicle> vehicles;
