@@ -7,18 +7,15 @@ public class Chromosome {
     int[] cromosome;
     Pixel[][] imageMat;
     ImageMat img;
+    List<ArrayList<Integer>> segments;
   
   
     public Chromosome(ImageMat img) {
         cromosome = new int[img.getHeight()*img.getWidth()];
         this.img = img;
-        //TODO 2D list
         this.imageMat = img.getPixels();
         initPrimMST(img);
-    }
-
-    public int[] getCromosome() {
-        return cromosome;
+        this.segments = new ArrayList<>();
     }
 
     private void initPrimMST(ImageMat img){
@@ -85,17 +82,19 @@ public class Chromosome {
 
     public int[] getCromosome() {
         return cromosome;
-  
+    }
+
+
     // measure of the ‘similarity’ (homogeneity) of pixels in the same segment
     // Assumes a 2D list in the form of [[1,52,23]] where the numbers are pixelnumbers
     private double overallDeviation(Chromosome segments) {
         double deviation = 0;
         //Change when we have 2d list
-        for (Integer segment:segments.getCromosome()) {
+        for (List<Integer> segment: this.segments) {
             //Find segment center
-            ArrayList<Integer> centerPos = getSegmentCenter(segment);
+            List<Integer> centerPos = getSegmentCenter(segment);
             Pixel centerPixel = imageMat[centerPos.get(0)][centerPos.get(1)];
-            for (int pixel = 0; pixel < segment.length; pixel++ ) {
+            for (int pixel = 0; pixel < segment.size(); pixel++ ) {
                 Pixel toPixel = getPixelonIndex(segment.get(pixel));
                 deviation += Edge.dist(centerPixel, toPixel);
             }
@@ -103,14 +102,14 @@ public class Chromosome {
         return deviation;
     }
 
-    private List<Integer> getSegmentCenter(Integer[] segment) {
+    private List<Integer> getSegmentCenter(List<Integer> segment) {
         List<Integer> segmentCenter = new ArrayList<>();
         int segmentWidth = 0;
         int segmentHeight = 0;
         int minSegmentWidth = Integer.MAX_VALUE;
         int minSegmentHeight = Integer.MAX_VALUE;
-        for (int pixel = 0; pixel < segment.length; pixel++ ) {
-            Pixel temp = getPixelonIndex(segment[pixel]);
+        for (int pixel = 0; pixel < segment.size(); pixel++ ) {
+            Pixel temp = getPixelonIndex(segment.get(pixel));
             if(temp.getRowIdx() > segmentWidth) {
                 segmentWidth = temp.getRowIdx();
             }
