@@ -7,7 +7,6 @@ public class Chromosome {
     int[] cromosome;
 
     public Chromosome(ImageMat img) {
-
         cromosome = new int[img.getHeight()*img.getWidth()];
         initPrimMST(img);
     }
@@ -15,22 +14,51 @@ public class Chromosome {
     private void initPrimMST(ImageMat img){
         Pixel[][] mat = img.getPixels();
         Pixel currentPixel = mat[0][0];
-        List<Color> visitedPixels = new ArrayList<Color>();
-        List<Edge> candidateEdges = new ArrayList<Edge>();
+        List<Color> visitedPixels = new ArrayList<>();
+        List<Edge> candidateEdges = new ArrayList<>();
 
         visitedPixels.add(currentPixel);
-
         while(visitedPixels.size() < img.getHeight()*img.getWidth()){
             addEdges(candidateEdges, currentPixel, mat);
+
+            Edge bestEdge = candidateEdges.get(0);
+            candidateEdges.remove(0);
+            // Check if the edge "to pixel" is already connected in the MST
+            while(visitedPixels.contains(bestEdge.getTo())){
+                bestEdge = candidateEdges.get(0);
+                candidateEdges.remove(0);
+            }
+
+            this.cromosome[bestEdge.getFrom().getPixelIdx()] = bestEdge.getTo().getPixelIdx();
+            visitedPixels.add(currentPixel);
+            currentPixel = bestEdge.getTo();
         }
     }
 
     private void addEdges(List<Edge> candidateEdges, Pixel currentPixel, Pixel[][] mat){
         if(currentPixel.getColIdx() > 0){
-            insertByDist(candidateEdges, new Edge(currentPixel, mat[currentPixel.getRowIdx()][currentPixel.getColIdx()]));
+            insertByDist(candidateEdges, new Edge(currentPixel, mat[currentPixel.getRowIdx()][currentPixel.getColIdx()-1]));
             if(currentPixel.getRowIdx() > 0){
-                Edge insertEdge = new Edge()
+                insertByDist(candidateEdges, new Edge(currentPixel, mat[currentPixel.getRowIdx()-1][currentPixel.getColIdx()-1]));
             }
+            if(currentPixel.getRowIdx()+1 < mat.length){
+                insertByDist(candidateEdges, new Edge(currentPixel, mat[currentPixel.getRowIdx()+1][currentPixel.getColIdx()-1]));
+            }
+        }
+        if(currentPixel.getColIdx()+1 < mat[0].length){
+            insertByDist(candidateEdges, new Edge(currentPixel, mat[currentPixel.getRowIdx()][currentPixel.getColIdx()+1]));
+            if(currentPixel.getRowIdx() > 0){
+                insertByDist(candidateEdges, new Edge(currentPixel, mat[currentPixel.getRowIdx()-1][currentPixel.getColIdx()+1]));
+            }
+            if(currentPixel.getRowIdx()+1 < mat.length){
+                insertByDist(candidateEdges, new Edge(currentPixel, mat[currentPixel.getRowIdx()+1][currentPixel.getColIdx()+1]));
+            }
+        }
+        if(currentPixel.getRowIdx() > 0){
+            insertByDist(candidateEdges, new Edge(currentPixel, mat[currentPixel.getRowIdx()-1][currentPixel.getColIdx()]));
+        }
+        if(currentPixel.getRowIdx()+1 < mat.length){
+            insertByDist(candidateEdges, new Edge(currentPixel, mat[currentPixel.getRowIdx()+1][currentPixel.getColIdx()]));
         }
     }
 
@@ -44,26 +72,12 @@ public class Chromosome {
         candidates.add(newEdge);
     }
 
-    public static void main(String[] args) {
-        List<Integer> test = new ArrayList<>();
-
-        test.add(9);
-        test.add(5);
-        test.add(3);
-        test.add(0);
-        test.add(5);
-
-        Collections.sort(test);
-
-        for(int i = 0; i < test.size(); i++){
-            if(7 < test.get(i)){
-                test.add(i, 7);
-                break;
-            }
-        }
-
-        System.out.println(test);
-
+    public int[] getCromosome() {
+        return cromosome;
     }
 
+    public static void main(String[] args) {
+        ImageMat loadImg = new ImageMat("0");
+        Chromosome test = new Chromosome(loadImg);
+    }
 }
