@@ -14,7 +14,7 @@ public class Edge {
     }
 
     //Calculates the Euclidean distance by using RGB
-    private double dist(Pixel FromPixel, Pixel ToPixel) {
+    public static double dist(Pixel FromPixel, Pixel ToPixel) {
         double deltaRed = FromPixel.getRed() - ToPixel.getRed();
         double deltaGreen = FromPixel.getGreen() - ToPixel.getGreen();
         double deltaBlue = FromPixel.getBlue() - ToPixel.getBlue();
