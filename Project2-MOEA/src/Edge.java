@@ -1,11 +1,12 @@
 import java.awt.*;
 
 public class Edge {
-    private Color from;
-    private Color to;
+    private Pixel from;
+    private Pixel to;
+
     private double distance;
 
-    public Edge(Color from, Color to, float distance) {
+    public Edge(Pixel from, Pixel to, int colFromIdx, int colToIdx, int rowFromIdx, int rowToIdx) {
         this.from = from;
         this.to = to;
         this.distance = distance;
@@ -19,7 +20,7 @@ public class Edge {
         return to;
     }
 
-    public float getDistance() {
+    public double getDistance() {
         return distance;
     }
 }

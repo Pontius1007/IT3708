@@ -6,21 +6,21 @@ import java.io.File;
 public class ImageMat {
     int width;
     int height;
-    Color[][] pixels;
+    Pixel[][] pixels;
 
     public ImageMat(String imageFile) {
         try {
-            File input = new File("Test_Images/"+imageFile+"/Test image.jpg");
+            File input = new File("Test_Images/" + imageFile + "/Test image.jpg");
             BufferedImage image = ImageIO.read(input);
             this.width = image.getWidth();
             this.height = image.getHeight();
 
-            this.pixels = new Color[height][width];
+            this.pixels = new Pixel[height][width];
 
 
-            for(int i=0; i<this.height; i++) {
-                for(int j=0; j<this.width; j++) {
-                    Color c = new Color(image.getRGB(i, j));
+            for (int i = 0; i < this.height; i++) {
+                for (int j = 0; j < this.width; j++) {
+                    Pixel c = new Pixel(image.getRGB(i, j), i, j);
                     pixels[i][j] = c;
                 }
             }
@@ -38,13 +38,7 @@ public class ImageMat {
         return height;
     }
 
-    public Color[][] getPixels() {
+    public Pixel[][] getPixels() {
         return pixels;
-    }
-
-    public static void main(String[] args) {
-        ImageMat test = new ImageMat("86016");
-        System.out.println(test.getHeight());
-        System.out.println(test.getWidth());
     }
 }
