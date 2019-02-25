@@ -74,17 +74,25 @@ public class Chromosome {
         List<Integer> segmentCenter = new ArrayList<>();
         int segmentWidth = 0;
         int segmentHeight = 0;
+        int minSegmentWidth = Integer.MAX_VALUE;
+        int minSegmentHeight = Integer.MAX_VALUE;
         for (int pixel = 0; pixel < segment.length; pixel++ ) {
             Pixel temp = getPixelonIndex(segment[pixel]);
             if(temp.getRowIdx() > segmentWidth) {
                 segmentWidth = temp.getRowIdx();
             }
+            if(temp.getRowIdx() < minSegmentWidth) {
+                minSegmentWidth = temp.getRowIdx();
+            }
             if(temp.getColIdx() > segmentHeight) {
                 segmentHeight = temp.getColIdx();
             }
+            if(temp.getColIdx() < minSegmentHeight) {
+                minSegmentHeight = temp.getColIdx();
+            }
         }
-        segmentCenter.add(segmentWidth/2);
-        segmentCenter.add(segmentHeight/2);
+        segmentCenter.add((minSegmentWidth + (segmentWidth-minSegmentWidth))/2);
+        segmentCenter.add((minSegmentHeight + (segmentHeight-minSegmentHeight))/2);
         return segmentCenter;
     }
 
