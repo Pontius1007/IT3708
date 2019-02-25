@@ -1,4 +1,5 @@
 import java.awt.*;
+import java.io.FileReader;
 
 public class Edge {
     private Pixel from;
@@ -20,11 +21,11 @@ public class Edge {
         return Math.sqrt((Math.pow(deltaRed, 2)) + (Math.pow(deltaGreen, 2)) + (Math.pow(deltaBlue, 2)));
     }
 
-    public Color getFrom() {
+    public Pixel getFrom() {
         return from;
     }
 
-    public Color getTo() {
+    public Pixel getTo() {
         return to;
     }
 
