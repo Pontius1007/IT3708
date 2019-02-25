@@ -1,32 +1,40 @@
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.*;
 import java.util.List;
 
 public class Chromosome {
-    int[] cromosome;
-    Pixel[][] imageMat;
-    ImageMat img;
-    List<ArrayList<Integer>> segments;
+    private int[] cromosome;
+    private Pixel[][] imageMat;
+    private ImageMat img;
+    private int numberOfSegments;
+
+    private List<List<Integer>> segments;
+
+    private double deviation;
   
   
-    public Chromosome(ImageMat img) {
+    public Chromosome(ImageMat img, int numberOfSegments) {
         cromosome = new int[img.getHeight()*img.getWidth()];
         this.img = img;
         this.imageMat = img.getPixels();
-        initPrimMST(img);
+        this.numberOfSegments = numberOfSegments;
         this.segments = new ArrayList<>();
+        initPrimMST(img);
+        this.deviation = overallDeviation(this.segments);
     }
 
     private void initPrimMST(ImageMat img){
         Pixel[][] mat = img.getPixels();
         Pixel currentPixel = mat[0][0];
+
         List<Pixel> visitedPixels = new ArrayList<>();
         List<Edge> candidateEdges = new ArrayList<>();
 
         List<Edge> worstEdges = new ArrayList<Edge>();
         int numberOfWorstEdges = 5;
+        double bestWorstEdge = 0;
 
+        this.cromosome[0] = -1;
         visitedPixels.add(currentPixel);
         while(visitedPixels.size() < img.getHeight()*img.getWidth()){
             addEdges(candidateEdges, currentPixel, mat);
@@ -39,14 +47,54 @@ public class Chromosome {
                 candidateEdges.remove(0);
             }
 
-            this.cromosome[bestEdge.getFrom().getPixelIdx()] = bestEdge.getTo().getPixelIdx();
+            this.cromosome[bestEdge.getTo().getPixelIdx()] = bestEdge.getFrom().getPixelIdx();
+            if(worstEdges.size() == 0 || bestEdge.getDistance() > worstEdges.get(0).getDistance()){
+                this.addToWorst(bestEdge, worstEdges);
+            }
             visitedPixels.add(currentPixel);
             currentPixel = bestEdge.getTo();
         }
+        //remove the n worst edges in the mst
+        for(Edge e: worstEdges){
+            this.cromosome[e.getFrom().getPixelIdx()] = -1;
+        }
+
+        findSegments();
     }
 
+    private void findSegments() {
+        ArrayList<Integer> roots = new ArrayList<>();
+        for (int i = 0; i < this.cromosome.length; i++) {
+            if (this.cromosome[i] == -1) {
+                roots.add(i);
+                this.segments.add(new ArrayList<>(Arrays.asList(i)));
+            }
+        }
+        //adding every pixel to one sement
+        for(int i = 0; i < this.cromosome.length; i++){
+            //if already added as root, skip
+            if (this.cromosome[i] == -1) { continue; }
+            int current = i;
+            //search for root by backtracking
+            while(this.cromosome[current] != -1){
+                current = this.cromosome[current];
+            }
+            int segmentIdx = roots.indexOf(current);
+            this.segments.get(segmentIdx).add(i);
+        }
+    }
+
+    private void addToWorst(Edge e, List<Edge> worstEdges){
+        //replace the best edge in worstedges if needed
+        worstEdges.add(e);
+        worstEdges.sort(Comparator.comparingDouble(Edge::getDistance));
+        if(worstEdges.size() > this.numberOfSegments-1){
+            worstEdges.remove(0);
+        }
+    }
 
     private void addEdges(List<Edge> candidateEdges, Pixel currentPixel, Pixel[][] mat){
+        //add left neighbours
         if(currentPixel.getColIdx() > 0){
             insertByDist(candidateEdges, new Edge(currentPixel, mat[currentPixel.getRowIdx()][currentPixel.getColIdx()-1]));
             if(currentPixel.getRowIdx() > 0){
@@ -56,6 +104,7 @@ public class Chromosome {
                 insertByDist(candidateEdges, new Edge(currentPixel, mat[currentPixel.getRowIdx()+1][currentPixel.getColIdx()-1]));
             }
         }
+        //add right neighbours
         if(currentPixel.getColIdx()+1 < mat[0].length){
             insertByDist(candidateEdges, new Edge(currentPixel, mat[currentPixel.getRowIdx()][currentPixel.getColIdx()+1]));
             if(currentPixel.getRowIdx() > 0){
@@ -65,6 +114,7 @@ public class Chromosome {
                 insertByDist(candidateEdges, new Edge(currentPixel, mat[currentPixel.getRowIdx()+1][currentPixel.getColIdx()+1]));
             }
         }
+        //add up and down
         if(currentPixel.getRowIdx() > 0){
             insertByDist(candidateEdges, new Edge(currentPixel, mat[currentPixel.getRowIdx()-1][currentPixel.getColIdx()]));
         }
@@ -91,7 +141,7 @@ public class Chromosome {
 
     // measure of the ‘similarity’ (homogeneity) of pixels in the same segment
     // Assumes a 2D list in the form of [[1,52,23]] where the numbers are pixelnumbers
-    private double overallDeviation(Chromosome segments) {
+    private double overallDeviation(List<List<Integer>> segments) {
         double deviation = 0;
         //Change when we have 2d list
         for (List<Integer> segment: this.segments) {
@@ -104,6 +154,10 @@ public class Chromosome {
             }
         }
         return deviation;
+    }
+
+    public List<List<Integer>> getSegments() {
+        return segments;
     }
 
     private List<Integer> getSegmentCenter(List<Integer> segment) {
@@ -139,8 +193,17 @@ public class Chromosome {
         return imageMat[rowIndex][colIndex];
     }
 
+    public double getDeviation() {
+        return deviation;
+    }
+
     public static void main(String[] args) {
-        ImageMat loadImg = new ImageMat("1");
-        Chromosome test = new Chromosome(loadImg);
+        ImageMat loadImg = new ImageMat("0");
+        Chromosome test = new Chromosome(loadImg, 2);
+        List<List<Integer>> testSeg = test.getSegments();
+        for(List<Integer> l: testSeg){
+            System.out.println(l);
+        }
+        System.out.println(test.getDeviation());
     }
 }
