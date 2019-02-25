@@ -5,11 +5,20 @@ import java.util.List;
 
 public class Chromosome {
     int[] cromosome;
+    Pixel[][] imageMat;
+    ImageMat img;
+
 
     public Chromosome(ImageMat img) {
-
         cromosome = new int[img.getHeight()*img.getWidth()];
+        this.img = img;
+        //TODO 2D list
+        this.imageMat = img.getPixels();
         initPrimMST(img);
+    }
+
+    public int[] getCromosome() {
+        return cromosome;
     }
 
     private void initPrimMST(ImageMat img){
@@ -29,7 +38,7 @@ public class Chromosome {
         if(currentPixel.getColIdx() > 0){
             insertByDist(candidateEdges, new Edge(currentPixel, mat[currentPixel.getRowIdx()][currentPixel.getColIdx()]));
             if(currentPixel.getRowIdx() > 0){
-                Edge insertEdge = new Edge()
+                Edge insertEdge = new Edge();
             }
         }
     }
@@ -42,6 +51,56 @@ public class Chromosome {
             }
         }
         candidates.add(newEdge);
+    }
+
+    // measure of the ‘similarity’ (homogeneity) of pixels in the same segment
+    // Assumes a 2D list in the form of [[1,52,23]] where the numbers are pixelnumbers
+    private double overallDeviation(Chromosome segments) {
+        double deviation = 0;
+        //Change when we have 2d list
+        for (Integer segment:segments.getCromosome()) {
+            //Find segment center
+            ArrayList<Integer> centerPos = getSegmentCenter(segment);
+            Pixel centerPixel = imageMat[centerPos.get(0)][centerPos.get(1)];
+            for (int pixel = 0; pixel < segment.length; pixel++ ) {
+                Pixel toPixel = getPixelonIndex(segment.get(pixel));
+                deviation += Edge.dist(centerPixel, toPixel);
+            }
+        }
+        return deviation;
+    }
+
+    private List<Integer> getSegmentCenter(Integer[] segment) {
+        List<Integer> segmentCenter = new ArrayList<>();
+        int segmentWidth = 0;
+        int segmentHeight = 0;
+        int minSegmentWidth = Integer.MAX_VALUE;
+        int minSegmentHeight = Integer.MAX_VALUE;
+        for (int pixel = 0; pixel < segment.length; pixel++ ) {
+            Pixel temp = getPixelonIndex(segment[pixel]);
+            if(temp.getRowIdx() > segmentWidth) {
+                segmentWidth = temp.getRowIdx();
+            }
+            if(temp.getRowIdx() < minSegmentWidth) {
+                minSegmentWidth = temp.getRowIdx();
+            }
+            if(temp.getColIdx() > segmentHeight) {
+                segmentHeight = temp.getColIdx();
+            }
+            if(temp.getColIdx() < minSegmentHeight) {
+                minSegmentHeight = temp.getColIdx();
+            }
+        }
+        segmentCenter.add((minSegmentWidth + (segmentWidth-minSegmentWidth))/2);
+        segmentCenter.add((minSegmentHeight + (segmentHeight-minSegmentHeight))/2);
+        return segmentCenter;
+    }
+
+    private Pixel getPixelonIndex(int pixelNumber) {
+        //TODO: Check for bugs
+        int rowIndex = pixelNumber / this.img.getWidth();
+        int colIndex = pixelNumber % this.img.getWidth();
+        return imageMat[rowIndex][colIndex];
     }
 
     public static void main(String[] args) {
