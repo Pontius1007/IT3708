@@ -21,8 +21,11 @@ public class Chromosome {
     private void initPrimMST(ImageMat img){
         Pixel[][] mat = img.getPixels();
         Pixel currentPixel = mat[0][0];
-        List<Color> visitedPixels = new ArrayList<>();
+        List<Pixel> visitedPixels = new ArrayList<>();
         List<Edge> candidateEdges = new ArrayList<>();
+
+        List<Edge> worstEdges = new ArrayList<Edge>();
+        int numberOfWorstEdges = 5;
 
         visitedPixels.add(currentPixel);
         while(visitedPixels.size() < img.getHeight()*img.getWidth()){
@@ -31,7 +34,7 @@ public class Chromosome {
             Edge bestEdge = candidateEdges.get(0);
             candidateEdges.remove(0);
             // Check if the edge "to pixel" is already connected in the MST
-            while(visitedPixels.contains(bestEdge.getTo())){
+            while(visitedPixels.contains(bestEdge.getTo())) {
                 bestEdge = candidateEdges.get(0);
                 candidateEdges.remove(0);
             }
@@ -41,6 +44,7 @@ public class Chromosome {
             currentPixel = bestEdge.getTo();
         }
     }
+
 
     private void addEdges(List<Edge> candidateEdges, Pixel currentPixel, Pixel[][] mat){
         if(currentPixel.getColIdx() > 0){
@@ -136,7 +140,7 @@ public class Chromosome {
     }
 
     public static void main(String[] args) {
-        ImageMat loadImg = new ImageMat("0");
+        ImageMat loadImg = new ImageMat("1");
         Chromosome test = new Chromosome(loadImg);
     }
 }

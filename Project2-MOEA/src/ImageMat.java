@@ -10,7 +10,7 @@ public class ImageMat {
 
     public ImageMat(String imageFile) {
         try {
-            File input = new File("Test_Images/" + imageFile + "/Test image.jpeg");
+            File input = new File("Test_Images/" + imageFile + "/Test image.jpg");
             BufferedImage image = ImageIO.read(input);
             this.width = image.getWidth();
             this.height = image.getHeight();
@@ -19,6 +19,7 @@ public class ImageMat {
 
             for (int i = 0; i < this.height; i++) {
                 for (int j = 0; j < this.width; j++) {
+
                     Pixel c = new Pixel(image.getRGB(j, i), i, j, i*this.width+j);
                     pixels[i][j] = c;
                 }
