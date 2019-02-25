@@ -11,12 +11,12 @@ public class Edge {
         this.distance = distance;
     }
 
-
+    //Calculates the Euclidean distance by using RGB
     public double dist(Color FromPixel, Color ToPixel) {
-        double deltaRed = FromPixel.getRed()-ToPixel.getRed();
-        double deltaGreen = FromPixel.getGreen()-ToPixel.getGreen();
-        double deltaBlue = FromPixel.getBlue()-ToPixel.getBlue();
-        return Math.sqrt((Math.pow(deltaRed, 2))+(Math.pow(deltaGreen, 2))+(Math.pow(deltaBlue, 2)));
+        double deltaRed = FromPixel.getRed() - ToPixel.getRed();
+        double deltaGreen = FromPixel.getGreen() - ToPixel.getGreen();
+        double deltaBlue = FromPixel.getBlue() - ToPixel.getBlue();
+        return Math.sqrt((Math.pow(deltaRed, 2)) + (Math.pow(deltaGreen, 2)) + (Math.pow(deltaBlue, 2)));
     }
 
     public Color getFrom() {
