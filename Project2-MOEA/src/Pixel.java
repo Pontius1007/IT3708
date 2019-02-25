@@ -2,7 +2,7 @@ import java.awt.*;
 
 public class Pixel {
 
-    Color color;
+    public Color color;
     int rowIdx;
     int colIdx;
     int pixelIdx;

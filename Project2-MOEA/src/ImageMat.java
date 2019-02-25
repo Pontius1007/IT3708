@@ -30,6 +30,24 @@ public class ImageMat {
         }
     }
 
+    public void saveAs(String path){
+        try {
+            File output = new File(path);
+            BufferedImage image = new BufferedImage(this.width, this.height, BufferedImage.TYPE_INT_RGB);
+            for(int i=0; i<this.height; i++) {
+                for(int j=0; j<this.width; j++) {
+                    Color newColor = this.pixels[i][j].color;
+                    image.setRGB(j,i,newColor.getRGB());
+                }
+            }
+            ImageIO.write(image, "jpg", output);
+        }
+
+        catch(Exception e) {
+            System.out.println(e);
+        }
+    }
+
     public int getWidth() {
         return width;
     }

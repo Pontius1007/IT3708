@@ -186,7 +186,7 @@ public class Chromosome {
         return segmentCenter;
     }
 
-    private Pixel getPixelonIndex(int pixelNumber) {
+    public Pixel getPixelonIndex(int pixelNumber) {
         //TODO: Check for bugs
         int rowIndex = pixelNumber / this.img.getWidth();
         int colIndex = pixelNumber % this.img.getWidth();
@@ -198,12 +198,16 @@ public class Chromosome {
     }
 
     public static void main(String[] args) {
-        ImageMat loadImg = new ImageMat("0");
+        ImageMat loadImg = new ImageMat("1");
         Chromosome test = new Chromosome(loadImg, 2);
         List<List<Integer>> testSeg = test.getSegments();
         for(List<Integer> l: testSeg){
             System.out.println(l);
         }
+        for(int index: testSeg.get(1)){
+            test.getPixelonIndex(index).color = Color.green;
+        }
         System.out.println(test.getDeviation());
+        test.img.saveAs("test.jpg");
     }
 }
