@@ -19,44 +19,36 @@ public class Chromosome {
         this.imageMat = img.getPixels();
         this.numberOfSegments = numberOfSegments;
         this.segments = new ArrayList<>();
-        initPrimMST(img);
+        initPrimMST(img, numberOfSegments);
         this.deviation = overallDeviation(this.segments);
     }
 
-    private void initPrimMST(ImageMat img){
-        Pixel[][] mat = img.getPixels();
-        Pixel currentPixel = mat[0][0];
-
-        List<Pixel> visitedPixels = new ArrayList<>();
-        List<Edge> candidateEdges = new ArrayList<>();
+    private void initPrimMST(ImageMat img, int numberOfSegments){
+        for (int i = 0; i < cromosome.length; i++) cromosome[i] = i;
+        HashSet<Integer> visited = new HashSet<>(img.getWidth()*img.getWidth());
+        PriorityQueue<Edge> priorityQueue = new PriorityQueue<>();
 
         List<Edge> worstEdges = new ArrayList<Edge>();
-        int numberOfWorstEdges = 5;
         double bestWorstEdge = 0;
 
-        this.cromosome[0] = -1;
-        visitedPixels.add(currentPixel);
-        while(visitedPixels.size() < img.getHeight()*img.getWidth()){
-            addEdges(candidateEdges, currentPixel, mat);
-
-            Edge bestEdge = candidateEdges.get(0);
-            candidateEdges.remove(0);
-            // Check if the edge "to pixel" is already connected in the MST
-            while(visitedPixels.contains(bestEdge.getTo())) {
-                bestEdge = candidateEdges.get(0);
-                candidateEdges.remove(0);
+        int current = 0; // Starts at the last pixel
+        while (visited.size() < cromosome.length){
+            if (!visited.contains(current)){
+                visited.add(current);
+                addEdges(priorityQueue, getPixelonIndex(current), img.getPixels());
             }
-
-            this.cromosome[bestEdge.getTo().getPixelIdx()] = bestEdge.getFrom().getPixelIdx();
-            if(worstEdges.size() == 0 || bestEdge.getDistance() > worstEdges.get(0).getDistance()){
-                this.addToWorst(bestEdge, worstEdges);
+            Edge edge = priorityQueue.poll();
+            if (!visited.contains(edge.getTo())){
+                cromosome[edge.getTo()] = edge.getFrom();
+                if(worstEdges.size() == 0 || edge.getDistance() > worstEdges.get(0).getDistance()){
+                    this.addToWorst(edge, worstEdges);
+                }
             }
-            visitedPixels.add(currentPixel);
-            currentPixel = bestEdge.getTo();
+            current = edge.getTo();
         }
-        //remove the n worst edges in the mst
+
         for(Edge e: worstEdges){
-            this.cromosome[e.getFrom().getPixelIdx()] = -1;
+            this.cromosome[e.getFrom()] = e.getFrom();
         }
 
         findSegments();
@@ -65,7 +57,7 @@ public class Chromosome {
     private void findSegments() {
         ArrayList<Integer> roots = new ArrayList<>();
         for (int i = 0; i < this.cromosome.length; i++) {
-            if (this.cromosome[i] == -1) {
+            if (this.cromosome[i] == i) {
                 roots.add(i);
                 this.segments.add(new ArrayList<>(Arrays.asList(i)));
             }
@@ -73,10 +65,10 @@ public class Chromosome {
         //adding every pixel to one sement
         for(int i = 0; i < this.cromosome.length; i++){
             //if already added as root, skip
-            if (this.cromosome[i] == -1) { continue; }
+            if (this.cromosome[i] == i) { continue; }
             int current = i;
             //search for root by backtracking
-            while(this.cromosome[current] != -1){
+            while(this.cromosome[current] != current){
                 current = this.cromosome[current];
             }
             int segmentIdx = roots.indexOf(current);
@@ -93,44 +85,34 @@ public class Chromosome {
         }
     }
 
-    private void addEdges(List<Edge> candidateEdges, Pixel currentPixel, Pixel[][] mat){
+    private void addEdges(PriorityQueue<Edge> candidateEdges, Pixel currentPixel, Pixel[][] mat){
         //add left neighbours
         if(currentPixel.getColIdx() > 0){
-            insertByDist(candidateEdges, new Edge(currentPixel, mat[currentPixel.getRowIdx()][currentPixel.getColIdx()-1]));
+            candidateEdges.add(new Edge(currentPixel, mat[currentPixel.getRowIdx()][currentPixel.getColIdx()-1]));
             if(currentPixel.getRowIdx() > 0){
-                insertByDist(candidateEdges, new Edge(currentPixel, mat[currentPixel.getRowIdx()-1][currentPixel.getColIdx()-1]));
+                candidateEdges.add(new Edge(currentPixel, mat[currentPixel.getRowIdx()-1][currentPixel.getColIdx()-1]));
             }
             if(currentPixel.getRowIdx()+1 < mat.length){
-                insertByDist(candidateEdges, new Edge(currentPixel, mat[currentPixel.getRowIdx()+1][currentPixel.getColIdx()-1]));
+                candidateEdges.add(new Edge(currentPixel, mat[currentPixel.getRowIdx()+1][currentPixel.getColIdx()-1]));
             }
         }
         //add right neighbours
         if(currentPixel.getColIdx()+1 < mat[0].length){
-            insertByDist(candidateEdges, new Edge(currentPixel, mat[currentPixel.getRowIdx()][currentPixel.getColIdx()+1]));
+            candidateEdges.add(new Edge(currentPixel, mat[currentPixel.getRowIdx()][currentPixel.getColIdx()+1]));
             if(currentPixel.getRowIdx() > 0){
-                insertByDist(candidateEdges, new Edge(currentPixel, mat[currentPixel.getRowIdx()-1][currentPixel.getColIdx()+1]));
+                candidateEdges.add(new Edge(currentPixel, mat[currentPixel.getRowIdx()-1][currentPixel.getColIdx()+1]));
             }
             if(currentPixel.getRowIdx()+1 < mat.length){
-                insertByDist(candidateEdges, new Edge(currentPixel, mat[currentPixel.getRowIdx()+1][currentPixel.getColIdx()+1]));
+                candidateEdges.add(new Edge(currentPixel, mat[currentPixel.getRowIdx()+1][currentPixel.getColIdx()+1]));
             }
         }
         //add up and down
         if(currentPixel.getRowIdx() > 0){
-            insertByDist(candidateEdges, new Edge(currentPixel, mat[currentPixel.getRowIdx()-1][currentPixel.getColIdx()]));
+            candidateEdges.add(new Edge(currentPixel, mat[currentPixel.getRowIdx()-1][currentPixel.getColIdx()]));
         }
         if(currentPixel.getRowIdx()+1 < mat.length){
-            insertByDist(candidateEdges, new Edge(currentPixel, mat[currentPixel.getRowIdx()+1][currentPixel.getColIdx()]));
+            candidateEdges.add(new Edge(currentPixel, mat[currentPixel.getRowIdx()+1][currentPixel.getColIdx()]));
         }
-    }
-
-    private void insertByDist(List<Edge> candidates, Edge newEdge){
-        for(int i = 0; i < candidates.size(); i++){
-            if(newEdge.getDistance() < candidates.get(i).getDistance()){
-                candidates.add(i, newEdge);
-                return;
-            }
-        }
-        candidates.add(newEdge);
     }
 
 
@@ -199,14 +181,15 @@ public class Chromosome {
 
     public static void main(String[] args) {
         ImageMat loadImg = new ImageMat("1");
-        Chromosome test = new Chromosome(loadImg, 2);
+        Chromosome test = new Chromosome(loadImg, 100);
         List<List<Integer>> testSeg = test.getSegments();
         for(List<Integer> l: testSeg){
             System.out.println(l);
         }
-        for(int index: testSeg.get(1)){
+        for(int index: testSeg.get(0)){
             test.getPixelonIndex(index).color = Color.green;
         }
+
         System.out.println(test.getDeviation());
         test.img.saveAs("test.jpg");
     }
