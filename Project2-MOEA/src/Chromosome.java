@@ -1,6 +1,7 @@
 import java.awt.*;
 import java.util.*;
 import java.util.List;
+import java.util.SplittableRandom;
 
 public class Chromosome {
     private int[] cromosome;
@@ -19,11 +20,12 @@ public class Chromosome {
         this.imageMat = img.getPixels();
         this.numberOfSegments = numberOfSegments;
         this.segments = new ArrayList<>();
-        initPrimMST(img, numberOfSegments);
+        initPrimMST(img);
+        findSegments();
         this.deviation = overallDeviation(this.segments);
     }
 
-    private void initPrimMST(ImageMat img, int numberOfSegments){
+    private void initPrimMST(ImageMat img){
         for (int i = 0; i < cromosome.length; i++) cromosome[i] = i;
         HashSet<Integer> visited = new HashSet<>(img.getWidth()*img.getWidth());
         PriorityQueue<Edge> priorityQueue = new PriorityQueue<>();
@@ -31,7 +33,7 @@ public class Chromosome {
         List<Edge> worstEdges = new ArrayList<Edge>();
         double bestWorstEdge = 0;
 
-        int current = 0; // Starts at the last pixel
+        int current = new SplittableRandom().nextInt(0, cromosome.length-1);
         while (visited.size() < cromosome.length){
             if (!visited.contains(current)){
                 visited.add(current);
@@ -50,8 +52,6 @@ public class Chromosome {
         for(Edge e: worstEdges){
             this.cromosome[e.getFrom()] = e.getFrom();
         }
-
-        findSegments();
     }
 
     private void findSegments() {
@@ -180,7 +180,7 @@ public class Chromosome {
     }
 
     public static void main(String[] args) {
-        ImageMat loadImg = new ImageMat("1");
+        ImageMat loadImg = new ImageMat("86016");
         Chromosome test = new Chromosome(loadImg, 100);
         List<List<Integer>> testSeg = test.getSegments();
         for(List<Integer> l: testSeg){
