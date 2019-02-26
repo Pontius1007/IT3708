@@ -14,7 +14,7 @@ public class Chromosome {
     private double deviation;
   
   
-    public Chromosome(ImageMat img, int numberOfSegments) {
+    private Chromosome(ImageMat img, int numberOfSegments) {
         cromosome = new int[img.getHeight()*img.getWidth()];
         this.img = img;
         this.imageMat = img.getPixels();
@@ -59,7 +59,7 @@ public class Chromosome {
         for (int i = 0; i < this.cromosome.length; i++) {
             if (this.cromosome[i] == i) {
                 roots.add(i);
-                this.segments.add(new ArrayList<>(Arrays.asList(i)));
+                this.segments.add(new ArrayList<>(Collections.singletonList(i)));
             }
         }
         //adding every pixel to one sement
@@ -130,15 +130,15 @@ public class Chromosome {
             //Find segment center
             List<Integer> centerPos = getSegmentCenter(segment);
             Pixel centerPixel = imageMat[centerPos.get(0)][centerPos.get(1)];
-            for (int pixel = 0; pixel < segment.size(); pixel++ ) {
-                Pixel toPixel = getPixelonIndex(segment.get(pixel));
+            for (Integer integer : segment) {
+                Pixel toPixel = getPixelonIndex(integer);
                 deviation += Edge.dist(centerPixel, toPixel);
             }
         }
         return deviation;
     }
 
-    public List<List<Integer>> getSegments() {
+    private List<List<Integer>> getSegments() {
         return segments;
     }
 
@@ -148,18 +148,18 @@ public class Chromosome {
         int segmentHeight = 0;
         int minSegmentWidth = Integer.MAX_VALUE;
         int minSegmentHeight = Integer.MAX_VALUE;
-        for (int pixel = 0; pixel < segment.size(); pixel++ ) {
-            Pixel temp = getPixelonIndex(segment.get(pixel));
-            if(temp.getRowIdx() > segmentWidth) {
+        for (Integer integer : segment) {
+            Pixel temp = getPixelonIndex(integer);
+            if (temp.getRowIdx() > segmentWidth) {
                 segmentWidth = temp.getRowIdx();
             }
-            if(temp.getRowIdx() < minSegmentWidth) {
+            if (temp.getRowIdx() < minSegmentWidth) {
                 minSegmentWidth = temp.getRowIdx();
             }
-            if(temp.getColIdx() > segmentHeight) {
+            if (temp.getColIdx() > segmentHeight) {
                 segmentHeight = temp.getColIdx();
             }
-            if(temp.getColIdx() < minSegmentHeight) {
+            if (temp.getColIdx() < minSegmentHeight) {
                 minSegmentHeight = temp.getColIdx();
             }
         }
@@ -168,20 +168,22 @@ public class Chromosome {
         return segmentCenter;
     }
 
-    public Pixel getPixelonIndex(int pixelNumber) {
+    private Pixel getPixelonIndex(int pixelNumber) {
         //TODO: Check for bugs
         int rowIndex = pixelNumber / this.img.getWidth();
         int colIndex = pixelNumber % this.img.getWidth();
         return imageMat[rowIndex][colIndex];
     }
 
-    public double getDeviation() {
+    private double getDeviation() {
         return deviation;
     }
 
     public static void main(String[] args) {
+
         ImageMat loadImg = new ImageMat("86016");
         Chromosome test = new Chromosome(loadImg, 100);
+
         List<List<Integer>> testSeg = test.getSegments();
         for(List<Integer> l: testSeg){
             System.out.println(l);
