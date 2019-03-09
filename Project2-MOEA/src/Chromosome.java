@@ -15,7 +15,7 @@ public class Chromosome {
     private double connectivity;
 
 
-    private Chromosome(ImageMat img, int numberOfSegments) {
+    Chromosome(ImageMat img, int numberOfSegments) {
         cromosome = new int[img.getHeight() * img.getWidth()];
         this.img = img;
         this.imageMat = img.getPixels();
@@ -192,8 +192,6 @@ public class Chromosome {
         }
         return deviation;
     }
-    //TODO - have we missed something here? Centroid is the average color of all the pixels in the segment
-
 
     private List<List<Integer>> getSegments() {
         return segments;
@@ -246,7 +244,6 @@ public class Chromosome {
     }
 
     private Pixel getPixelonIndex(int pixelNumber) {
-        //TODO: Check for bugs
         int rowIndex = pixelNumber / this.img.getWidth();
         int colIndex = pixelNumber % this.img.getWidth();
         return imageMat[rowIndex][colIndex];
