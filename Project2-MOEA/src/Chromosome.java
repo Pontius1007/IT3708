@@ -9,8 +9,10 @@ public class Chromosome {
     private int numberOfSegments;
 
     private List<List<Integer>> segments;
+    private int[] segementDivision;
 
     private double deviation;
+    private double connectivity;
 
 
     private Chromosome(ImageMat img, int numberOfSegments) {
@@ -19,9 +21,11 @@ public class Chromosome {
         this.imageMat = img.getPixels();
         this.numberOfSegments = numberOfSegments;
         this.segments = new ArrayList<>();
+        this.segementDivision = new int[img.getHeight() * img.getWidth()];
         initPrimMST(img);
         findSegments();
         this.deviation = overallDeviation(this.segments);
+        this.connectivity = overallConnectivity();
     }
 
     private void initPrimMST(ImageMat img) {
@@ -58,6 +62,7 @@ public class Chromosome {
             if (this.cromosome[i] == i) {
                 roots.add(i);
                 this.segments.add(new ArrayList<>(Collections.singletonList(i)));
+                segementDivision[i] = segments.size()-1;
             }
         }
         //adding every pixel to one sement
@@ -73,6 +78,7 @@ public class Chromosome {
             }
             int segmentIdx = roots.indexOf(current);
             this.segments.get(segmentIdx).add(i);
+            segementDivision[i] = segmentIdx;
         }
     }
 
@@ -122,7 +128,50 @@ public class Chromosome {
 
     //Evaluates the degree to which neighbouring pixels have been placed in the same segment
     private double overallConnectivity() {
-        return 0;
+        double connectiviy = 0;
+        for (List<Integer> segment : this.segments) {
+            //Find segment center
+            for(int pixel: segment){
+                Pixel currentPixel = getPixelonIndex(pixel);
+                if (currentPixel.getColIdx() > 0) {
+                    connectiviy += checkNeighbour(currentPixel.pixelIdx, imageMat[currentPixel.getRowIdx()][currentPixel.getColIdx() - 1].pixelIdx);
+                    if (currentPixel.getRowIdx() > 0) {
+                        connectiviy += checkNeighbour(currentPixel.pixelIdx, imageMat[currentPixel.getRowIdx()-1][currentPixel.getColIdx() - 1].pixelIdx);
+                    }
+                    if (currentPixel.getRowIdx() + 1 < imageMat.length) {
+                        connectiviy += checkNeighbour(currentPixel.pixelIdx, imageMat[currentPixel.getRowIdx()+1][currentPixel.getColIdx() - 1].pixelIdx);
+                    }
+                }
+                //add right neighbours
+                if (currentPixel.getColIdx() + 1 < imageMat[0].length) {
+                    connectiviy += checkNeighbour(currentPixel.pixelIdx, imageMat[currentPixel.getRowIdx()][currentPixel.getColIdx() + 1].pixelIdx);
+                    if (currentPixel.getRowIdx() > 0) {
+                        connectiviy += checkNeighbour(currentPixel.pixelIdx, imageMat[currentPixel.getRowIdx()-1][currentPixel.getColIdx() + 1].pixelIdx);
+                    }
+                    if (currentPixel.getRowIdx() + 1 < imageMat.length) {
+                        connectiviy += checkNeighbour(currentPixel.pixelIdx, imageMat[currentPixel.getRowIdx()+1][currentPixel.getColIdx() + 1].pixelIdx);
+                    }
+                }
+                //add up and down
+                if (currentPixel.getRowIdx() > 0) {
+                    connectiviy += checkNeighbour(currentPixel.pixelIdx, imageMat[currentPixel.getRowIdx()-1][currentPixel.getColIdx()].pixelIdx);
+                }
+                if (currentPixel.getRowIdx() + 1 < imageMat.length) {
+                    connectiviy += checkNeighbour(currentPixel.pixelIdx, imageMat[currentPixel.getRowIdx()+1][currentPixel.getColIdx()].pixelIdx);
+                }
+
+            }
+        }
+        return connectiviy;
+    }
+
+    private double checkNeighbour(int current, int target){
+        if(segementDivision[current] == segementDivision[target]){
+            return 0;
+        }
+        else{
+            return 0.125;
+        }
     }
 
 
@@ -210,17 +259,20 @@ public class Chromosome {
     public static void main(String[] args) {
 
         ImageMat loadImg = new ImageMat("86016");
-        Chromosome test = new Chromosome(loadImg, 100);
+        Chromosome test = new Chromosome(loadImg, 3);
 
-        List<List<Integer>> testSeg = test.getSegments();
-        for (List<Integer> l : testSeg) {
+
+        for(List<Integer> l : test.segments){
             System.out.println(l);
         }
+
+
+        List<List<Integer>> testSeg = test.getSegments();
         for (int index : testSeg.get(0)) {
             test.getPixelonIndex(index).color = Color.green;
         }
-        test.overallDeviation(test.segments);
         System.out.println(test.getDeviation());
+        System.out.println(test.connectivity);
         test.img.saveAs("test.jpg");
     }
 }
