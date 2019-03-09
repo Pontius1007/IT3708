@@ -120,6 +120,11 @@ public class Chromosome {
         return cromosome;
     }
 
+    //Evaluates the degree to which neighbouring pixels have been placed in the same segment
+    private double overallConnectivity() {
+        return 0;
+    }
+
 
     // measure of the ‘similarity’ (homogeneity) of pixels in the same segment
     // Assumes a 2D list in the form of [[1,52,23]] where the numbers are pixelnumbers
@@ -128,18 +133,42 @@ public class Chromosome {
         //Change when we have 2d list
         for (List<Integer> segment: this.segments) {
             //Find segment center
-            List<Integer> centerPos = getSegmentCenter(segment);
-            Pixel centerPixel = imageMat[centerPos.get(0)][centerPos.get(1)];
+            Color centroidColor = getSegmentCentroid(segment);
+            //List<Integer> centerPos = getSegmentCenter(segment);
+            //Pixel centerPixel = imageMat[centerPos.get(0)][centerPos.get(1)];
             for (Integer integer : segment) {
                 Pixel toPixel = getPixelonIndex(integer);
-                deviation += Edge.dist(centerPixel, toPixel);
+                deviation += Edge.distColor(toPixel, centroidColor);
             }
         }
         return deviation;
     }
+    //TODO - have we missed something here? Centroid is the average color of all the pixels in the segment
+
+
 
     private List<List<Integer>> getSegments() {
         return segments;
+    }
+
+    //The centroid is the average color of all the pixels in one segment.
+    private Color getSegmentCentroid(List<Integer> segment) {
+        int red = 0;
+        int green = 0;
+        int blue = 0;
+        int numberOfPixelsInSegment = segment.size();
+        for (Integer integer : segment) {
+            Pixel temp = getPixelonIndex(integer);
+            red += temp.getRed();
+            green += temp.getGreen();
+            blue += temp.getBlue();
+        }
+        red = red/numberOfPixelsInSegment;
+        green = green/numberOfPixelsInSegment;
+        blue = blue/numberOfPixelsInSegment;
+
+        Color centroid = new Color(red, green, blue);
+        return centroid;
     }
 
     private List<Integer> getSegmentCenter(List<Integer> segment) {
@@ -191,7 +220,7 @@ public class Chromosome {
         for(int index: testSeg.get(0)){
             test.getPixelonIndex(index).color = Color.green;
         }
-
+        test.overallDeviation(test.segments);
         System.out.println(test.getDeviation());
         test.img.saveAs("test.jpg");
     }
