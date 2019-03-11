@@ -1,14 +1,17 @@
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class NSGAII {
     private int populationNumber = 5;
-    private List<Chromosome> population;
+    private ArrayList<Chromosome> population = new ArrayList<>();
+    private ArrayList<ArrayList<Chromosome>> rankedPopulation = new ArrayList<>();
 
     //TODO: Check for bugs. Has not been tested with solutions dominating each other
-    private List<Chromosome> fastNondominatedSort(List<Chromosome> population) {
+    private ArrayList<Chromosome> fastNondominatedSort(ArrayList<Chromosome> population) {
         Set<Chromosome> non_dominated_set = new HashSet<>();
         //Include first member in P'
         non_dominated_set.add(population.get(0));
@@ -59,16 +62,42 @@ public class NSGAII {
 
     }
 
+    private void initializePopulation(ImageMat loadImg) {
+        for (int i = 0; i < this.populationNumber; i++) {
+            Chromosome temp = new Chromosome(loadImg, ThreadLocalRandom.current().nextInt(20, 100));
+            //TODO: Legg til kall her for å legge til segmenter mindre enn k kanskje?
+            this.population.add(temp);
+        }
+
+    }
+
+    private void rankPopulation() {
+        ArrayList<Chromosome> rankList;
+        int rank = 1;
+        while (this.population.size() > 0) {
+            rankList = fastNondominatedSort(this.population);
+            for (Chromosome x : rankList) {
+                x.setRank(rank);
+            }
+            rankedPopulation.add(rankList);
+            population.removeAll(rankList);
+            rank++;
+        }
+    }
+
     private void runMainLoop(String imageFile) {
         ImageMat loadImg = new ImageMat(imageFile);
-        this.population = new ArrayList<>();
-        for (int i = 0; i < populationNumber; i++) {
-            this.population.add(new Chromosome(loadImg, i + 2));
-        }
-        List<Chromosome> test = fastNondominatedSort(this.population);
-        System.out.println(test.size());
-        System.out.println(population.size());
-        crowdingDistanceAssignment(test);
+        initializePopulation(loadImg);
+        rankPopulation();
+        System.out.println(rankedPopulation.size());
+        //TODO: binary tournament selection
+        //Todo: recombination/crossover
+        //TODO: mutation
+        //Use this to create a child population of size N
+
+        //After the first iteration, the main loop comes here as it differs from the first iteration. Check the document.
+
+        
     }
 
 
