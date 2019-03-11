@@ -16,6 +16,7 @@ public class Chromosome {
     private double crowding_distance;
     private boolean useDeviation = true; //0
     private boolean useConnectivity = true; //1
+    private int rank;
 
     Chromosome(ImageMat img, int numberOfSegments) {
         cromosome = new int[img.getHeight() * img.getWidth()];
@@ -28,14 +29,6 @@ public class Chromosome {
         findSegments();
         this.deviation = overallDeviation(this.segments);
         this.connectivity = overallConnectivity();
-    }
-
-    static Comparator<Chromosome> deviationComparator() {
-        return Comparator.comparingDouble(Chromosome::getDeviation);
-    }
-
-    static Comparator<Chromosome> connectivityComparator() {
-        return Comparator.comparingDouble(Chromosome::getConnectivity);
     }
 
     private void initPrimMST(ImageMat img) {
@@ -282,23 +275,35 @@ public class Chromosome {
         return useConnectivity;
     }
 
-    public static void main(String[] args) {
+    public int getRank() {
+        return rank;
+    }
 
-        ImageMat loadImg = new ImageMat("86016");
-        Chromosome test = new Chromosome(loadImg, 3);
+    static Comparator<Chromosome> deviationComparator() {
+        return Comparator.comparingDouble(Chromosome::getDeviation);
+    }
 
+    static Comparator<Chromosome> connectivityComparator() {
+        return Comparator.comparingDouble(Chromosome::getConnectivity);
+    }
 
-        for (List<Integer> l : test.segments) {
-            System.out.println(l);
-        }
+    //Return 1 if object 2 should be before object 1
+    static Comparator<Chromosome> crowdingComparator() {
+        return (o1, o2) -> {
+            if (o1.getCrowding_distance() > o2.getCrowding_distance()) return -1;
+            if (o1.getCrowding_distance() < o2.getCrowding_distance()) return 1;
+            return 0;
+        };
+    }
 
-
-        List<List<Integer>> testSeg = test.getSegments();
-        for (int index : testSeg.get(0)) {
-            test.getPixelonIndex(index).color = Color.green;
-        }
-        System.out.println(test.getDeviation());
-        System.out.println(test.connectivity);
-        test.img.saveAs("test.jpg");
+    //Return 1 if object 2 should be before object 1
+    static Comparator<Chromosome> nonDominatedCrowdingComparator() {
+        return ((o1, o2) -> {
+            if (o1.getRank() < o2.getRank()) return -1;
+            if (o1.getRank() > o2.getRank()) return 1;
+            if (o1.getCrowding_distance() > o2.getCrowding_distance()) return -1;
+            if (o1.getCrowding_distance() < o2.getCrowding_distance()) return 1;
+            return 0;
+        });
     }
 }
