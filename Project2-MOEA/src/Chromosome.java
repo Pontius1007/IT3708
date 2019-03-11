@@ -62,7 +62,7 @@ public class Chromosome {
             if (this.cromosome[i] == i) {
                 roots.add(i);
                 this.segments.add(new ArrayList<>(Collections.singletonList(i)));
-                segementDivision[i] = segments.size()-1;
+                segementDivision[i] = segments.size() - 1;
             }
         }
         //adding every pixel to one sement
@@ -131,33 +131,33 @@ public class Chromosome {
         double connectiviy = 0;
         for (List<Integer> segment : this.segments) {
             //Find segment center
-            for(int pixel: segment){
+            for (int pixel : segment) {
                 Pixel currentPixel = getPixelonIndex(pixel);
                 if (currentPixel.getColIdx() > 0) {
                     connectiviy += checkNeighbour(currentPixel.pixelIdx, imageMat[currentPixel.getRowIdx()][currentPixel.getColIdx() - 1].pixelIdx);
                     if (currentPixel.getRowIdx() > 0) {
-                        connectiviy += checkNeighbour(currentPixel.pixelIdx, imageMat[currentPixel.getRowIdx()-1][currentPixel.getColIdx() - 1].pixelIdx);
+                        connectiviy += checkNeighbour(currentPixel.pixelIdx, imageMat[currentPixel.getRowIdx() - 1][currentPixel.getColIdx() - 1].pixelIdx);
                     }
                     if (currentPixel.getRowIdx() + 1 < imageMat.length) {
-                        connectiviy += checkNeighbour(currentPixel.pixelIdx, imageMat[currentPixel.getRowIdx()+1][currentPixel.getColIdx() - 1].pixelIdx);
+                        connectiviy += checkNeighbour(currentPixel.pixelIdx, imageMat[currentPixel.getRowIdx() + 1][currentPixel.getColIdx() - 1].pixelIdx);
                     }
                 }
                 //add right neighbours
                 if (currentPixel.getColIdx() + 1 < imageMat[0].length) {
                     connectiviy += checkNeighbour(currentPixel.pixelIdx, imageMat[currentPixel.getRowIdx()][currentPixel.getColIdx() + 1].pixelIdx);
                     if (currentPixel.getRowIdx() > 0) {
-                        connectiviy += checkNeighbour(currentPixel.pixelIdx, imageMat[currentPixel.getRowIdx()-1][currentPixel.getColIdx() + 1].pixelIdx);
+                        connectiviy += checkNeighbour(currentPixel.pixelIdx, imageMat[currentPixel.getRowIdx() - 1][currentPixel.getColIdx() + 1].pixelIdx);
                     }
                     if (currentPixel.getRowIdx() + 1 < imageMat.length) {
-                        connectiviy += checkNeighbour(currentPixel.pixelIdx, imageMat[currentPixel.getRowIdx()+1][currentPixel.getColIdx() + 1].pixelIdx);
+                        connectiviy += checkNeighbour(currentPixel.pixelIdx, imageMat[currentPixel.getRowIdx() + 1][currentPixel.getColIdx() + 1].pixelIdx);
                     }
                 }
                 //add up and down
                 if (currentPixel.getRowIdx() > 0) {
-                    connectiviy += checkNeighbour(currentPixel.pixelIdx, imageMat[currentPixel.getRowIdx()-1][currentPixel.getColIdx()].pixelIdx);
+                    connectiviy += checkNeighbour(currentPixel.pixelIdx, imageMat[currentPixel.getRowIdx() - 1][currentPixel.getColIdx()].pixelIdx);
                 }
                 if (currentPixel.getRowIdx() + 1 < imageMat.length) {
-                    connectiviy += checkNeighbour(currentPixel.pixelIdx, imageMat[currentPixel.getRowIdx()+1][currentPixel.getColIdx()].pixelIdx);
+                    connectiviy += checkNeighbour(currentPixel.pixelIdx, imageMat[currentPixel.getRowIdx() + 1][currentPixel.getColIdx()].pixelIdx);
                 }
 
             }
@@ -165,11 +165,10 @@ public class Chromosome {
         return connectiviy;
     }
 
-    private double checkNeighbour(int current, int target){
-        if(segementDivision[current] == segementDivision[target]){
+    private double checkNeighbour(int current, int target) {
+        if (segementDivision[current] == segementDivision[target]) {
             return 0;
-        }
-        else{
+        } else {
             return 0.125;
         }
     }
@@ -249,8 +248,12 @@ public class Chromosome {
         return imageMat[rowIndex][colIndex];
     }
 
-    private double getDeviation() {
+    double getDeviation() {
         return deviation;
+    }
+
+    double getConnectivity() {
+        return connectivity;
     }
 
     public static void main(String[] args) {
@@ -259,7 +262,7 @@ public class Chromosome {
         Chromosome test = new Chromosome(loadImg, 3);
 
 
-        for(List<Integer> l : test.segments){
+        for (List<Integer> l : test.segments) {
             System.out.println(l);
         }
 
