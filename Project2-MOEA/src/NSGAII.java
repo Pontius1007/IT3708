@@ -1,4 +1,3 @@
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -9,7 +8,7 @@ public class NSGAII {
     private List<Chromosome> population;
 
     //TODO: Check for bugs. Has not been tested with solutions dominating each other
-    private List<Chromosome> fast_nondominated_sort(List<Chromosome> population) {
+    private List<Chromosome> fastNondominatedSort(List<Chromosome> population) {
         Set<Chromosome> non_dominated_set = new HashSet<>();
         //Include first member in P'
         non_dominated_set.add(population.get(0));
@@ -36,26 +35,25 @@ public class NSGAII {
         return new ArrayList<>(non_dominated_set);
     }
 
-    private void crowding_distance_assignment(List<Chromosome> pareto_front) {
+    private void crowdingDistanceAssignment(List<Chromosome> pareto_front) {
         //initialize distance to 0
         for (Chromosome chromosome : pareto_front) chromosome.setCrowding_distance(0);
-        if (pareto_front.get(0).isUseDeviation()) crowding_distance_assignment_per_objective(pareto_front, 0);
-        if (pareto_front.get(0).isUseConnectivity()) crowding_distance_assignment_per_objective(pareto_front, 1);
+        if (pareto_front.get(0).isUseDeviation()) crowdingDistanceAssignmentPerObjective(pareto_front, 0);
+        if (pareto_front.get(0).isUseConnectivity()) crowdingDistanceAssignmentPerObjective(pareto_front, 1);
     }
 
-    private void crowding_distance_assignment_per_objective(List<Chromosome> pareto_front, int sortingObjectiveIndex) {
+    private void crowdingDistanceAssignmentPerObjective(List<Chromosome> pareto_front, int sortingObjectiveIndex) {
         if (sortingObjectiveIndex == 0) pareto_front.sort(Chromosome.deviationComparator());
         if (sortingObjectiveIndex == 1) pareto_front.sort(Chromosome.connectivityComparator());
         //Set boundries so they are always detected
         pareto_front.get(0).setCrowding_distance(Double.POSITIVE_INFINITY);
-        pareto_front.get(pareto_front.size()-1).setCrowding_distance(Double.POSITIVE_INFINITY);
+        pareto_front.get(pareto_front.size() - 1).setCrowding_distance(Double.POSITIVE_INFINITY);
 
-        for (int i = 1; i < pareto_front.size()-1; i++) {
+        for (int i = 1; i < pareto_front.size() - 1; i++) {
             if (sortingObjectiveIndex == 0) {
-                pareto_front.get(i).setCrowding_distance(pareto_front.get(i).getCrowding_distance() + (pareto_front.get(i+1).getDeviation() - pareto_front.get(i-1).getDeviation()));
-            }
-            else {
-                pareto_front.get(i).setCrowding_distance(pareto_front.get(i).getCrowding_distance() + (pareto_front.get(i+1).getConnectivity() - pareto_front.get(i-1).getConnectivity()));
+                pareto_front.get(i).setCrowding_distance(pareto_front.get(i).getCrowding_distance() + (pareto_front.get(i + 1).getDeviation() - pareto_front.get(i - 1).getDeviation()));
+            } else {
+                pareto_front.get(i).setCrowding_distance(pareto_front.get(i).getCrowding_distance() + (pareto_front.get(i + 1).getConnectivity() - pareto_front.get(i - 1).getConnectivity()));
             }
         }
 
@@ -67,10 +65,10 @@ public class NSGAII {
         for (int i = 0; i < populationNumber; i++) {
             this.population.add(new Chromosome(loadImg, i + 2));
         }
-        List<Chromosome> test = fast_nondominated_sort(this.population);
+        List<Chromosome> test = fastNondominatedSort(this.population);
         System.out.println(test.size());
         System.out.println(population.size());
-        crowding_distance_assignment(test);
+        crowdingDistanceAssignment(test);
     }
 
 
