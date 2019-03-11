@@ -279,6 +279,10 @@ public class Chromosome {
         return rank;
     }
 
+    public void setRank(int rank) {
+        this.rank = rank;
+    }
+
     static Comparator<Chromosome> deviationComparator() {
         return Comparator.comparingDouble(Chromosome::getDeviation);
     }
