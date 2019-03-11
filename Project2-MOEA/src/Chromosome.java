@@ -13,7 +13,9 @@ public class Chromosome {
 
     private double deviation;
     private double connectivity;
-
+    private double crowding_distance;
+    private boolean useDeviation = true; //0
+    private boolean useConnectivity = true; //1
 
     Chromosome(ImageMat img, int numberOfSegments) {
         cromosome = new int[img.getHeight() * img.getWidth()];
@@ -26,6 +28,14 @@ public class Chromosome {
         findSegments();
         this.deviation = overallDeviation(this.segments);
         this.connectivity = overallConnectivity();
+    }
+
+    static Comparator<Chromosome> deviationComparator() {
+        return Comparator.comparingDouble(Chromosome::getDeviation);
+    }
+
+    static Comparator<Chromosome> connectivityComparator() {
+        return Comparator.comparingDouble(Chromosome::getConnectivity);
     }
 
     private void initPrimMST(ImageMat img) {
@@ -254,6 +264,22 @@ public class Chromosome {
 
     double getConnectivity() {
         return connectivity;
+    }
+
+    public void setCrowding_distance(double crowding_distance) {
+        this.crowding_distance = crowding_distance;
+    }
+
+    public double getCrowding_distance() {
+        return crowding_distance;
+    }
+
+    public boolean isUseDeviation() {
+        return useDeviation;
+    }
+
+    public boolean isUseConnectivity() {
+        return useConnectivity;
     }
 
     public static void main(String[] args) {
