@@ -1,8 +1,8 @@
+import jdk.nashorn.internal.runtime.regexp.joni.encoding.CharacterType;
+
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.*;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class NSGAII {
@@ -16,25 +16,38 @@ public class NSGAII {
         //Include first member in P'
         non_dominated_set.add(population.get(0));
 
+
+        List<Chromosome> isDominated = new ArrayList<>();
+
         for (Chromosome individual : population) {
+            if(isDominated.contains(individual)){
+                continue;
+            }
             //Include p in P' temporarily
             non_dominated_set.add(individual);
             //Compare p with other members of P'
             for (Chromosome non_dominated : non_dominated_set) {
+                if(isDominated.contains(individual)){
+                    continue;
+                }
                 if (non_dominated == individual) {
                     continue;
                 }
                 //If p dominates a member of P', delete it
                 if (individual.getConnectivity() < non_dominated.getConnectivity() && individual.getDeviation() < non_dominated.getDeviation()) {
                     System.out.println("If p dominates a member of P', delete it");
-                    non_dominated_set.remove(non_dominated);
+                    isDominated.add(non_dominated);
+
                     //if p is dominated by other members of P', do not include p in P'
                 } else if (individual.getConnectivity() > non_dominated.getConnectivity() && individual.getDeviation() > non_dominated.getDeviation()) {
                     System.out.println("if p is dominated by other members of P', do not include p in P'");
-                    non_dominated_set.remove(individual);
+                    isDominated.add(individual);
                 }
             }
         }
+
+        population.removeAll(isDominated);
+
         return new ArrayList<>(non_dominated_set);
     }
 
@@ -89,23 +102,20 @@ public class NSGAII {
         ImageMat loadImg = new ImageMat(imageFile);
         initializePopulation(loadImg);
         rankPopulation();
-        System.out.println(rankedPopulation.size());
+        System.out.println("rankedPopulation size" + rankedPopulation.size());
         //TODO: binary tournament selection
         //Todo: recombination/crossover
         //TODO: mutation
         //Use this to create a child population of size N
 
         //After the first iteration, the main loop comes here as it differs from the first iteration. Check the document.
-
-        
     }
 
+    private void tournament(Chromosome[] participants){
+    }
 
     public static void main(String[] args) {
         NSGAII run = new NSGAII();
         run.runMainLoop("86016");
-
     }
-
-
 }
