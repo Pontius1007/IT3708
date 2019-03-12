@@ -31,8 +31,13 @@ public class Chromosome {
         this.connectivity = overallConnectivity();
     }
 
-    public Chromosome(Chromosome father, Chromosome mother){
+    // crossover constructor
+    public Chromosome(ImageMat img, Chromosome father, Chromosome mother, double mutationRate){
         chromosome = new int[img.getHeight() * img.getWidth()];
+        this.img = img;
+        this.imageMat = img.getPixels();
+        this.segments = new ArrayList<>();
+        this.segementDivision = new int[img.getHeight() * img.getWidth()];
         //integer for index to take genes from mother instead of father.
         int nsplit = new SplittableRandom().nextInt(0, chromosome.length);
         for(int i = 0; i < nsplit; i++){
@@ -40,6 +45,11 @@ public class Chromosome {
         }
         for(int i = nsplit; i < chromosome.length; i++){
             chromosome[i] = mother.chromosome[i];
+        }
+        for(int i = 0; i < chromosome.length; i++){
+            if(new SplittableRandom().nextInt(0, 100) < mutationRate*100){
+                mutateRandomEdge(i);
+            }
         }
         findSegments();
     }
@@ -83,7 +93,9 @@ public class Chromosome {
 
     private void findSegments() {
         //roots is all pixels representing one segment. (pointing to itself)
+        boolean[] visited = new boolean[chromosome.length];
         ArrayList<Integer> roots = new ArrayList<>();
+
         for (int i = 0; i < this.chromosome.length; i++) {
             if (this.chromosome[i] == i) {
                 roots.add(i);
@@ -92,6 +104,7 @@ public class Chromosome {
             }
         }
         //adding every pixel to one sement
+        int currentSegment = 0;
         for (int i = 0; i < this.chromosome.length; i++) {
             //if already added as root, skip
             if (this.chromosome[i] == i) {
@@ -99,7 +112,7 @@ public class Chromosome {
             }
             int current = i;
             //search for root by backtracking
-            while (this.chromosome[current] != current) {
+            while () {
                 current = this.chromosome[current];
             }
             int segmentIdx = roots.indexOf(current);

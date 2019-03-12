@@ -4,9 +4,13 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class NSGAII {
     private int populationNumber = 5;
+    private int childPopulationNumber = 5;
+    private double mutationRate = 0.05;
     private ArrayList<Chromosome> population = new ArrayList<>();
     private ArrayList<ArrayList<Chromosome>> rankedPopulation = new ArrayList<>();
 
@@ -96,6 +100,9 @@ public class NSGAII {
             population.removeAll(rankList);
             rank++;
         }
+        for(List<Chromosome> list: rankedPopulation){
+            population.addAll(list);
+        }
     }
 
     private void runMainLoop(String imageFile) {
@@ -103,15 +110,33 @@ public class NSGAII {
         initializePopulation(loadImg);
         rankPopulation();
         System.out.println("rankedPopulation size" + rankedPopulation.size());
-        //TODO: binary tournament selection
-        //Todo: recombination/crossover
-        //TODO: mutation
+        List<Chromosome> children = new ArrayList<>();
+        for(int i = 0; i < this.childPopulationNumber; i++){
+            Chromosome father = selectParent();
+            Chromosome mother = selectParent();
+            Chromosome child = new Chromosome(loadImg, father, mother, mutationRate);
+            children.add(child);
+        }
+        System.out.println("population size" + population.size());
+        System.out.println("children size" + children.size());
         //Use this to create a child population of size N
 
         //After the first iteration, the main loop comes here as it differs from the first iteration. Check the document.
     }
 
-    private void tournament(Chromosome[] participants){
+    private Chromosome selectParent(){
+        int indx1;
+        int indx2;
+        indx1 = new SplittableRandom().nextInt(0, population.size());
+        indx2 = new SplittableRandom().nextInt(0, population.size());
+        while(indx1 == indx2){
+            System.out.println("evig");
+            indx2 = new SplittableRandom().nextInt(0, population.size());
+        }
+        Chromosome p1 = population.get(indx1);
+        Chromosome p2 = population.get(indx2);
+        if(Chromosome.nonDominatedCrowdingComparator().compare(p1, p2) < 0) return p1;
+        return p2;
     }
 
     public static void main(String[] args) {
