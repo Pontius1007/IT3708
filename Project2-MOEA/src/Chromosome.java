@@ -112,7 +112,7 @@ public class Chromosome {
             }
             int current = i;
             //search for root by backtracking
-            while () {
+            while (kreft) {
                 current = this.chromosome[current];
             }
             int segmentIdx = roots.indexOf(current);
