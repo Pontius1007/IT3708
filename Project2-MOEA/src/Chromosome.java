@@ -3,7 +3,7 @@ import java.util.List;
 import java.util.*;
 
 public class Chromosome {
-    private int[] cromosome;
+    public int[] chromosome;
     private Pixel[][] imageMat;
     private ImageMat img;
     private int numberOfSegments;
@@ -13,10 +13,13 @@ public class Chromosome {
 
     private double deviation;
     private double connectivity;
+    private double crowding_distance;
+    private boolean useDeviation = true; //0
+    private boolean useConnectivity = true; //1
+    private int rank;
 
-
-    private Chromosome(ImageMat img, int numberOfSegments) {
-        cromosome = new int[img.getHeight() * img.getWidth()];
+    public Chromosome(ImageMat img, int numberOfSegments) {
+        chromosome = new int[img.getHeight() * img.getWidth()];
         this.img = img;
         this.imageMat = img.getPixels();
         this.numberOfSegments = numberOfSegments;
@@ -28,22 +31,44 @@ public class Chromosome {
         this.connectivity = overallConnectivity();
     }
 
+    public Chromosome(Chromosome father, Chromosome mother){
+        chromosome = new int[img.getHeight() * img.getWidth()];
+        //integer for index to take genes from mother instead of father.
+        int nsplit = new SplittableRandom().nextInt(0, chromosome.length);
+        for(int i = 0; i < nsplit; i++){
+            chromosome[i] = father.chromosome[i];
+        }
+        for(int i = nsplit; i < chromosome.length; i++){
+            chromosome[i] = mother.chromosome[i];
+        }
+        findSegments();
+    }
+
+    public void mutateRandomEdge(int pixelIndex){
+        List<Integer> neigbours = getNeighbours(pixelIndex);
+        //change edge to a random possible edge for the pixel
+        chromosome[pixelIndex] = neigbours.get(new SplittableRandom().nextInt(0, neigbours.size()));
+    }
+
     private void initPrimMST(ImageMat img) {
-        for (int i = 0; i < cromosome.length; i++) cromosome[i] = i;
+        for (int i = 0; i < chromosome.length; i++) chromosome[i] = i;
         HashSet<Integer> visited = new HashSet<>(img.getWidth() * img.getWidth());
+        // Edges sorted after color distance in priorityQueue
         PriorityQueue<Edge> priorityQueue = new PriorityQueue<>();
-
         List<Edge> worstEdges = new ArrayList<>();
-
-        int current = new SplittableRandom().nextInt(0, cromosome.length - 1);
-        while (visited.size() < cromosome.length) {
+        // Random starting point for the prims algorithm
+        int current = new SplittableRandom().nextInt(0, chromosome.length - 1);
+        while (visited.size() < chromosome.length) {
             if (!visited.contains(current)) {
                 visited.add(current);
+                // add all possible edges from current pixel to all neighbours.
                 addEdges(priorityQueue, getPixelonIndex(current), img.getPixels());
             }
             Edge edge = priorityQueue.poll();
+            // add the best scoring edge to the MST if the "to node" is not visited.
             if (!visited.contains(edge.getTo())) {
-                cromosome[edge.getTo()] = edge.getFrom();
+                chromosome[edge.getTo()] = edge.getFrom();
+                // adds the n worst edges, to remove them and make segments.
                 if (worstEdges.size() == 0 || edge.getDistance() > worstEdges.get(0).getDistance()) {
                     this.addToWorst(edge, worstEdges);
                 }
@@ -52,29 +77,30 @@ public class Chromosome {
         }
 
         for (Edge e : worstEdges) {
-            this.cromosome[e.getFrom()] = e.getFrom();
+            this.chromosome[e.getFrom()] = e.getFrom();
         }
     }
 
     private void findSegments() {
+        //roots is all pixels representing one segment. (pointing to itself)
         ArrayList<Integer> roots = new ArrayList<>();
-        for (int i = 0; i < this.cromosome.length; i++) {
-            if (this.cromosome[i] == i) {
+        for (int i = 0; i < this.chromosome.length; i++) {
+            if (this.chromosome[i] == i) {
                 roots.add(i);
                 this.segments.add(new ArrayList<>(Collections.singletonList(i)));
-                segementDivision[i] = segments.size()-1;
+                segementDivision[i] = segments.size() - 1;
             }
         }
         //adding every pixel to one sement
-        for (int i = 0; i < this.cromosome.length; i++) {
+        for (int i = 0; i < this.chromosome.length; i++) {
             //if already added as root, skip
-            if (this.cromosome[i] == i) {
+            if (this.chromosome[i] == i) {
                 continue;
             }
             int current = i;
             //search for root by backtracking
-            while (this.cromosome[current] != current) {
-                current = this.cromosome[current];
+            while (this.chromosome[current] != current) {
+                current = this.chromosome[current];
             }
             int segmentIdx = roots.indexOf(current);
             this.segments.get(segmentIdx).add(i);
@@ -123,7 +149,41 @@ public class Chromosome {
 
 
     public int[] getCromosome() {
-        return cromosome;
+        return chromosome;
+    }
+
+    public List<Integer> getNeighbours(int pixelIndex){
+        List<Integer> neighbours = new ArrayList<>();
+        Pixel currentPixel = getPixelonIndex(pixelIndex);
+        // checks if a neighbour is out of bounds of the matrix, and adds to neighbours if not.
+        // add left neighbours
+        if (currentPixel.getColIdx() > 0) {
+            neighbours.add(imageMat[currentPixel.getRowIdx()][currentPixel.getColIdx() - 1].getPixelIdx());
+            if (currentPixel.getRowIdx() > 0) {
+                neighbours.add(imageMat[currentPixel.getRowIdx() - 1][currentPixel.getColIdx() - 1].getPixelIdx());
+            }
+            if (currentPixel.getRowIdx() + 1 < imageMat.length) {
+                neighbours.add(imageMat[currentPixel.getRowIdx() + 1][currentPixel.getColIdx() - 1].getPixelIdx());
+            }
+        }
+        //add right neighbours
+        if (currentPixel.getColIdx() + 1 < imageMat[0].length) {
+            neighbours.add(imageMat[currentPixel.getRowIdx()][currentPixel.getColIdx() + 1].getPixelIdx());
+            if (currentPixel.getRowIdx() > 0) {
+                neighbours.add(imageMat[currentPixel.getRowIdx() - 1][currentPixel.getColIdx() + 1].getPixelIdx());
+            }
+            if (currentPixel.getRowIdx() + 1 < imageMat.length) {
+                neighbours.add(imageMat[currentPixel.getRowIdx() + 1][currentPixel.getColIdx() + 1].getPixelIdx());
+            }
+        }
+        //add up and down
+        if (currentPixel.getRowIdx() > 0) {
+            neighbours.add(imageMat[currentPixel.getRowIdx() - 1][currentPixel.getColIdx()].getPixelIdx());
+        }
+        if (currentPixel.getRowIdx() + 1 < imageMat.length) {
+            neighbours.add(imageMat[currentPixel.getRowIdx() + 1][currentPixel.getColIdx()].getPixelIdx());
+        }
+        return neighbours;
     }
 
     //Evaluates the degree to which neighbouring pixels have been placed in the same segment
@@ -131,33 +191,33 @@ public class Chromosome {
         double connectiviy = 0;
         for (List<Integer> segment : this.segments) {
             //Find segment center
-            for(int pixel: segment){
+            for (int pixel : segment) {
                 Pixel currentPixel = getPixelonIndex(pixel);
                 if (currentPixel.getColIdx() > 0) {
                     connectiviy += checkNeighbour(currentPixel.pixelIdx, imageMat[currentPixel.getRowIdx()][currentPixel.getColIdx() - 1].pixelIdx);
                     if (currentPixel.getRowIdx() > 0) {
-                        connectiviy += checkNeighbour(currentPixel.pixelIdx, imageMat[currentPixel.getRowIdx()-1][currentPixel.getColIdx() - 1].pixelIdx);
+                        connectiviy += checkNeighbour(currentPixel.pixelIdx, imageMat[currentPixel.getRowIdx() - 1][currentPixel.getColIdx() - 1].pixelIdx);
                     }
                     if (currentPixel.getRowIdx() + 1 < imageMat.length) {
-                        connectiviy += checkNeighbour(currentPixel.pixelIdx, imageMat[currentPixel.getRowIdx()+1][currentPixel.getColIdx() - 1].pixelIdx);
+                        connectiviy += checkNeighbour(currentPixel.pixelIdx, imageMat[currentPixel.getRowIdx() + 1][currentPixel.getColIdx() - 1].pixelIdx);
                     }
                 }
                 //add right neighbours
                 if (currentPixel.getColIdx() + 1 < imageMat[0].length) {
                     connectiviy += checkNeighbour(currentPixel.pixelIdx, imageMat[currentPixel.getRowIdx()][currentPixel.getColIdx() + 1].pixelIdx);
                     if (currentPixel.getRowIdx() > 0) {
-                        connectiviy += checkNeighbour(currentPixel.pixelIdx, imageMat[currentPixel.getRowIdx()-1][currentPixel.getColIdx() + 1].pixelIdx);
+                        connectiviy += checkNeighbour(currentPixel.pixelIdx, imageMat[currentPixel.getRowIdx() - 1][currentPixel.getColIdx() + 1].pixelIdx);
                     }
                     if (currentPixel.getRowIdx() + 1 < imageMat.length) {
-                        connectiviy += checkNeighbour(currentPixel.pixelIdx, imageMat[currentPixel.getRowIdx()+1][currentPixel.getColIdx() + 1].pixelIdx);
+                        connectiviy += checkNeighbour(currentPixel.pixelIdx, imageMat[currentPixel.getRowIdx() + 1][currentPixel.getColIdx() + 1].pixelIdx);
                     }
                 }
                 //add up and down
                 if (currentPixel.getRowIdx() > 0) {
-                    connectiviy += checkNeighbour(currentPixel.pixelIdx, imageMat[currentPixel.getRowIdx()-1][currentPixel.getColIdx()].pixelIdx);
+                    connectiviy += checkNeighbour(currentPixel.pixelIdx, imageMat[currentPixel.getRowIdx() - 1][currentPixel.getColIdx()].pixelIdx);
                 }
                 if (currentPixel.getRowIdx() + 1 < imageMat.length) {
-                    connectiviy += checkNeighbour(currentPixel.pixelIdx, imageMat[currentPixel.getRowIdx()+1][currentPixel.getColIdx()].pixelIdx);
+                    connectiviy += checkNeighbour(currentPixel.pixelIdx, imageMat[currentPixel.getRowIdx() + 1][currentPixel.getColIdx()].pixelIdx);
                 }
 
             }
@@ -165,11 +225,10 @@ public class Chromosome {
         return connectiviy;
     }
 
-    private double checkNeighbour(int current, int target){
-        if(segementDivision[current] == segementDivision[target]){
+    private double checkNeighbour(int current, int target) {
+        if (segementDivision[current] == segementDivision[target]) {
             return 0;
-        }
-        else{
+        } else {
             return 0.125;
         }
     }
@@ -192,8 +251,6 @@ public class Chromosome {
         }
         return deviation;
     }
-    //TODO - have we missed something here? Centroid is the average color of all the pixels in the segment
-
 
     private List<List<Integer>> getSegments() {
         return segments;
@@ -246,33 +303,74 @@ public class Chromosome {
     }
 
     private Pixel getPixelonIndex(int pixelNumber) {
-        //TODO: Check for bugs
         int rowIndex = pixelNumber / this.img.getWidth();
         int colIndex = pixelNumber % this.img.getWidth();
         return imageMat[rowIndex][colIndex];
     }
 
-    private double getDeviation() {
+    double getDeviation() {
         return deviation;
     }
 
+    double getConnectivity() {
+        return connectivity;
+    }
+
+    public void setCrowding_distance(double crowding_distance) {
+        this.crowding_distance = crowding_distance;
+    }
+
+    public double getCrowding_distance() {
+        return crowding_distance;
+    }
+
+    public boolean isUseDeviation() {
+        return useDeviation;
+    }
+
+    public boolean isUseConnectivity() {
+        return useConnectivity;
+    }
+
+    public int getRank() {
+        return rank;
+    }
+
+    public void setRank(int rank) {
+        this.rank = rank;
+    }
+
+    static Comparator<Chromosome> deviationComparator() {
+        return Comparator.comparingDouble(Chromosome::getDeviation);
+    }
+
+    static Comparator<Chromosome> connectivityComparator() {
+        return Comparator.comparingDouble(Chromosome::getConnectivity);
+    }
+
+    //Return 1 if object 2 should be before object 1
+    static Comparator<Chromosome> crowdingComparator() {
+        return (o1, o2) -> {
+            if (o1.getCrowding_distance() > o2.getCrowding_distance()) return -1;
+            if (o1.getCrowding_distance() < o2.getCrowding_distance()) return 1;
+            return 0;
+        };
+    }
+
+    //Return 1 if object 2 should be before object 1
+    static Comparator<Chromosome> nonDominatedCrowdingComparator() {
+        return ((o1, o2) -> {
+            if (o1.getRank() < o2.getRank()) return -1;
+            if (o1.getRank() > o2.getRank()) return 1;
+            if (o1.getCrowding_distance() > o2.getCrowding_distance()) return -1;
+            if (o1.getCrowding_distance() < o2.getCrowding_distance()) return 1;
+            return 0;
+        });
+    }
+
     public static void main(String[] args) {
-
-        ImageMat loadImg = new ImageMat("86016");
-        Chromosome test = new Chromosome(loadImg, 3);
-
-
-        for(List<Integer> l : test.segments){
-            System.out.println(l);
+        for(int i = 0; i < 20; i++){
+            System.out.println(new SplittableRandom().nextInt(0,3));
         }
-
-
-        List<List<Integer>> testSeg = test.getSegments();
-        for (int index : testSeg.get(0)) {
-            test.getPixelonIndex(index).color = Color.green;
-        }
-        System.out.println(test.getDeviation());
-        System.out.println(test.connectivity);
-        test.img.saveAs("test.jpg");
     }
 }
