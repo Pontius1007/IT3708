@@ -1,11 +1,6 @@
-import jdk.nashorn.internal.runtime.regexp.joni.encoding.CharacterType;
-
-import java.awt.*;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class NSGAII {
     private int populationNumber = 5;
@@ -106,22 +101,56 @@ public class NSGAII {
     }
 
     private void runMainLoop(String imageFile) {
+        //MERK: Med denne metoden må nok innit pop være 2x
         ImageMat loadImg = new ImageMat(imageFile);
         initializePopulation(loadImg);
         rankPopulation();
-        System.out.println("rankedPopulation size" + rankedPopulation.size());
-        List<Chromosome> children = new ArrayList<>();
+        createNewPopulationBasedOnRank();
+        //Creates new population of size N based on initial population in generation 0
+
+        int generation = 1;
+
+        while (true) {
+            //Create offsprings
+            ArrayList<Chromosome> children = createChildren(loadImg);
+            population.addAll(children);
+            rankPopulation();
+            createNewPopulationBasedOnRank();
+            generation++;
+        }
+        //Use this to create a child population of size N
+
+        //After the first iteration, the main loop comes here as it differs from the first iteration. Check the document.
+    }
+
+    private ArrayList<Chromosome> createChildren(ImageMat loadImg) {
+        ArrayList<Chromosome> children = new ArrayList<>();
         for(int i = 0; i < this.childPopulationNumber; i++){
             Chromosome father = selectParent();
             Chromosome mother = selectParent();
             Chromosome child = new Chromosome(loadImg, father, mother, mutationRate);
             children.add(child);
         }
-        System.out.println("population size" + population.size());
-        System.out.println("children size" + children.size());
-        //Use this to create a child population of size N
+        return children;
+    }
 
-        //After the first iteration, the main loop comes here as it differs from the first iteration. Check the document.
+    private void createNewPopulationBasedOnRank() {
+        population.clear();
+        for (List<Chromosome> pareto_front : rankedPopulation) {
+            crowdingDistanceAssignment(pareto_front);
+            //Add the pareto-front to the population if space
+            if (pareto_front.size() <= this.populationNumber - population.size()) {
+                population.addAll(pareto_front);
+            }
+            else {
+                ArrayList<Chromosome> pareto_front_copy = new ArrayList<>(pareto_front);
+                pareto_front_copy.sort(Chromosome.nonDominatedCrowdingComparator());
+                while (population.size() < this.populationNumber) {
+                    population.add(pareto_front_copy.remove(0));
+                }
+            }
+        }
+
     }
 
     private Chromosome selectParent(){
