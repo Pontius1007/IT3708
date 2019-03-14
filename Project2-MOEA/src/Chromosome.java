@@ -8,7 +8,7 @@ public class Chromosome {
     public static ImageMat img;
     private int numberOfSegments;
 
-    private int[] segementDivision;
+    public int[] segementDivision;
 
     private double deviation;
     private double connectivity;
@@ -20,12 +20,20 @@ public class Chromosome {
     public Chromosome(int numberOfSegments) {
         chromosome = new int[img.getHeight() * img.getWidth()];
         this.numberOfSegments = numberOfSegments;
-        this.segementDivision = new int[img.getHeight() * img.getWidth()];
         initPrimMST(img);
         findSegments();
         this.deviation = overallDeviation();
         this.connectivity = overallConnectivity();
     }
+
+
+    public Chromosome(Chromosome c2){
+        chromosome = new int[img.getHeight() * img.getWidth()];
+        findSegments();
+        this.deviation = overallDeviation();
+        this.connectivity = overallConnectivity();
+    }
+
 
     // crossover constructor
     public Chromosome(ImageMat img, Chromosome father, Chromosome mother, double mutationRate) {
@@ -356,6 +364,7 @@ public class Chromosome {
     }
 
     public static void main(String[] args) {
+        List<Chromosome> population;
 
     }
 }

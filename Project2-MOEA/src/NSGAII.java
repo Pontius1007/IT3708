@@ -3,11 +3,13 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class NSGAII {
     //Real number is 2x
-    private int populationNumber = 5;
-    private int childPopulationNumber = 5;
+    private int populationNumber = 40;
+    private int childPopulationNumber = 40;
     private double mutationRate = 0.05;
     private ArrayList<Chromosome> population = new ArrayList<>();
     private ArrayList<ArrayList<Chromosome>> rankedPopulation = new ArrayList<>();
+
+    private int size;
 
     //TODO: Check for bugs. Has not been tested with solutions dominating each other
     private ArrayList<Chromosome> fastNondominatedSort(ArrayList<Chromosome> population) {
@@ -77,6 +79,7 @@ public class NSGAII {
     private void initializePopulation(ImageMat loadImg) {
         Chromosome.imageMat = loadImg.getPixels();
         Chromosome.img = loadImg;
+        size = loadImg.getWidth()*loadImg.getHeight();
         for (int i = 0; i < this.populationNumber * 2; i++) {
             Chromosome temp = new Chromosome(ThreadLocalRandom.current().nextInt(20, 100));
             //TODO: Legg til kall her for å legge til segmenter mindre enn k kanskje?
@@ -86,6 +89,7 @@ public class NSGAII {
     }
 
     private void rankPopulation() {
+        rankedPopulation.clear();
         ArrayList<Chromosome> rankList;
         int rank = 1;
         while (this.population.size() > 0) {
