@@ -77,12 +77,19 @@ public class NSGAII {
     }
 
     private void initializePopulation(ImageMat loadImg) {
-        for (int i = 0; i < this.populationNumber * 2; i++) {
-            Chromosome temp = new Chromosome(loadImg, ThreadLocalRandom.current().nextInt(20, 100));
-            //TODO: Legg til kall her for å legge til segmenter mindre enn k kanskje?
-            this.population.add(temp);
-        }
+        List<Chromosome> populationInProgress = Collections.synchronizedList(new ArrayList<>(this.populationNumber * 2));
 
+        final ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
+        for (int i = 0; i < this.populationNumber * 2; i++) {
+            executorService.execute(() -> {
+                Chromosome temp = new Chromosome(loadImg, ThreadLocalRandom.current().nextInt(20, 100));
+                //TODO: Legg til kall her for å legge til segmenter mindre enn k kanskje?
+                populationInProgress.add(temp);
+            });
+        }
+        executorService.shutdown();
+        while (!executorService.isTerminated()) ;
     }
 
     private void rankPopulation() {
@@ -130,7 +137,7 @@ public class NSGAII {
 
     private List<Chromosome> createChildren(ImageMat loadImg, boolean generationZero) {
         int multiplier = (generationZero) ? 2 : 1;
-        List children =  Collections.synchronizedList(new ArrayList());
+        List<Chromosome> children = Collections.synchronizedList(new ArrayList<>(this.childPopulationNumber));
 
         final ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
@@ -143,7 +150,7 @@ public class NSGAII {
             });
         }
         executorService.shutdown();
-        while (!executorService.isTerminated());
+        while (!executorService.isTerminated()) ;
         return children;
     }
 
