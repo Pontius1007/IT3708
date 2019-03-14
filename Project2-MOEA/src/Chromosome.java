@@ -336,15 +336,6 @@ public class Chromosome {
     }
 
     //Return 1 if object 2 should be before object 1
-    static Comparator<Chromosome> crowdingComparator() {
-        return (o1, o2) -> {
-            if (o1.getCrowding_distance() > o2.getCrowding_distance()) return -1;
-            if (o1.getCrowding_distance() < o2.getCrowding_distance()) return 1;
-            return 0;
-        };
-    }
-
-    //Return 1 if object 2 should be before object 1
     static Comparator<Chromosome> nonDominatedCrowdingComparator() {
         return ((o1, o2) -> {
             if (o1.getRank() < o2.getRank()) return -1;
