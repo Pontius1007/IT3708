@@ -93,31 +93,31 @@ public class Chromosome {
 
     private void findSegments() {
         //roots is all pixels representing one segment. (pointing to itself)
-        boolean[] visited = new boolean[chromosome.length];
-        ArrayList<Integer> roots = new ArrayList<>();
+        segementDivision = new int[chromosome.length];
+        segments = new ArrayList<>();
+        int currentSegmentID = 0;
+        for(int i = 0; i < chromosome.length; i++){
 
-        for (int i = 0; i < this.chromosome.length; i++) {
-            if (this.chromosome[i] == i) {
-                roots.add(i);
-                this.segments.add(new ArrayList<>(Collections.singletonList(i)));
-                segementDivision[i] = segments.size() - 1;
+            if(segementDivision[i] != -1) continue;
+            List<Integer> currentSegment = new ArrayList<>();
+            currentSegment.add(i);
+            segementDivision[i] = currentSegmentID;
+            int nextPixel = chromosome[i];
+            while(segementDivision[nextPixel] == -1){
+                currentSegment.add(nextPixel);
+                segementDivision[nextPixel] = currentSegmentID;
+                nextPixel = segementDivision[nextPixel];
             }
-        }
-        //adding every pixel to one sement
-        int currentSegment = 0;
-        for (int i = 0; i < this.chromosome.length; i++) {
-            //if already added as root, skip
-            if (this.chromosome[i] == i) {
-                continue;
+            if(segementDivision[i] != segementDivision[nextPixel]){
+                int setSegment = segementDivision[nextPixel];
+                for(int pixelidx: currentSegment){
+                    segementDivision[pixelidx] = setSegment;
+                }
             }
-            int current = i;
-            //search for root by backtracking
-            while () {
-                current = this.chromosome[current];
+            else{
+                currentSegmentID++;
             }
-            int segmentIdx = roots.indexOf(current);
-            this.segments.get(segmentIdx).add(i);
-            segementDivision[i] = segmentIdx;
+
         }
     }
 
