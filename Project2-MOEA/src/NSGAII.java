@@ -75,8 +75,10 @@ public class NSGAII {
     }
 
     private void initializePopulation(ImageMat loadImg) {
+        Chromosome.imageMat = loadImg.getPixels();
+        Chromosome.img = loadImg;
         for (int i = 0; i < this.populationNumber * 2; i++) {
-            Chromosome temp = new Chromosome(loadImg, ThreadLocalRandom.current().nextInt(20, 100));
+            Chromosome temp = new Chromosome(ThreadLocalRandom.current().nextInt(20, 100));
             //TODO: Legg til kall her for å legge til segmenter mindre enn k kanskje?
             this.population.add(temp);
         }
@@ -163,7 +165,6 @@ public class NSGAII {
         indx1 = new SplittableRandom().nextInt(0, population.size());
         indx2 = new SplittableRandom().nextInt(0, population.size());
         while (indx1 == indx2) {
-            System.out.println("evig");
             indx2 = new SplittableRandom().nextInt(0, population.size());
         }
         Chromosome p1 = population.get(indx1);
@@ -174,6 +175,7 @@ public class NSGAII {
 
     private void printStatus(int generation) {
         System.out.println("This is generation: " + generation);
+        System.out.println("Size of population " + this.population.size());
     }
 
     public static void main(String[] args) {

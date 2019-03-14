@@ -4,11 +4,10 @@ import java.util.*;
 
 public class Chromosome {
     public int[] chromosome;
-    private Pixel[][] imageMat;
-    private ImageMat img;
+    public static Pixel[][] imageMat;
+    public static ImageMat img;
     private int numberOfSegments;
 
-    private List<List<Integer>> segments;
     private int[] segementDivision;
 
     private double deviation;
@@ -18,16 +17,13 @@ public class Chromosome {
     private boolean useConnectivity = true; //1
     private int rank;
 
-    public Chromosome(ImageMat img, int numberOfSegments) {
+    public Chromosome(int numberOfSegments) {
         chromosome = new int[img.getHeight() * img.getWidth()];
-        this.img = img;
-        this.imageMat = img.getPixels();
         this.numberOfSegments = numberOfSegments;
-        this.segments = new ArrayList<>();
         this.segementDivision = new int[img.getHeight() * img.getWidth()];
         initPrimMST(img);
         findSegments();
-        this.deviation = overallDeviation(this.segments);
+        this.deviation = overallDeviation();
         this.connectivity = overallConnectivity();
     }
 
@@ -36,7 +32,6 @@ public class Chromosome {
         chromosome = new int[img.getHeight() * img.getWidth()];
         this.img = img;
         this.imageMat = img.getPixels();
-        this.segments = new ArrayList<>();
         this.segementDivision = new int[img.getHeight() * img.getWidth()];
         //integer for index to take genes from mother instead of father.
         int nsplit = new SplittableRandom().nextInt(0, chromosome.length);
@@ -91,15 +86,26 @@ public class Chromosome {
         }
     }
 
+    private List<List<Integer>> getSegmentMatrix(){
+        List<List<Integer>> segmentMat = new ArrayList<>();
+        for(int i = 0; i <= numberOfSegments; i++){
+            segmentMat.add(new ArrayList<>());
+        }
+        for(int i = 0; i < segementDivision.length; i++){
+            segmentMat.get(segementDivision[i]).add(i);
+        }
+        return segmentMat;
+    }
+
     private void findSegments() {
         //roots is all pixels representing one segment. (pointing to itself)
         segementDivision = new int[chromosome.length];
-        segments = new ArrayList<>();
-        int currentSegmentID = 0;
+        int currentSegmentID = 0;;
+        List<Integer> currentSegment;
         for(int i = 0; i < chromosome.length; i++){
 
             if(segementDivision[i] != -1) continue;
-            List<Integer> currentSegment = new ArrayList<>();
+            currentSegment = new ArrayList<>();
             currentSegment.add(i);
             segementDivision[i] = currentSegmentID;
             int nextPixel = chromosome[i];
@@ -118,6 +124,12 @@ public class Chromosome {
                 currentSegmentID++;
             }
 
+        }
+        numberOfSegments = 0;
+        for(int segid: segementDivision){
+            if(segid > numberOfSegments){
+                numberOfSegments = segid;
+            }
         }
     }
 
@@ -202,7 +214,7 @@ public class Chromosome {
     //Evaluates the degree to which neighbouring pixels have been placed in the same segment
     private double overallConnectivity() {
         double connectiviy = 0;
-        for (List<Integer> segment : this.segments) {
+        for (List<Integer> segment : this.getSegmentMatrix()) {
             //Find segment center
             for (int pixel : segment) {
                 Pixel currentPixel = getPixelonIndex(pixel);
@@ -249,10 +261,10 @@ public class Chromosome {
 
     // measure of the ‘similarity’ (homogeneity) of pixels in the same segment
     // Assumes a 2D list in the form of [[1,52,23]] where the numbers are pixelnumbers
-    private double overallDeviation(List<List<Integer>> segments) {
+    private double overallDeviation() {
         double deviation = 0;
         //Change when we have 2d list
-        for (List<Integer> segment : this.segments) {
+        for (List<Integer> segment : getSegmentMatrix()) {
             //Find segment center
             Color centroidColor = getSegmentCentroid(segment);
             //List<Integer> centerPos = getSegmentCenter(segment);
@@ -265,9 +277,6 @@ public class Chromosome {
         return deviation;
     }
 
-    private List<List<Integer>> getSegments() {
-        return segments;
-    }
 
     //The centroid is the average color of all the pixels in one segment.
     private Color getSegmentCentroid(List<Integer> segment) {
@@ -347,8 +356,6 @@ public class Chromosome {
     }
 
     public static void main(String[] args) {
-        for (int i = 0; i < 20; i++) {
-            System.out.println(new SplittableRandom().nextInt(0, 3));
-        }
+
     }
 }
