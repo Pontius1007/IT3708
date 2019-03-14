@@ -5,11 +5,13 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class NSGAII {
     //Real number is 2x
-    private int populationNumber = 5;
-    private int childPopulationNumber = 5;
+    private int populationNumber = 40;
+    private int childPopulationNumber = 40;
     private double mutationRate = 0.05;
     private List<Chromosome> population = new ArrayList<>();
     private ArrayList<ArrayList<Chromosome>> rankedPopulation = new ArrayList<>();
+
+    private int size;
 
     //TODO: Check for bugs. Has not been tested with solutions dominating each other
     private ArrayList<Chromosome> fastNondominatedSort(List<Chromosome> population) {
@@ -94,6 +96,7 @@ public class NSGAII {
     }
 
     private void rankPopulation() {
+        rankedPopulation.clear();
         ArrayList<Chromosome> rankList;
         int rank = 1;
         while (this.population.size() > 0) {
@@ -180,7 +183,6 @@ public class NSGAII {
         indx1 = new SplittableRandom().nextInt(0, population.size());
         indx2 = new SplittableRandom().nextInt(0, population.size());
         while (indx1 == indx2) {
-            System.out.println("evig");
             indx2 = new SplittableRandom().nextInt(0, population.size());
         }
         Chromosome p1 = population.get(indx1);
@@ -191,6 +193,7 @@ public class NSGAII {
 
     private void printStatus(int generation) {
         System.out.println("This is generation: " + generation);
+        System.out.println("Size of population " + this.population.size());
     }
 
     public static void main(String[] args) {
