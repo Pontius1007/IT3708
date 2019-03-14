@@ -1,13 +1,8 @@
-import jdk.nashorn.internal.runtime.regexp.joni.encoding.CharacterType;
-
-import java.awt.*;
 import java.util.*;
-import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class NSGAII {
+    //Real number is 2x
     private int populationNumber = 5;
     private int childPopulationNumber = 5;
     private double mutationRate = 0.05;
@@ -24,14 +19,14 @@ public class NSGAII {
         List<Chromosome> isDominated = new ArrayList<>();
 
         for (Chromosome individual : population) {
-            if(isDominated.contains(individual)){
+            if (isDominated.contains(individual)) {
                 continue;
             }
             //Include p in P' temporarily
             non_dominated_set.add(individual);
             //Compare p with other members of P'
             for (Chromosome non_dominated : non_dominated_set) {
-                if(isDominated.contains(individual)){
+                if (isDominated.contains(individual)) {
                     continue;
                 }
                 if (non_dominated == individual) {
@@ -80,7 +75,7 @@ public class NSGAII {
     }
 
     private void initializePopulation(ImageMat loadImg) {
-        for (int i = 0; i < this.populationNumber; i++) {
+        for (int i = 0; i < this.populationNumber * 2; i++) {
             Chromosome temp = new Chromosome(loadImg, ThreadLocalRandom.current().nextInt(20, 100));
             //TODO: Legg til kall her for å legge til segmenter mindre enn k kanskje?
             this.population.add(temp);
@@ -100,7 +95,7 @@ public class NSGAII {
             population.removeAll(rankList);
             rank++;
         }
-        for(List<Chromosome> list: rankedPopulation){
+        for (List<Chromosome> list : rankedPopulation) {
             population.addAll(list);
         }
     }
@@ -109,34 +104,76 @@ public class NSGAII {
         ImageMat loadImg = new ImageMat(imageFile);
         initializePopulation(loadImg);
         rankPopulation();
-        System.out.println("rankedPopulation size" + rankedPopulation.size());
-        List<Chromosome> children = new ArrayList<>();
-        for(int i = 0; i < this.childPopulationNumber; i++){
+        //Creates new population of size N based on initial population in generation 0
+        //Not following the psudo-code correctly here, as I doubt it really matters. Easier to do it this day
+        //createNewPopulationBasedOnRank();
+        //Following the psudo-code:
+        this.population = createChildren(loadImg, true);
+
+        int generation = 1;
+
+        while (true) {
+            //Print status
+            printStatus(generation);
+            //Create offsprings
+            ArrayList<Chromosome> children = createChildren(loadImg, false);
+            population.addAll(children);
+            rankPopulation();
+            createNewPopulationBasedOnRank();
+            //Should be use selection, crossover and mutation to create a new population of size N here?
+            generation++;
+
+        }
+    }
+
+    private ArrayList<Chromosome> createChildren(ImageMat loadImg, boolean generationZero) {
+        int multiplier = (generationZero) ? 2 : 1;
+        ArrayList<Chromosome> children = new ArrayList<>();
+        for (int i = 0; i < this.childPopulationNumber * multiplier; i++) {
             Chromosome father = selectParent();
             Chromosome mother = selectParent();
             Chromosome child = new Chromosome(loadImg, father, mother, mutationRate);
             children.add(child);
         }
-        System.out.println("population size" + population.size());
-        System.out.println("children size" + children.size());
-        //Use this to create a child population of size N
-
-        //After the first iteration, the main loop comes here as it differs from the first iteration. Check the document.
+        return children;
     }
 
-    private Chromosome selectParent(){
+    private void createNewPopulationBasedOnRank() {
+        population.clear();
+        for (List<Chromosome> pareto_front : rankedPopulation) {
+            crowdingDistanceAssignment(pareto_front);
+            //Add the pareto-front to the population if space
+            if (pareto_front.size() <= this.populationNumber - population.size()) {
+                population.addAll(pareto_front);
+            } else {
+                ArrayList<Chromosome> pareto_front_copy = new ArrayList<>(pareto_front);
+                pareto_front_copy.sort(Chromosome.nonDominatedCrowdingComparator());
+                while (population.size() < this.populationNumber) {
+                    population.add(pareto_front_copy.remove(0));
+                }
+            }
+        }
+
+    }
+
+    private Chromosome selectParent() {
+        //Binary tournament selection
         int indx1;
         int indx2;
         indx1 = new SplittableRandom().nextInt(0, population.size());
         indx2 = new SplittableRandom().nextInt(0, population.size());
-        while(indx1 == indx2){
+        while (indx1 == indx2) {
             System.out.println("evig");
             indx2 = new SplittableRandom().nextInt(0, population.size());
         }
         Chromosome p1 = population.get(indx1);
         Chromosome p2 = population.get(indx2);
-        if(Chromosome.nonDominatedCrowdingComparator().compare(p1, p2) < 0) return p1;
+        if (Chromosome.nonDominatedCrowdingComparator().compare(p1, p2) < 0) return p1;
         return p2;
+    }
+
+    private void printStatus(int generation) {
+        System.out.println("This is generation: " + generation);
     }
 
     public static void main(String[] args) {

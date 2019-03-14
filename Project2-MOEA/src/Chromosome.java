@@ -32,7 +32,7 @@ public class Chromosome {
     }
 
     // crossover constructor
-    public Chromosome(ImageMat img, Chromosome father, Chromosome mother, double mutationRate){
+    public Chromosome(ImageMat img, Chromosome father, Chromosome mother, double mutationRate) {
         chromosome = new int[img.getHeight() * img.getWidth()];
         this.img = img;
         this.imageMat = img.getPixels();
@@ -40,21 +40,21 @@ public class Chromosome {
         this.segementDivision = new int[img.getHeight() * img.getWidth()];
         //integer for index to take genes from mother instead of father.
         int nsplit = new SplittableRandom().nextInt(0, chromosome.length);
-        for(int i = 0; i < nsplit; i++){
+        for (int i = 0; i < nsplit; i++) {
             chromosome[i] = father.chromosome[i];
         }
-        for(int i = nsplit; i < chromosome.length; i++){
+        for (int i = nsplit; i < chromosome.length; i++) {
             chromosome[i] = mother.chromosome[i];
         }
-        for(int i = 0; i < chromosome.length; i++){
-            if(new SplittableRandom().nextInt(0, 100) < mutationRate*100){
+        for (int i = 0; i < chromosome.length; i++) {
+            if (new SplittableRandom().nextInt(0, 100) < mutationRate * 100) {
                 mutateRandomEdge(i);
             }
         }
         findSegments();
     }
 
-    public void mutateRandomEdge(int pixelIndex){
+    public void mutateRandomEdge(int pixelIndex) {
         List<Integer> neigbours = getNeighbours(pixelIndex);
         //change edge to a random possible edge for the pixel
         chromosome[pixelIndex] = neigbours.get(new SplittableRandom().nextInt(0, neigbours.size()));
@@ -165,7 +165,7 @@ public class Chromosome {
         return chromosome;
     }
 
-    public List<Integer> getNeighbours(int pixelIndex){
+    public List<Integer> getNeighbours(int pixelIndex) {
         List<Integer> neighbours = new ArrayList<>();
         Pixel currentPixel = getPixelonIndex(pixelIndex);
         // checks if a neighbour is out of bounds of the matrix, and adds to neighbours if not.
@@ -289,32 +289,6 @@ public class Chromosome {
         return centroid;
     }
 
-    private List<Integer> getSegmentCenter(List<Integer> segment) {
-        List<Integer> segmentCenter = new ArrayList<>();
-        int segmentWidth = 0;
-        int segmentHeight = 0;
-        int minSegmentWidth = Integer.MAX_VALUE;
-        int minSegmentHeight = Integer.MAX_VALUE;
-        for (Integer integer : segment) {
-            Pixel temp = getPixelonIndex(integer);
-            if (temp.getRowIdx() > segmentWidth) {
-                segmentWidth = temp.getRowIdx();
-            }
-            if (temp.getRowIdx() < minSegmentWidth) {
-                minSegmentWidth = temp.getRowIdx();
-            }
-            if (temp.getColIdx() > segmentHeight) {
-                segmentHeight = temp.getColIdx();
-            }
-            if (temp.getColIdx() < minSegmentHeight) {
-                minSegmentHeight = temp.getColIdx();
-            }
-        }
-        segmentCenter.add((minSegmentWidth + (segmentWidth - minSegmentWidth)) / 2);
-        segmentCenter.add((minSegmentHeight + (segmentHeight - minSegmentHeight)) / 2);
-        return segmentCenter;
-    }
-
     private Pixel getPixelonIndex(int pixelNumber) {
         int rowIndex = pixelNumber / this.img.getWidth();
         int colIndex = pixelNumber % this.img.getWidth();
@@ -362,15 +336,6 @@ public class Chromosome {
     }
 
     //Return 1 if object 2 should be before object 1
-    static Comparator<Chromosome> crowdingComparator() {
-        return (o1, o2) -> {
-            if (o1.getCrowding_distance() > o2.getCrowding_distance()) return -1;
-            if (o1.getCrowding_distance() < o2.getCrowding_distance()) return 1;
-            return 0;
-        };
-    }
-
-    //Return 1 if object 2 should be before object 1
     static Comparator<Chromosome> nonDominatedCrowdingComparator() {
         return ((o1, o2) -> {
             if (o1.getRank() < o2.getRank()) return -1;
@@ -382,8 +347,8 @@ public class Chromosome {
     }
 
     public static void main(String[] args) {
-        for(int i = 0; i < 20; i++){
-            System.out.println(new SplittableRandom().nextInt(0,3));
+        for (int i = 0; i < 20; i++) {
+            System.out.println(new SplittableRandom().nextInt(0, 3));
         }
     }
 }
