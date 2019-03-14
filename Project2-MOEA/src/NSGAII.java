@@ -90,6 +90,7 @@ public class NSGAII {
         }
         executorService.shutdown();
         while (!executorService.isTerminated()) ;
+        this.population.addAll(populationInProgress);
     }
 
     private void rankPopulation() {
