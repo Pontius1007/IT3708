@@ -1,4 +1,6 @@
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class NSGAII {
@@ -6,13 +8,13 @@ public class NSGAII {
     private int populationNumber = 40;
     private int childPopulationNumber = 40;
     private double mutationRate = 0.05;
-    private ArrayList<Chromosome> population = new ArrayList<>();
+    private List<Chromosome> population = new ArrayList<>();
     private ArrayList<ArrayList<Chromosome>> rankedPopulation = new ArrayList<>();
 
     private int size;
 
     //TODO: Check for bugs. Has not been tested with solutions dominating each other
-    private ArrayList<Chromosome> fastNondominatedSort(ArrayList<Chromosome> population) {
+    private ArrayList<Chromosome> fastNondominatedSort(List<Chromosome> population) {
         Set<Chromosome> non_dominated_set = new HashSet<>();
         //Include first member in P'
         non_dominated_set.add(population.get(0));
@@ -77,15 +79,20 @@ public class NSGAII {
     }
 
     private void initializePopulation(ImageMat loadImg) {
-        Chromosome.imageMat = loadImg.getPixels();
-        Chromosome.img = loadImg;
-        size = loadImg.getWidth()*loadImg.getHeight();
-        for (int i = 0; i < this.populationNumber * 2; i++) {
-            Chromosome temp = new Chromosome(ThreadLocalRandom.current().nextInt(20, 100));
-            //TODO: Legg til kall her for å legge til segmenter mindre enn k kanskje?
-            this.population.add(temp);
-        }
+        List<Chromosome> populationInProgress = Collections.synchronizedList(new ArrayList<>(this.populationNumber * 2));
 
+        final ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
+        for (int i = 0; i < this.populationNumber * 2; i++) {
+            executorService.execute(() -> {
+                Chromosome temp = new Chromosome(loadImg, ThreadLocalRandom.current().nextInt(20, 100));
+                //TODO: Legg til kall her for å legge til segmenter mindre enn k kanskje?
+                populationInProgress.add(temp);
+            });
+        }
+        executorService.shutdown();
+        while (!executorService.isTerminated()) ;
+        this.population.addAll(populationInProgress);
     }
 
     private void rankPopulation() {
@@ -122,7 +129,7 @@ public class NSGAII {
             //Print status
             printStatus(generation);
             //Create offsprings
-            ArrayList<Chromosome> children = createChildren(loadImg, false);
+            List<Chromosome> children = createChildren(loadImg, false);
             population.addAll(children);
             rankPopulation();
             createNewPopulationBasedOnRank();
@@ -132,15 +139,22 @@ public class NSGAII {
         }
     }
 
-    private ArrayList<Chromosome> createChildren(ImageMat loadImg, boolean generationZero) {
+    private List<Chromosome> createChildren(ImageMat loadImg, boolean generationZero) {
         int multiplier = (generationZero) ? 2 : 1;
-        ArrayList<Chromosome> children = new ArrayList<>();
+        List<Chromosome> children = Collections.synchronizedList(new ArrayList<>(this.childPopulationNumber));
+
+        final ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
         for (int i = 0; i < this.childPopulationNumber * multiplier; i++) {
-            Chromosome father = selectParent();
-            Chromosome mother = selectParent();
-            Chromosome child = new Chromosome(loadImg, father, mother, mutationRate);
-            children.add(child);
+            executorService.execute(() -> {
+                Chromosome father = selectParent();
+                Chromosome mother = selectParent();
+                Chromosome child = new Chromosome(loadImg, father, mother, mutationRate);
+                children.add(child);
+            });
         }
+        executorService.shutdown();
+        while (!executorService.isTerminated()) ;
         return children;
     }
 
