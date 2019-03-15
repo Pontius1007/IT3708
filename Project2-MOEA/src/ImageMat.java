@@ -48,12 +48,11 @@ public class ImageMat {
 
     public void saveAsGreen(String path, Chromosome optimalSolution) {
         try {
-            File output = new File(path + "Green");
+            File output = new File(path + "Green.jpg");
             BufferedImage image = new BufferedImage(this.width, this.height, BufferedImage.TYPE_INT_RGB);
             for (int i = 0; i < this.height; i++) {
                 for (int j = 0; j < this.width; j++) {
                     if (optimalSolution.isEdge(i * this.width + j)) {
-                        System.out.println("Edge");
                         Color green = Color.green;
                         image.setRGB(j, i, green.getRGB());
                     } else {
@@ -71,12 +70,11 @@ public class ImageMat {
 
     public void saveAsBlackAndWhite(String path, Chromosome optimalSolution) {
         try {
-            File output = new File(path + "Black");
+            File output = new File(path + "Black.jpg");
             BufferedImage image = new BufferedImage(this.width, this.height, BufferedImage.TYPE_INT_RGB);
             for (int i = 0; i < this.height; i++) {
                 for (int j = 0; j < this.width; j++) {
                     if (optimalSolution.isEdge(i * this.width + j)) {
-                        System.out.println("Edge");
                         Color green = Color.black;
                         image.setRGB(j, i, green.getRGB());
                     } else {
