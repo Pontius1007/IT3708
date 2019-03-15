@@ -79,19 +79,20 @@ public class NSGAII {
     }
 
     private void initializePopulation(ImageMat loadImg) {
-        List<Chromosome> populationInProgress = Collections.synchronizedList(new ArrayList<>(this.populationNumber * 2));
+        //List<Chromosome> populationInProgress = Collections.synchronizedList(new ArrayList<>(this.populationNumber * 2));
+        List<Chromosome> populationInProgress = new ArrayList<>(this.populationNumber * 2);
 
-        final ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        //final ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
         for (int i = 0; i < this.populationNumber * 2; i++) {
-            executorService.execute(() -> {
-                Chromosome temp = new Chromosome(loadImg, ThreadLocalRandom.current().nextInt(20, 100));
-                //TODO: Legg til kall her for å legge til segmenter mindre enn k kanskje?
-                populationInProgress.add(temp);
-            });
+            //executorService.execute(() -> {
+            Chromosome temp = new Chromosome(ThreadLocalRandom.current().nextInt(20, 100));
+            //TODO: Legg til kall her for å legge til segmenter mindre enn k kanskje?
+            populationInProgress.add(temp);
+            //});
         }
-        executorService.shutdown();
-        while (!executorService.isTerminated()) ;
+        //executorService.shutdown();
+        //while (!executorService.isTerminated()) ;
         this.population.addAll(populationInProgress);
     }
 
@@ -141,20 +142,21 @@ public class NSGAII {
 
     private List<Chromosome> createChildren(ImageMat loadImg, boolean generationZero) {
         int multiplier = (generationZero) ? 2 : 1;
-        List<Chromosome> children = Collections.synchronizedList(new ArrayList<>(this.childPopulationNumber));
+        //List<Chromosome> children = Collections.synchronizedList(new ArrayList<>(this.childPopulationNumber));
+        List<Chromosome> children = new ArrayList<>(this.childPopulationNumber);
 
-        final ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        //final ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
         for (int i = 0; i < this.childPopulationNumber * multiplier; i++) {
-            executorService.execute(() -> {
-                Chromosome father = selectParent();
-                Chromosome mother = selectParent();
-                Chromosome child = new Chromosome(loadImg, father, mother, mutationRate);
-                children.add(child);
-            });
+            //executorService.execute(() -> {
+            Chromosome father = selectParent();
+            Chromosome mother = selectParent();
+            Chromosome child = new Chromosome(loadImg, father, mother, mutationRate);
+            children.add(child);
+            //});
         }
-        executorService.shutdown();
-        while (!executorService.isTerminated()) ;
+        //executorService.shutdown();
+        //while (!executorService.isTerminated()) ;
         return children;
     }
 
