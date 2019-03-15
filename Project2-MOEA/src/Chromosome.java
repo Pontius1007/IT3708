@@ -93,7 +93,7 @@ public class Chromosome {
 
     private List<List<Integer>> getSegmentMatrix() {
         List<List<Integer>> segmentMat = new ArrayList<>();
-        for (int i = 0; i <= numberOfSegments; i++) {
+        for (int i = 0; i < numberOfSegments; i++) {
             segmentMat.add(new ArrayList<>());
         }
         for (int i = 0; i < segementDivision.length; i++) {
@@ -105,6 +105,7 @@ public class Chromosome {
     private void findSegments() {
         //roots is all pixels representing one segment. (pointing to itself)
         segementDivision = new int[chromosome.length];
+        Arrays.fill(segementDivision, -1);
         int currentSegmentID = 0;
         List<Integer> currentSegment;
         for (int i = 0; i < chromosome.length; i++) {
@@ -113,13 +114,18 @@ public class Chromosome {
             currentSegment = new ArrayList<>();
             currentSegment.add(i);
             segementDivision[i] = currentSegmentID;
+            //Sets next pixel to pointer in chromosome. See chromosome representation. Will be one of the neighbours
             int nextPixel = chromosome[i];
+            //As long as the neighbour does not belong to a segment
             while (segementDivision[nextPixel] == -1) {
+                //Loops and adds pixel to segment. Updates segmentDivision-list.
                 currentSegment.add(nextPixel);
                 segementDivision[nextPixel] = currentSegmentID;
                 nextPixel = segementDivision[nextPixel];
             }
+            //If connected to another segment "merges" them together
             if (segementDivision[i] != segementDivision[nextPixel]) {
+                //Sets segment to the parent segment
                 int setSegment = segementDivision[nextPixel];
                 for (int pixelidx : currentSegment) {
                     segementDivision[pixelidx] = setSegment;
@@ -129,19 +135,19 @@ public class Chromosome {
             }
 
         }
-        numberOfSegments = 0;
-        for (int segid : segementDivision) {
+        //numberOfSegments = currentSegmentID;
+        /*for (int segid : segementDivision) {
             if (segid > numberOfSegments) {
                 numberOfSegments = segid;
             }
-        }
+        }*/
     }
 
     private void addToWorst(Edge e, List<Edge> worstEdges) {
         //replace the best edge in worstedges if needed
         worstEdges.add(e);
         worstEdges.sort(Comparator.comparingDouble(Edge::getDistance));
-        if (worstEdges.size() > this.numberOfSegments - 1) {
+        if (worstEdges.size() > this.numberOfSegments) {
             worstEdges.remove(0);
         }
     }
@@ -279,8 +285,10 @@ public class Chromosome {
     private double overallDeviation() {
         double deviation = 0;
         //Change when we have 2d list
+        System.out.println("Number of segments: " + getSegmentMatrix().size());
         for (List<Integer> segment : getSegmentMatrix()) {
             //Find segment center
+            System.out.println(segment.size());
             Color centroidColor = getSegmentCentroid(segment);
             //List<Integer> centerPos = getSegmentCenter(segment);
             //Pixel centerPixel = imageMat[centerPos.get(0)][centerPos.get(1)];
@@ -375,6 +383,9 @@ public class Chromosome {
         Chromosome.img = loadImg;
         Chromosome test = new Chromosome(3);
         List<Integer> segment0 = test.getSegmentMatrix().get(0);
+        for (List<Integer> segment : test.getSegmentMatrix()) {
+            System.out.println(segment.size());
+        }
         for (int index : segment0) {
             Pixel p = test.getPixelonIndex(index);
             Chromosome.img.getPixels()[p.getRowIdx()][p.getColIdx()].color = Color.green;
