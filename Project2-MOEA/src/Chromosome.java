@@ -4,12 +4,11 @@ import java.util.*;
 
 public class Chromosome {
     public int[] chromosome;
-    private Pixel[][] imageMat;
-    private ImageMat img;
+    public static Pixel[][] imageMat;
+    public static ImageMat img;
     private int numberOfSegments;
 
-    private List<List<Integer>> segments;
-    private int[] segementDivision;
+    public int[] segementDivision;
 
     private double deviation;
     private double connectivity;
@@ -18,21 +17,30 @@ public class Chromosome {
     private boolean useConnectivity = true; //1
     private int rank;
 
-    public Chromosome(ImageMat img, int numberOfSegments) {
+    public Chromosome(int numberOfSegments) {
         chromosome = new int[img.getHeight() * img.getWidth()];
-        this.img = img;
-        this.imageMat = img.getPixels();
         this.numberOfSegments = numberOfSegments;
-        this.segments = new ArrayList<>();
-        this.segementDivision = new int[img.getHeight() * img.getWidth()];
         initPrimMST(img);
         findSegments();
-        this.deviation = overallDeviation(this.segments);
+        this.deviation = overallDeviation();
         this.connectivity = overallConnectivity();
     }
 
-    public Chromosome(Chromosome father, Chromosome mother){
+
+    public Chromosome(Chromosome c2){
         chromosome = new int[img.getHeight() * img.getWidth()];
+        findSegments();
+        this.deviation = overallDeviation();
+        this.connectivity = overallConnectivity();
+    }
+
+
+    // crossover constructor
+    public Chromosome(ImageMat img, Chromosome father, Chromosome mother, double mutationRate) {
+        chromosome = new int[img.getHeight() * img.getWidth()];
+        this.img = img;
+        this.imageMat = img.getPixels();
+        this.segementDivision = new int[img.getHeight() * img.getWidth()];
         //integer for index to take genes from mother instead of father.
         for(int i = 0; i < chromosome.length; i++){
             if(new SplittableRandom().nextInt(0, 2) == 0){
@@ -42,10 +50,15 @@ public class Chromosome {
                 chromosome[i] = mother.chromosome[i];
             }
         }
+        for (int i = 0; i < chromosome.length; i++) {
+            if (new SplittableRandom().nextInt(0, 100) < mutationRate * 100) {
+                mutateRandomEdge(i);
+            }
+        }
         findSegments();
     }
 
-    public void mutateRandomEdge(int pixelIndex){
+    public void mutateRandomEdge(int pixelIndex) {
         List<Integer> neigbours = getNeighbours(pixelIndex);
         //change edge to a random possible edge for the pixel
         chromosome[pixelIndex] = neigbours.get(new SplittableRandom().nextInt(0, neigbours.size()));
@@ -82,30 +95,50 @@ public class Chromosome {
         }
     }
 
+    private List<List<Integer>> getSegmentMatrix(){
+        List<List<Integer>> segmentMat = new ArrayList<>();
+        for(int i = 0; i <= numberOfSegments; i++){
+            segmentMat.add(new ArrayList<>());
+        }
+        for(int i = 0; i < segementDivision.length; i++){
+            segmentMat.get(segementDivision[i]).add(i);
+        }
+        return segmentMat;
+    }
+
     private void findSegments() {
         //roots is all pixels representing one segment. (pointing to itself)
-        ArrayList<Integer> roots = new ArrayList<>();
-        for (int i = 0; i < this.chromosome.length; i++) {
-            if (this.chromosome[i] == i) {
-                roots.add(i);
-                this.segments.add(new ArrayList<>(Collections.singletonList(i)));
-                segementDivision[i] = segments.size() - 1;
+        segementDivision = new int[chromosome.length];
+        int currentSegmentID = 0;;
+        List<Integer> currentSegment;
+        for(int i = 0; i < chromosome.length; i++){
+
+            if(segementDivision[i] != -1) continue;
+            currentSegment = new ArrayList<>();
+            currentSegment.add(i);
+            segementDivision[i] = currentSegmentID;
+            int nextPixel = chromosome[i];
+            while(segementDivision[nextPixel] == -1){
+                currentSegment.add(nextPixel);
+                segementDivision[nextPixel] = currentSegmentID;
+                nextPixel = segementDivision[nextPixel];
             }
+            if(segementDivision[i] != segementDivision[nextPixel]){
+                int setSegment = segementDivision[nextPixel];
+                for(int pixelidx: currentSegment){
+                    segementDivision[pixelidx] = setSegment;
+                }
+            }
+            else{
+                currentSegmentID++;
+            }
+
         }
-        //adding every pixel to one sement
-        for (int i = 0; i < this.chromosome.length; i++) {
-            //if already added as root, skip
-            if (this.chromosome[i] == i) {
-                continue;
+        numberOfSegments = 0;
+        for(int segid: segementDivision){
+            if(segid > numberOfSegments){
+                numberOfSegments = segid;
             }
-            int current = i;
-            //search for root by backtracking
-            while (this.chromosome[current] != current) {
-                current = this.chromosome[current];
-            }
-            int segmentIdx = roots.indexOf(current);
-            this.segments.get(segmentIdx).add(i);
-            segementDivision[i] = segmentIdx;
         }
     }
 
@@ -153,7 +186,7 @@ public class Chromosome {
         return chromosome;
     }
 
-    public List<Integer> getNeighbours(int pixelIndex){
+    public List<Integer> getNeighbours(int pixelIndex) {
         List<Integer> neighbours = new ArrayList<>();
         Pixel currentPixel = getPixelonIndex(pixelIndex);
         // checks if a neighbour is out of bounds of the matrix, and adds to neighbours if not.
@@ -190,7 +223,7 @@ public class Chromosome {
     //Evaluates the degree to which neighbouring pixels have been placed in the same segment
     private double overallConnectivity() {
         double connectiviy = 0;
-        for (List<Integer> segment : this.segments) {
+        for (List<Integer> segment : this.getSegmentMatrix()) {
             //Find segment center
             for (int pixel : segment) {
                 Pixel currentPixel = getPixelonIndex(pixel);
@@ -237,10 +270,10 @@ public class Chromosome {
 
     // measure of the ‘similarity’ (homogeneity) of pixels in the same segment
     // Assumes a 2D list in the form of [[1,52,23]] where the numbers are pixelnumbers
-    private double overallDeviation(List<List<Integer>> segments) {
+    private double overallDeviation() {
         double deviation = 0;
         //Change when we have 2d list
-        for (List<Integer> segment : this.segments) {
+        for (List<Integer> segment : getSegmentMatrix()) {
             //Find segment center
             Color centroidColor = getSegmentCentroid(segment);
             //List<Integer> centerPos = getSegmentCenter(segment);
@@ -253,9 +286,6 @@ public class Chromosome {
         return deviation;
     }
 
-    private List<List<Integer>> getSegments() {
-        return segments;
-    }
 
     //The centroid is the average color of all the pixels in one segment.
     private Color getSegmentCentroid(List<Integer> segment) {
@@ -275,32 +305,6 @@ public class Chromosome {
 
         Color centroid = new Color(red, green, blue);
         return centroid;
-    }
-
-    private List<Integer> getSegmentCenter(List<Integer> segment) {
-        List<Integer> segmentCenter = new ArrayList<>();
-        int segmentWidth = 0;
-        int segmentHeight = 0;
-        int minSegmentWidth = Integer.MAX_VALUE;
-        int minSegmentHeight = Integer.MAX_VALUE;
-        for (Integer integer : segment) {
-            Pixel temp = getPixelonIndex(integer);
-            if (temp.getRowIdx() > segmentWidth) {
-                segmentWidth = temp.getRowIdx();
-            }
-            if (temp.getRowIdx() < minSegmentWidth) {
-                minSegmentWidth = temp.getRowIdx();
-            }
-            if (temp.getColIdx() > segmentHeight) {
-                segmentHeight = temp.getColIdx();
-            }
-            if (temp.getColIdx() < minSegmentHeight) {
-                minSegmentHeight = temp.getColIdx();
-            }
-        }
-        segmentCenter.add((minSegmentWidth + (segmentWidth - minSegmentWidth)) / 2);
-        segmentCenter.add((minSegmentHeight + (segmentHeight - minSegmentHeight)) / 2);
-        return segmentCenter;
     }
 
     private Pixel getPixelonIndex(int pixelNumber) {
@@ -350,15 +354,6 @@ public class Chromosome {
     }
 
     //Return 1 if object 2 should be before object 1
-    static Comparator<Chromosome> crowdingComparator() {
-        return (o1, o2) -> {
-            if (o1.getCrowding_distance() > o2.getCrowding_distance()) return -1;
-            if (o1.getCrowding_distance() < o2.getCrowding_distance()) return 1;
-            return 0;
-        };
-    }
-
-    //Return 1 if object 2 should be before object 1
     static Comparator<Chromosome> nonDominatedCrowdingComparator() {
         return ((o1, o2) -> {
             if (o1.getRank() < o2.getRank()) return -1;
@@ -370,8 +365,7 @@ public class Chromosome {
     }
 
     public static void main(String[] args) {
-        for(int i = 0; i < 20; i++){
-            System.out.println(new SplittableRandom().nextInt(0,3));
-        }
+        List<Chromosome> population;
+
     }
 }
