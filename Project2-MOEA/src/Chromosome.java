@@ -4,7 +4,6 @@ import java.util.*;
 
 public class Chromosome {
     public int[] chromosome;
-    public static Pixel[][] imageMat;
     public static ImageMat img;
     private int numberOfSegments;
 
@@ -36,10 +35,8 @@ public class Chromosome {
 
 
     // crossover constructor
-    public Chromosome(ImageMat img, Chromosome father, Chromosome mother, double mutationRate) {
+    public Chromosome(Chromosome father, Chromosome mother, double mutationRate) {
         chromosome = new int[img.getHeight() * img.getWidth()];
-        this.img = img;
-        this.imageMat = img.getPixels();
         this.segementDivision = new int[img.getHeight() * img.getWidth()];
         //integer for index to take genes from mother instead of father.
         for(int i = 0; i < chromosome.length; i++){
@@ -191,6 +188,7 @@ public class Chromosome {
         Pixel currentPixel = getPixelonIndex(pixelIndex);
         // checks if a neighbour is out of bounds of the matrix, and adds to neighbours if not.
         // add left neighbours
+        Pixel[][] imageMat = img.getPixels();
         if (currentPixel.getColIdx() > 0) {
             neighbours.add(imageMat[currentPixel.getRowIdx()][currentPixel.getColIdx() - 1].getPixelIdx());
             if (currentPixel.getRowIdx() > 0) {
@@ -223,6 +221,7 @@ public class Chromosome {
     //Evaluates the degree to which neighbouring pixels have been placed in the same segment
     private double overallConnectivity() {
         double connectiviy = 0;
+        Pixel[][] imageMat = img.getPixels();
         for (List<Integer> segment : this.getSegmentMatrix()) {
             //Find segment center
             for (int pixel : segment) {
@@ -310,7 +309,7 @@ public class Chromosome {
     private Pixel getPixelonIndex(int pixelNumber) {
         int rowIndex = pixelNumber / this.img.getWidth();
         int colIndex = pixelNumber % this.img.getWidth();
-        return imageMat[rowIndex][colIndex];
+        return img.getPixels()[rowIndex][colIndex];
     }
 
     double getDeviation() {

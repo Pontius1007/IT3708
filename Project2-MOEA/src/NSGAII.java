@@ -5,8 +5,8 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class NSGAII {
     //Real number is 2x
-    private int populationNumber = 40;
-    private int childPopulationNumber = 40;
+    private int populationNumber = 50;
+    private int childPopulationNumber = 50;
     private double mutationRate = 0.05;
     private List<Chromosome> population = new ArrayList<>();
     private ArrayList<ArrayList<Chromosome>> rankedPopulation = new ArrayList<>();
@@ -79,6 +79,8 @@ public class NSGAII {
     }
 
     private void initializePopulation(ImageMat loadImg) {
+
+        Chromosome.img = loadImg;
         //List<Chromosome> populationInProgress = Collections.synchronizedList(new ArrayList<>(this.populationNumber * 2));
         List<Chromosome> populationInProgress = new ArrayList<>(this.populationNumber * 2);
 
@@ -122,7 +124,7 @@ public class NSGAII {
         //Not following the psudo-code correctly here, as I doubt it really matters. Easier to do it this day
         //createNewPopulationBasedOnRank();
         //Following the psudo-code:
-        this.population = createChildren(loadImg, true);
+        this.population = createChildren(true);
 
         int generation = 1;
 
@@ -130,7 +132,7 @@ public class NSGAII {
             //Print status
             printStatus(generation);
             //Create offsprings
-            List<Chromosome> children = createChildren(loadImg, false);
+            List<Chromosome> children = createChildren(false);
             population.addAll(children);
             rankPopulation();
             createNewPopulationBasedOnRank();
@@ -140,7 +142,7 @@ public class NSGAII {
         }
     }
 
-    private List<Chromosome> createChildren(ImageMat loadImg, boolean generationZero) {
+    private List<Chromosome> createChildren(boolean generationZero) {
         int multiplier = (generationZero) ? 2 : 1;
         //List<Chromosome> children = Collections.synchronizedList(new ArrayList<>(this.childPopulationNumber));
         List<Chromosome> children = new ArrayList<>(this.childPopulationNumber);
@@ -151,7 +153,7 @@ public class NSGAII {
             //executorService.execute(() -> {
             Chromosome father = selectParent();
             Chromosome mother = selectParent();
-            Chromosome child = new Chromosome(loadImg, father, mother, mutationRate);
+            Chromosome child = new Chromosome(father, mother, mutationRate);
             children.add(child);
             //});
         }
