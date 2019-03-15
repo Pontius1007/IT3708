@@ -16,6 +16,9 @@ public class Chromosome {
     private boolean useConnectivity = true; //1
     private int rank;
 
+    //Used for normal GA
+    private double weightedSum = Integer.MAX_VALUE;
+
     public Chromosome(int numberOfSegments) {
         chromosome = new int[img.getHeight() * img.getWidth()];
         this.numberOfSegments = numberOfSegments;
@@ -26,8 +29,13 @@ public class Chromosome {
     }
 
 
-    public Chromosome(Chromosome c2) {
+    public Chromosome(Chromosome c2, double mutationRate) {
         chromosome = new int[img.getHeight() * img.getWidth()];
+        for (int i = 0; i < chromosome.length; i++) {
+            if (new SplittableRandom().nextInt(0, 100) < mutationRate * 100) {
+                mutateRandomEdge(i);
+            }
+        }
         findSegments();
         this.deviation = overallDeviation();
         this.connectivity = overallConnectivity();
@@ -334,6 +342,11 @@ public class Chromosome {
         return img.getPixels()[rowIndex][colIndex];
     }
 
+    //TODO: Needs optimalization
+    public void setWeightedSum() {
+        this.weightedSum = this.connectivity*8 + this.deviation;
+    }
+
     double getDeviation() {
         return deviation;
     }
@@ -366,8 +379,16 @@ public class Chromosome {
         this.rank = rank;
     }
 
+    public double getWeightedSum() {
+        return weightedSum;
+    }
+
     static Comparator<Chromosome> deviationComparator() {
         return Comparator.comparingDouble(Chromosome::getDeviation);
+    }
+
+    static Comparator<Chromosome> weightedSumComparator() {
+        return Comparator.comparingDouble(Chromosome::getWeightedSum);
     }
 
     static Comparator<Chromosome> connectivityComparator() {
