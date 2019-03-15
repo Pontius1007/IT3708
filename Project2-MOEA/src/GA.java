@@ -6,20 +6,21 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class GA {
     //Settings
-    private int populationSize = 50;
-    private double crossoverRate = 0.6;
-    private double mutationRate = 0.6;
+    private int populationSize = 5;
+    private double crossoverRate = 1;
+    private double mutationRate = 1;
     private int maxGenerationNumber = 100;
-    private int elites = 10;
-    private int tournamentSize = 3;
+    private int elites = 2;
+    private int tournamentSize = 2;
     private int generationNumber = 0;
-    private int startingSegments = 20;
+    private int startingSegments = 3;
 
     private List<Chromosome> population = new ArrayList<>(this.populationSize);
 
     private void createInitialPopulation(ImageMat loadImg) {
         Chromosome.img = loadImg;
         for (int i = 0; i < this.populationSize; i++) {
+            System.out.println("Created individual numbered: " + i);
             Chromosome populationMember = new Chromosome(this.startingSegments);
             //TODO: mergeSmallerThanKSegments();
             populationMember.setWeightedSum();
@@ -101,7 +102,7 @@ public class GA {
 
     public static void main(String[] args) {
         GA run = new GA();
-        run.geneticAlgorithm("0");
+        run.geneticAlgorithm("2");
     }
 
 
