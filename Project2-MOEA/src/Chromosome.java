@@ -65,6 +65,7 @@ public class Chromosome {
         HashSet<Integer> visited = new HashSet<>(img.getWidth() * img.getWidth());
         // Edges sorted after color distance in priorityQueue
         PriorityQueue<Edge> priorityQueue = new PriorityQueue<>();
+        PriorityQueue<Edge> edgesQueue = new PriorityQueue<>(Collections.reverseOrder());
         List<Edge> worstEdges = new ArrayList<>();
         // Random starting point for the prims algorithm
         int current = new SplittableRandom().nextInt(0, chromosome.length - 1);
@@ -76,17 +77,23 @@ public class Chromosome {
             }
             Edge edge = priorityQueue.poll();
             // add the best scoring edge to the MST if the "to node" is not visited.
+
             if (!visited.contains(edge.getTo())) {
                 chromosome[edge.getTo()] = edge.getFrom();
+                edgesQueue.add(edge);
                 // adds the n worst edges, to remove them and make segments.
-                if (worstEdges.size() == 0 || edge.getDistance() > worstEdges.get(0).getDistance()) {
-                    this.addToWorst(edge, worstEdges);
-                }
             }
             current = edge.getTo();
         }
 
+        for(int i = 0; i < this.numberOfSegments; i++) {
+            worstEdges.add(edgesQueue.poll());
+        }
+
+        System.out.println("Number of edges to be deleted: " + worstEdges.size());
         for (Edge e : worstEdges) {
+            System.out.println(e);
+            System.out.println(e.getDistance());
             this.chromosome[e.getFrom()] = e.getFrom();
         }
     }
@@ -379,9 +386,9 @@ public class Chromosome {
     }
 
     public static void main(String[] args) {
-        ImageMat loadImg = new ImageMat("2");
+        ImageMat loadImg = new ImageMat("0");
         Chromosome.img = loadImg;
-        Chromosome test = new Chromosome(3);
+        Chromosome test = new Chromosome(9);
         List<Integer> segment0 = test.getSegmentMatrix().get(0);
         for (List<Integer> segment : test.getSegmentMatrix()) {
             System.out.println(segment.size());
