@@ -48,7 +48,7 @@ public class ImageMat {
 
     public void saveAsGreen(String path, Chromosome optimalSolution) {
         try {
-            File output = new File(path);
+            File output = new File(path + "Green");
             BufferedImage image = new BufferedImage(this.width, this.height, BufferedImage.TYPE_INT_RGB);
             for (int i = 0; i < this.height; i++) {
                 for (int j = 0; j < this.width; j++) {
@@ -71,7 +71,7 @@ public class ImageMat {
 
     public void saveAsBlackAndWhite(String path, Chromosome optimalSolution) {
         try {
-            File output = new File(path);
+            File output = new File(path + "Black");
             BufferedImage image = new BufferedImage(this.width, this.height, BufferedImage.TYPE_INT_RGB);
             for (int i = 0; i < this.height; i++) {
                 for (int j = 0; j < this.width; j++) {
