@@ -78,7 +78,7 @@ public class ImageMat {
                         Color green = Color.black;
                         image.setRGB(j, i, green.getRGB());
                     } else {
-                        Color notEdge = Color.black;
+                        Color notEdge = Color.WHITE;
                         image.setRGB(j, i, notEdge.getRGB());
                     }
 
