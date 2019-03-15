@@ -48,6 +48,31 @@ public class ImageMat {
         }
     }
 
+    public void saveAsGreen(String path, Chromosome optimalSolution) {
+        try {
+            File output = new File(path);
+            BufferedImage image = new BufferedImage(this.width, this.height, BufferedImage.TYPE_INT_RGB);
+            for(int i=0; i < this.height; i++) {
+                for(int j = 0; j < this.width; j++) {
+                    /*if (optimalSolution.isEdge(i*this.width + j)) {
+                        System.out.println("Edge");
+                        Color green = Color.green;
+                        image.setRGB(j, i, green.getRGB());
+                    }
+                    else {
+                        Color originalColor = this.pixels[i][j].color;
+                        image.setRGB(j, i, originalColor.getRGB());
+                    }*/
+
+                }
+            }
+            ImageIO.write(image, "jpg", output);
+        }
+        catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+
     public int getWidth() {
         return width;
     }

@@ -26,7 +26,7 @@ public class Chromosome {
     }
 
 
-    public Chromosome(Chromosome c2){
+    public Chromosome(Chromosome c2) {
         chromosome = new int[img.getHeight() * img.getWidth()];
         findSegments();
         this.deviation = overallDeviation();
@@ -39,11 +39,10 @@ public class Chromosome {
         chromosome = new int[img.getHeight() * img.getWidth()];
         this.segementDivision = new int[img.getHeight() * img.getWidth()];
         //integer for index to take genes from mother instead of father.
-        for(int i = 0; i < chromosome.length; i++){
-            if(new SplittableRandom().nextInt(0, 2) == 0){
+        for (int i = 0; i < chromosome.length; i++) {
+            if (new SplittableRandom().nextInt(0, 2) == 0) {
                 chromosome[i] = father.chromosome[i];
-            }
-            else{
+            } else {
                 chromosome[i] = mother.chromosome[i];
             }
         }
@@ -92,12 +91,12 @@ public class Chromosome {
         }
     }
 
-    private List<List<Integer>> getSegmentMatrix(){
+    private List<List<Integer>> getSegmentMatrix() {
         List<List<Integer>> segmentMat = new ArrayList<>();
-        for(int i = 0; i <= numberOfSegments; i++){
+        for (int i = 0; i <= numberOfSegments; i++) {
             segmentMat.add(new ArrayList<>());
         }
-        for(int i = 0; i < segementDivision.length; i++){
+        for (int i = 0; i < segementDivision.length; i++) {
             segmentMat.get(segementDivision[i]).add(i);
         }
         return segmentMat;
@@ -106,34 +105,33 @@ public class Chromosome {
     private void findSegments() {
         //roots is all pixels representing one segment. (pointing to itself)
         segementDivision = new int[chromosome.length];
-        int currentSegmentID = 0;;
+        int currentSegmentID = 0;
         List<Integer> currentSegment;
-        for(int i = 0; i < chromosome.length; i++){
+        for (int i = 0; i < chromosome.length; i++) {
 
-            if(segementDivision[i] != -1) continue;
+            if (segementDivision[i] != -1) continue;
             currentSegment = new ArrayList<>();
             currentSegment.add(i);
             segementDivision[i] = currentSegmentID;
             int nextPixel = chromosome[i];
-            while(segementDivision[nextPixel] == -1){
+            while (segementDivision[nextPixel] == -1) {
                 currentSegment.add(nextPixel);
                 segementDivision[nextPixel] = currentSegmentID;
                 nextPixel = segementDivision[nextPixel];
             }
-            if(segementDivision[i] != segementDivision[nextPixel]){
+            if (segementDivision[i] != segementDivision[nextPixel]) {
                 int setSegment = segementDivision[nextPixel];
-                for(int pixelidx: currentSegment){
+                for (int pixelidx : currentSegment) {
                     segementDivision[pixelidx] = setSegment;
                 }
-            }
-            else{
+            } else {
                 currentSegmentID++;
             }
 
         }
         numberOfSegments = 0;
-        for(int segid: segementDivision){
-            if(segid > numberOfSegments){
+        for (int segid : segementDivision) {
+            if (segid > numberOfSegments) {
                 numberOfSegments = segid;
             }
         }
@@ -216,6 +214,15 @@ public class Chromosome {
             neighbours.add(imageMat[currentPixel.getRowIdx() + 1][currentPixel.getColIdx()].getPixelIdx());
         }
         return neighbours;
+    }
+
+    public boolean isEdge(int pixelIndex) {
+        for (int neighbourIndex : getNeighbours(pixelIndex)) {
+            if (segementDivision[pixelIndex] != segementDivision[neighbourIndex]) {
+                return true;
+            }
+        }
+        return false;
     }
 
     //Evaluates the degree to which neighbouring pixels have been placed in the same segment
@@ -364,7 +371,16 @@ public class Chromosome {
     }
 
     public static void main(String[] args) {
-        List<Chromosome> population;
+        ImageMat loadImg = new ImageMat("2");
+        Chromosome.img = loadImg;
+        Chromosome test = new Chromosome(3);
+        List<Integer> segment0 = test.getSegmentMatrix().get(0);
+        for (int index : segment0) {
+            Pixel p = test.getPixelonIndex(index);
+            Chromosome.img.getPixels()[p.getRowIdx()][p.getColIdx()].color = Color.green;
+
+        }
+        Chromosome.img.saveAs("blablalbal.jpg");
 
     }
 }
