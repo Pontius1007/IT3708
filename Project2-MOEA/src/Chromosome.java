@@ -34,12 +34,13 @@ public class Chromosome {
     public Chromosome(Chromosome father, Chromosome mother){
         chromosome = new int[img.getHeight() * img.getWidth()];
         //integer for index to take genes from mother instead of father.
-        int nsplit = new SplittableRandom().nextInt(0, chromosome.length);
-        for(int i = 0; i < nsplit; i++){
-            chromosome[i] = father.chromosome[i];
-        }
-        for(int i = nsplit; i < chromosome.length; i++){
-            chromosome[i] = mother.chromosome[i];
+        for(int i = 0; i < chromosome.length; i++){
+            if(new SplittableRandom().nextInt(0, 2) == 0){
+                chromosome[i] = father.chromosome[i];
+            }
+            else{
+                chromosome[i] = mother.chromosome[i];
+            }
         }
         findSegments();
     }
