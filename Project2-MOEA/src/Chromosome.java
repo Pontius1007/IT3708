@@ -31,6 +31,9 @@ public class Chromosome {
 
     public Chromosome(Chromosome c2, double mutationRate) {
         chromosome = new int[img.getHeight() * img.getWidth()];
+        for (int x = 0; x < chromosome.length; x++) {
+            chromosome[x] = c2.chromosome[x];
+        }
         for (int i = 0; i < chromosome.length; i++) {
             if (new SplittableRandom().nextInt(0, 100) < mutationRate * 100) {
                 mutateRandomEdge(i);
@@ -60,6 +63,8 @@ public class Chromosome {
             }
         }
         findSegments();
+        this.deviation = overallDeviation();
+        this.connectivity = overallConnectivity();
     }
 
     public void mutateRandomEdge(int pixelIndex) {
@@ -88,21 +93,18 @@ public class Chromosome {
 
             if (!visited.contains(edge.getTo())) {
                 chromosome[edge.getTo()] = edge.getFrom();
-                edgesQueue.add(edge);
+                worstEdges.add(edge);
                 // adds the n worst edges, to remove them and make segments.
             }
             current = edge.getTo();
         }
 
-        for(int i = 0; i < this.numberOfSegments; i++) {
-            worstEdges.add(edgesQueue.poll());
-        }
+        Collections.sort(worstEdges);
+        Collections.reverse(worstEdges);
 
-        System.out.println("Number of edges to be deleted: " + worstEdges.size());
-        for (Edge e : worstEdges) {
-            System.out.println(e);
-            System.out.println(e.getDistance());
-            this.chromosome[e.getFrom()] = e.getFrom();
+        for (int i = 0; i <numberOfSegments-1; i++) {
+            Edge removeEdge = worstEdges.get(i);
+            this.chromosome[removeEdge.getFrom()] = removeEdge.getFrom();
         }
     }
 
@@ -136,7 +138,7 @@ public class Chromosome {
                 //Loops and adds pixel to segment. Updates segmentDivision-list.
                 currentSegment.add(nextPixel);
                 segementDivision[nextPixel] = currentSegmentID;
-                nextPixel = segementDivision[nextPixel];
+                nextPixel = chromosome[nextPixel];
             }
             //If connected to another segment "merges" them together
             if (segementDivision[i] != segementDivision[nextPixel]) {
@@ -150,7 +152,7 @@ public class Chromosome {
             }
 
         }
-        //numberOfSegments = currentSegmentID;
+        numberOfSegments = currentSegmentID;
         /*for (int segid : segementDivision) {
             if (segid > numberOfSegments) {
                 numberOfSegments = segid;
@@ -300,10 +302,8 @@ public class Chromosome {
     private double overallDeviation() {
         double deviation = 0;
         //Change when we have 2d list
-        System.out.println("Number of segments: " + getSegmentMatrix().size());
         for (List<Integer> segment : getSegmentMatrix()) {
             //Find segment center
-            System.out.println(segment.size());
             Color centroidColor = getSegmentCentroid(segment);
             //List<Integer> centerPos = getSegmentCenter(segment);
             //Pixel centerPixel = imageMat[centerPos.get(0)][centerPos.get(1)];
@@ -407,9 +407,9 @@ public class Chromosome {
     }
 
     public static void main(String[] args) {
-        ImageMat loadImg = new ImageMat("0");
+        ImageMat loadImg = new ImageMat("2");
         Chromosome.img = loadImg;
-        Chromosome test = new Chromosome(9);
+        Chromosome test = new Chromosome(3);
         List<Integer> segment0 = test.getSegmentMatrix().get(0);
         for (List<Integer> segment : test.getSegmentMatrix()) {
             System.out.println(segment.size());
