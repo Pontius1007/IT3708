@@ -47,16 +47,19 @@ public class GA {
             if (crossoverRateCheck < this.crossoverRate) {
                 Chromosome child = new Chromosome(father, mother, this.mutationRate);
                 child.setWeightedSum();
+                //TODO: mergeSmallerThanKSegments();
                 children.add(child);
             } else {
                 int randomNum = ThreadLocalRandom.current().nextInt(0, 2);
                 if (randomNum == 1) {
                     Chromosome child = new Chromosome(father, this.mutationRate);
                     child.setWeightedSum();
+                    //TODO: mergeSmallerThanKSegments();
                     children.add(child);
                 } else {
                     Chromosome child = new Chromosome(mother, this.mutationRate);
                     child.setWeightedSum();
+                    //TODO: mergeSmallerThanKSegments();
                     children.add(child);
                 }
             }
