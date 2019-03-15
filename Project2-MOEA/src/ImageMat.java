@@ -20,7 +20,7 @@ public class ImageMat {
             for (int i = 0; i < this.height; i++) {
                 for (int j = 0; j < this.width; j++) {
 
-                    Pixel c = new Pixel(image.getRGB(j, i), i, j, i*this.width+j);
+                    Pixel c = new Pixel(image.getRGB(j, i), i, j, i * this.width + j);
                     pixels[i][j] = c;
                 }
             }
@@ -30,20 +30,18 @@ public class ImageMat {
         }
     }
 
-    public void saveAs(String path){
+    public void saveAs(String path) {
         try {
             File output = new File(path);
             BufferedImage image = new BufferedImage(this.width, this.height, BufferedImage.TYPE_INT_RGB);
-            for(int i=0; i<this.height; i++) {
-                for(int j=0; j<this.width; j++) {
+            for (int i = 0; i < this.height; i++) {
+                for (int j = 0; j < this.width; j++) {
                     Color newColor = this.pixels[i][j].color;
-                    image.setRGB(j,i,newColor.getRGB());
+                    image.setRGB(j, i, newColor.getRGB());
                 }
             }
             ImageIO.write(image, "jpg", output);
-        }
-
-        catch(Exception e) {
+        } catch (Exception e) {
             System.out.println(e);
         }
     }
@@ -52,23 +50,44 @@ public class ImageMat {
         try {
             File output = new File(path);
             BufferedImage image = new BufferedImage(this.width, this.height, BufferedImage.TYPE_INT_RGB);
-            for(int i=0; i < this.height; i++) {
-                for(int j = 0; j < this.width; j++) {
-                    /*if (optimalSolution.isEdge(i*this.width + j)) {
+            for (int i = 0; i < this.height; i++) {
+                for (int j = 0; j < this.width; j++) {
+                    if (optimalSolution.isEdge(i * this.width + j)) {
                         System.out.println("Edge");
                         Color green = Color.green;
                         image.setRGB(j, i, green.getRGB());
-                    }
-                    else {
+                    } else {
                         Color originalColor = this.pixels[i][j].color;
                         image.setRGB(j, i, originalColor.getRGB());
-                    }*/
+                    }
 
                 }
             }
             ImageIO.write(image, "jpg", output);
+        } catch (Exception e) {
+            System.out.println(e);
         }
-        catch (Exception e) {
+    }
+
+    public void saveAsBlackAndWhite(String path, Chromosome optimalSolution) {
+        try {
+            File output = new File(path);
+            BufferedImage image = new BufferedImage(this.width, this.height, BufferedImage.TYPE_INT_RGB);
+            for (int i = 0; i < this.height; i++) {
+                for (int j = 0; j < this.width; j++) {
+                    if (optimalSolution.isEdge(i * this.width + j)) {
+                        System.out.println("Edge");
+                        Color green = Color.black;
+                        image.setRGB(j, i, green.getRGB());
+                    } else {
+                        Color notEdge = Color.black;
+                        image.setRGB(j, i, notEdge.getRGB());
+                    }
+
+                }
+            }
+            ImageIO.write(image, "jpg", output);
+        } catch (Exception e) {
             System.out.println(e);
         }
     }
