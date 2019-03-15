@@ -139,6 +139,55 @@ public class Chromosome {
         }
     }
 
+    public void mergeAllSmallerThanN(int n){
+        int[] segmentcount = new int[numberOfSegments];
+        for(int segId: segementDivision){
+            segmentcount[segId]++;
+        }
+
+        List<Integer> toMerge = new ArrayList<>();
+        for(int i = 0; i < segmentcount.length; i++){
+            if(segmentcount[i] < n){
+                toMerge.add(i);
+            }
+        }
+        if(toMerge.size() == 0) {
+            findSegments();
+            return;
+        }
+        for(int segId: toMerge){
+            Edge bestEdge = findBestEdgeFromSegment(segId);
+            chromosome[bestEdge.getFrom()] = bestEdge.getTo();
+        }
+        mergeAllSmallerThanN(n);
+    }
+
+    public Edge findBestEdgeFromSegment(int segIdx){
+        List<Integer> seg = getSegmentMatrix().get(segIdx);
+        double bestDist = Double.MAX_VALUE;
+        Edge bestEdge = new Edge(getPixelonIndex(0), getPixelonIndex(0));
+        for(int pixelIdx: seg){
+            for(int neighbourIdx: getNeighbours(pixelIdx)){
+                if(segementDivision[pixelIdx] != segementDivision[neighbourIdx]){
+                    Edge currentEdge = new Edge(getPixelonIndex(pixelIdx), getPixelonIndex(neighbourIdx));
+                    if(currentEdge.getDistance() < bestDist){
+                        bestDist = currentEdge.getDistance();
+                        bestEdge = currentEdge;
+                    }
+                }
+            }
+        }
+        return bestEdge;
+    }
+
+    public void mergeNsmallestSegments(int n){
+        int[] segmentcount = new int[numberOfSegments];
+        for(int segId: segementDivision){
+            segmentcount[segId]++;
+        }
+
+    }
+
     private void addToWorst(Edge e, List<Edge> worstEdges) {
         //replace the best edge in worstedges if needed
         worstEdges.add(e);
