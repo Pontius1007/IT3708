@@ -5,8 +5,8 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class NSGAII {
     //Real number is 2x
-    private int populationNumber = 50;
-    private int childPopulationNumber = 50;
+    private int populationNumber = 5;
+    private int childPopulationNumber = 5;
     private double mutationRate = 0.05;
     private List<Chromosome> population = new ArrayList<>();
     private ArrayList<ArrayList<Chromosome>> rankedPopulation = new ArrayList<>();
@@ -38,12 +38,10 @@ public class NSGAII {
                 }
                 //If p dominates a member of P', delete it
                 if (individual.getConnectivity() < non_dominated.getConnectivity() && individual.getDeviation() < non_dominated.getDeviation()) {
-                    System.out.println("If p dominates a member of P', delete it");
                     isDominated.add(non_dominated);
 
                     //if p is dominated by other members of P', do not include p in P'
                 } else if (individual.getConnectivity() > non_dominated.getConnectivity() && individual.getDeviation() > non_dominated.getDeviation()) {
-                    System.out.println("if p is dominated by other members of P', do not include p in P'");
                     isDominated.add(individual);
                 }
             }
@@ -88,6 +86,7 @@ public class NSGAII {
 
         for (int i = 0; i < this.populationNumber * 2; i++) {
             //executorService.execute(() -> {
+            System.out.println("Created individual numbered: " + i);
             Chromosome temp = new Chromosome(ThreadLocalRandom.current().nextInt(20, 100));
             //TODO: Legg til kall her for å legge til segmenter mindre enn k kanskje?
             populationInProgress.add(temp);
@@ -113,32 +112,6 @@ public class NSGAII {
         }
         for (List<Chromosome> list : rankedPopulation) {
             population.addAll(list);
-        }
-    }
-
-    private void runMainLoop(String imageFile) {
-        ImageMat loadImg = new ImageMat(imageFile);
-        initializePopulation(loadImg);
-        rankPopulation();
-        //Creates new population of size N based on initial population in generation 0
-        //Not following the psudo-code correctly here, as I doubt it really matters. Easier to do it this day
-        //createNewPopulationBasedOnRank();
-        //Following the psudo-code:
-        this.population = createChildren(true);
-
-        int generation = 1;
-
-        while (true) {
-            //Print status
-            printStatus(generation);
-            //Create offsprings
-            List<Chromosome> children = createChildren(false);
-            population.addAll(children);
-            rankPopulation();
-            createNewPopulationBasedOnRank();
-            //Should be use selection, crossover and mutation to create a new population of size N here?
-            generation++;
-
         }
     }
 
@@ -198,6 +171,35 @@ public class NSGAII {
     private void printStatus(int generation) {
         System.out.println("This is generation: " + generation);
         System.out.println("Size of population " + this.population.size());
+    }
+
+    private void runMainLoop(String imageFile) {
+        ImageMat loadImg = new ImageMat(imageFile);
+        initializePopulation(loadImg);
+        rankPopulation();
+        //Creates new population of size N based on initial population in generation 0
+        //Not following the psudo-code correctly here, as I doubt it really matters. Easier to do it this day
+        //createNewPopulationBasedOnRank();
+        //Following the psudo-code:
+        this.population = createChildren(true);
+
+        int generation = 1;
+
+        while (generation < 10) {
+            //Print status
+            printStatus(generation);
+            //Create offsprings
+            List<Chromosome> children = createChildren(false);
+            population.addAll(children);
+            rankPopulation();
+            createNewPopulationBasedOnRank();
+            //Should be use selection, crossover and mutation to create a new population of size N here?
+            generation++;
+
+        }
+        Chromosome randomFinished = rankedPopulation.get(0).get(0);
+        loadImg.saveAsGreen("firsttest", randomFinished);
+        loadImg.saveAsBlackAndWhite("testimage", randomFinished);
     }
 
     public static void main(String[] args) {
