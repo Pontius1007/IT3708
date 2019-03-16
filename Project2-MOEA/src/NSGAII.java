@@ -5,13 +5,15 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class NSGAII {
     //Real number is 2x
-    private int populationNumber = 5;
-    private int childPopulationNumber = 5;
-    private double mutationRate = 0.05;
+    private int populationNumber = 10;
+    private int childPopulationNumber = 10;
+    private double mutationRate = 0.1;
+    private int maxGenerationNumber = 300;
+    private int minSegmentSize = 3500;
+    private int runMinSegmentSize = 50;
     private List<Chromosome> population = new ArrayList<>();
     private ArrayList<ArrayList<Chromosome>> rankedPopulation = new ArrayList<>();
 
-    private int size;
 
     //TODO: Check for bugs. Has not been tested with solutions dominating each other
     private ArrayList<Chromosome> fastNondominatedSort(List<Chromosome> population) {
@@ -87,8 +89,8 @@ public class NSGAII {
         for (int i = 0; i < this.populationNumber * 2; i++) {
             //executorService.execute(() -> {
             System.out.println("Created individual numbered: " + i);
-            Chromosome temp = new Chromosome(ThreadLocalRandom.current().nextInt(20, 100));
-            //TODO: Legg til kall her for å legge til segmenter mindre enn k kanskje?
+            Chromosome temp = new Chromosome(ThreadLocalRandom.current().nextInt(10, 1000));
+            temp.mergeAllSmallerThanN(this.runMinSegmentSize);
             populationInProgress.add(temp);
             //});
         }
@@ -127,6 +129,7 @@ public class NSGAII {
             Chromosome father = selectParent();
             Chromosome mother = selectParent();
             Chromosome child = new Chromosome(father, mother, mutationRate);
+            child.mergeAllSmallerThanN(this.runMinSegmentSize);
             children.add(child);
             //});
         }
@@ -169,6 +172,7 @@ public class NSGAII {
     }
 
     private void printStatus(int generation) {
+        System.out.println("---------------------");
         System.out.println("This is generation: " + generation);
         System.out.println("Size of population " + this.population.size());
     }
@@ -185,21 +189,28 @@ public class NSGAII {
 
         int generation = 1;
 
-        while (generation < 10) {
+        while (generation < this.maxGenerationNumber) {
             //Print status
             printStatus(generation);
             //Create offsprings
             List<Chromosome> children = createChildren(false);
             population.addAll(children);
             rankPopulation();
+            System.out.println("Creating new population");
             createNewPopulationBasedOnRank();
             //Should be use selection, crossover and mutation to create a new population of size N here?
             generation++;
 
         }
-        Chromosome randomFinished = rankedPopulation.get(0).get(0);
-        loadImg.saveAsGreen("firsttest", randomFinished);
-        loadImg.saveAsBlackAndWhite("testimage", randomFinished);
+
+        int number = 0;
+        System.out.println("Number of members in rank 1: " + rankedPopulation.get(0).size());
+        for (Chromosome contestant : rankedPopulation.get(0)) {
+            System.out.println("Merging for member: " + number);
+            contestant.mergeAllSmallerThanN(this.minSegmentSize);
+            loadImg.saveAsBlackAndWhite("testimage" + number, contestant);
+            number ++;
+        }
     }
 
     public static void main(String[] args) {
