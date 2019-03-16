@@ -5,12 +5,12 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class NSGAII {
     //Real number is 2x
-    private int populationNumber = 10;
-    private int childPopulationNumber = 10;
-    private double mutationRate = 0.1;
-    private int maxGenerationNumber = 300;
-    private int minSegmentSize = 3500;
-    private int runMinSegmentSize = 50;
+    private int populationNumber = 20;
+    private int childPopulationNumber = 20;
+    private double mutationRate = 0.05;
+    private int maxGenerationNumber = 150;
+    private int minSegmentSize = 1500;
+    private int runMinSegmentSize = 30;
     private List<Chromosome> population = new ArrayList<>();
     private ArrayList<ArrayList<Chromosome>> rankedPopulation = new ArrayList<>();
 
@@ -20,8 +20,6 @@ public class NSGAII {
         Set<Chromosome> non_dominated_set = new HashSet<>();
         //Include first member in P'
         non_dominated_set.add(population.get(0));
-
-
         List<Chromosome> isDominated = new ArrayList<>();
 
         for (Chromosome individual : population) {
@@ -41,7 +39,6 @@ public class NSGAII {
                 //If p dominates a member of P', delete it
                 if (individual.getConnectivity() < non_dominated.getConnectivity() && individual.getDeviation() < non_dominated.getDeviation()) {
                     isDominated.add(non_dominated);
-
                     //if p is dominated by other members of P', do not include p in P'
                 } else if (individual.getConnectivity() > non_dominated.getConnectivity() && individual.getDeviation() > non_dominated.getDeviation()) {
                     isDominated.add(individual);
@@ -49,7 +46,7 @@ public class NSGAII {
             }
         }
 
-        population.removeAll(isDominated);
+        non_dominated_set.removeAll(isDominated);
 
         return new ArrayList<>(non_dominated_set);
     }
@@ -89,8 +86,8 @@ public class NSGAII {
         for (int i = 0; i < this.populationNumber * 2; i++) {
             //executorService.execute(() -> {
             System.out.println("Created individual numbered: " + i);
-            Chromosome temp = new Chromosome(ThreadLocalRandom.current().nextInt(10, 1000));
-            temp.mergeAllSmallerThanN(this.runMinSegmentSize, 0);
+            Chromosome temp = new Chromosome(ThreadLocalRandom.current().nextInt(2000, 20000));
+            //temp.mergeAllSmallerThanN(this.runMinSegmentSize, 0);
             populationInProgress.add(temp);
             //});
         }
@@ -129,7 +126,7 @@ public class NSGAII {
             Chromosome father = selectParent();
             Chromosome mother = selectParent();
             Chromosome child = new Chromosome(father, mother, mutationRate);
-            child.mergeAllSmallerThanN(this.runMinSegmentSize, 0);
+            //child.mergeAllSmallerThanN(this.runMinSegmentSize, 0);
             children.add(child);
             //});
         }
@@ -175,6 +172,8 @@ public class NSGAII {
         System.out.println("---------------------");
         System.out.println("This is generation: " + generation);
         System.out.println("Size of population " + this.population.size());
+        System.out.println("The number of pareto fronts are: " + this.rankedPopulation.size());
+        System.out.println("The number of members in the best front is: " + this.rankedPopulation.get(0).size());
     }
 
     private void runMainLoop(String imageFile) {
@@ -183,9 +182,9 @@ public class NSGAII {
         rankPopulation();
         //Creates new population of size N based on initial population in generation 0
         //Not following the psudo-code correctly here, as I doubt it really matters. Easier to do it this day
-        //createNewPopulationBasedOnRank();
+        createNewPopulationBasedOnRank();
         //Following the psudo-code:
-        this.population = createChildren(true);
+        //this.population = createChildren(true);
 
         int generation = 1;
 
@@ -203,18 +202,41 @@ public class NSGAII {
 
         }
 
-        int number = 0;
         System.out.println("Number of members in rank 1: " + rankedPopulation.get(0).size());
-        for (Chromosome contestant : rankedPopulation.get(0)) {
-            System.out.println("Merging for member: " + number);
-            contestant.mergeAllSmallerThanN(this.minSegmentSize, 0);
-            loadImg.saveAsBlackAndWhite("testimage" + number, contestant);
-            number ++;
+        System.out.println("Number of pareto fronts: " + rankedPopulation.size());
+        final ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
+        for (int i = 0; i < rankedPopulation.get(0).size(); i++) {
+            final int index = i;
+            System.out.println("Merging for member: " + index);
+
+            Chromosome contestant = rankedPopulation.get(0).get(index);
+            executorService.execute(() -> {
+                contestant.mergeAllSmallerThanN(this.minSegmentSize, 0);
+                loadImg.saveAsBlackAndWhite("testimage" + index, contestant);
+                System.out.println("Finished writing number: " + index);
+            });
         }
+        executorService.shutdown();
+        while (!executorService.isTerminated()) ;
+
+
+
+
+        /*for (Chromosome contestant : rankedPopulation.get(0)) {
+            System.out.println("Merging for member: " + number);
+            executorService.execute(() -> {
+                contestant.mergeAllSmallerThanN(this.minSegmentSize, 0);
+            });
+            executorService.shutdown();
+            while (!executorService.isTerminated()) ;
+            loadImg.saveAsBlackAndWhite("testimage" + number, contestant);
+            number++;
+        }*/
     }
 
     public static void main(String[] args) {
         NSGAII run = new NSGAII();
-        run.runMainLoop("86016");
+        run.runMainLoop("216066");
     }
 }
