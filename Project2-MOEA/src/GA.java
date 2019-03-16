@@ -15,6 +15,7 @@ public class GA {
     private int generationNumber = 0;
     private int startingSegments = 500;
     private int mergeSmallerThan = 5;
+    private int startingSegments = 3;
 
     private List<Chromosome> population = new ArrayList<>(this.populationSize);
 
@@ -24,6 +25,7 @@ public class GA {
             System.out.println("Created individual numbered: " + i);
             Chromosome populationMember = new Chromosome(this.startingSegments);
             populationMember.mergeAllSmallerThanN(mergeSmallerThan);
+            //TODO: mergeSmallerThanKSegments();
             populationMember.setWeightedSum();
             this.population.add(populationMember);
         }
@@ -105,5 +107,4 @@ public class GA {
         GA run = new GA();
         run.geneticAlgorithm("2");
     }
-
 }

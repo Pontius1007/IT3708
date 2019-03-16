@@ -205,7 +205,6 @@ public class Chromosome {
         for(int segId: segementDivision){
             segmentcount[segId]++;
         }
-
     }
 
     private void addToWorst(Edge e, List<Edge> worstEdges) {
