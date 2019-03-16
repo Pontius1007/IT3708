@@ -2,6 +2,7 @@
 *.class
 out/
 Segmentation_Evaluation/
+Segmentation Evaluation/
 
 # Log file
 *.log
