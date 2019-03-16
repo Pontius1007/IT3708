@@ -15,7 +15,6 @@ public class GA {
     private int generationNumber = 0;
     private int startingSegments = 500;
     private int mergeSmallerThan = 5;
-    private int startingSegments = 3;
 
     private List<Chromosome> population = new ArrayList<>(this.populationSize);
 

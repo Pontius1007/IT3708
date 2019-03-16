@@ -172,7 +172,6 @@ public class Chromosome {
                 toMerge.add(i);
             }
         }
-        System.out.println(toMerge.size());
         if(toMerge.size() == 0) return;
         for(int segId: toMerge){
             Edge bestEdge = findBestEdgeFromSegment(segId);
