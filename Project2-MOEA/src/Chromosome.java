@@ -42,24 +42,6 @@ public class Chromosome {
         this.connectivity = overallConnectivity();
     }
 
-    public void mutate(double mutationRate){
-        if(new SplittableRandom().nextInt(0, 100) < 20) {
-            mutateMergeTwoRandomSegments();
-        }
-        else{
-            for(int pixelId: this.chromosome){
-                if(new SplittableRandom().nextInt(0, 100) < mutationRate*100){
-                    if(new SplittableRandom().nextInt(0, 100) < 50){
-                        mutateRandomEdge(pixelId);
-                    }
-                    else{
-                        mutateBestEdge(pixelId);
-                    }
-                }
-            }
-        }
-    }
-
 
     // crossover constructor
     public Chromosome(Chromosome father, Chromosome mother, double mutationRate) {
@@ -77,6 +59,24 @@ public class Chromosome {
         findSegments();
         this.deviation = overallDeviation();
         this.connectivity = overallConnectivity();
+    }
+
+    public void mutate(double mutationRate){
+        if(new SplittableRandom().nextInt(0, 100) < 50) {
+            mutateMergeTwoRandomSegments();
+        }
+        else{
+            for(int pixelId: this.chromosome){
+                if(new SplittableRandom().nextInt(0, 100) < mutationRate*100){
+                    if(new SplittableRandom().nextInt(0, 100) < 50){
+                        mutateRandomEdge(pixelId);
+                    }
+                    else{
+                        mutateBestEdge(pixelId);
+                    }
+                }
+            }
+        }
     }
 
     public void mutateRandomEdge(int pixelIndex) {
@@ -111,8 +111,10 @@ public class Chromosome {
                 }
             }
         }
-        Edge toConnect = connectingEdges.get(new SplittableRandom().nextInt(0, connectingEdges.size()));
-        chromosome[toConnect.getFrom()] = toConnect.getTo();
+        if (connectingEdges.size() > 0) {
+            Edge toConnect = connectingEdges.get(new SplittableRandom().nextInt(0, connectingEdges.size()));
+            chromosome[toConnect.getFrom()] = toConnect.getTo();
+        }
     }
 
     private void initPrimMST(ImageMat img) {

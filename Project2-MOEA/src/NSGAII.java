@@ -1,3 +1,4 @@
+import java.io.File;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -5,11 +6,11 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class NSGAII {
     //Real number is 2x
-    private int populationNumber = 20;
-    private int childPopulationNumber = 20;
+    private int populationNumber = 25;
+    private int childPopulationNumber = 25;
     private double mutationRate = 0.05;
     private int maxGenerationNumber = 200;
-    private int minSegmentSize = 2000;
+    private int minSegmentSize = 400;
     private int runMinSegmentSize = 30;
     private List<Chromosome> population = new ArrayList<>();
     private ArrayList<ArrayList<Chromosome>> rankedPopulation = new ArrayList<>();
@@ -87,8 +88,8 @@ public class NSGAII {
             final int index = i;
             executorService.execute(() -> {
                 System.out.println("Created individual numbered: " + index);
-                Chromosome temp = new Chromosome(ThreadLocalRandom.current().nextInt(10, 100));
-                temp.mergeAllSmallerThanN(this.runMinSegmentSize, 0);
+                Chromosome temp = new Chromosome(ThreadLocalRandom.current().nextInt(100, 1000));
+                //temp.mergeAllSmallerThanN(this.runMinSegmentSize, 0);
                 populationInProgress.add(temp);
             });
         }
@@ -125,7 +126,6 @@ public class NSGAII {
         for (int i = 0; i < this.childPopulationNumber * multiplier; i++) {
             final int index = i;
             executorService.execute(() -> {
-                System.out.println("Creating children number: " + index);
                 Chromosome father = selectParent();
                 Chromosome mother = selectParent();
                 Chromosome child = new Chromosome(father, mother, mutationRate);
@@ -209,6 +209,10 @@ public class NSGAII {
         System.out.println("Number of pareto fronts: " + rankedPopulation.size());
         final ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
+        for(File file: Objects.requireNonNull(new File("Segmentation_Evaluation/Student_Segmentation_Files/").listFiles()))
+            if (!file.isDirectory())
+                file.delete();
+
         for (int i = 0; i < rankedPopulation.get(0).size(); i++) {
             final int index = i;
             System.out.println("Merging for member: " + index);
@@ -216,7 +220,7 @@ public class NSGAII {
             Chromosome contestant = rankedPopulation.get(0).get(index);
             executorService.execute(() -> {
                 contestant.mergeAllSmallerThanN(this.minSegmentSize, 0);
-                loadImg.saveAsBlackAndWhite("testimage" + index, contestant);
+                loadImg.saveAsBlackAndWhite("Segmentation_Evaluation/Student_Segmentation_Files/testimage" + index, contestant);
                 System.out.println("Finished writing number: " + index);
             });
         }
