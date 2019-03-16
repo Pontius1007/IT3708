@@ -62,8 +62,11 @@ public class Chromosome {
     }
 
     public void mutate(double mutationRate){
-        if(new SplittableRandom().nextInt(0, 100) < 50) {
-            mutateMergeTwoRandomSegments();
+        if(new SplittableRandom().nextInt(0, 100) < 10) {
+            //mutateMergeTwoRandomSegments();
+        }
+        else if(new SplittableRandom().nextInt(0, 100) < 60){
+            mutateMergeTwoClosestSegments();
         }
         else{
             for(int pixelId: this.chromosome){
@@ -116,6 +119,47 @@ public class Chromosome {
             chromosome[toConnect.getFrom()] = toConnect.getTo();
         }
     }
+
+    public void mutateMergeTwoClosestSegments(){
+        List<Edge> connectingEdges = new ArrayList<>();
+        for(int pixel = 0; pixel < chromosome.length; pixel++){
+            for(int neighB: getNeighbours(pixel)){
+                if(segementDivision[pixel] != segementDivision[neighB]){
+                    connectingEdges.add(new Edge(pixel, neighB));
+                }
+            }
+        }
+
+        if (connectingEdges.size() > 0) {
+            Color[] centroids = new Color[this.numberOfSegments];
+            List<List<Integer>> segments = getSegmentMatrix();
+            for(int i = 0; i < numberOfSegments; i++){
+                centroids[i] = getSegmentCentroid(segments.get(i));
+            }
+
+            Edge bestEdge = connectingEdges.get(0);
+            double bestDist = colordist(centroids[connectingEdges.get(0).getFrom()], centroids[connectingEdges.get(0).getTo()]);
+            for(int i = 1; i < connectingEdges.size(); i++){
+                Edge currentEdge = connectingEdges.get(i);
+                double currentDist = colordist(centroids[currentEdge.getFrom()], centroids[currentEdge.getTo()]);
+                if(currentDist < bestDist){
+                    bestDist = currentDist;
+                    bestEdge = currentEdge;
+                }
+            }
+
+            chromosome[bestEdge.getFrom()] = bestEdge.getTo();
+        }
+    }
+
+    public double colordist(Color FromPixel, Color toPixel) {
+        double deltaRed = FromPixel.getRed() - toPixel.getRed();
+        double deltaGreen = FromPixel.getGreen() - toPixel.getGreen();
+        double deltaBlue = FromPixel.getBlue() - toPixel.getBlue();
+        return Math.sqrt((Math.pow(deltaRed, 2)) + (Math.pow(deltaGreen, 2)) + (Math.pow(deltaBlue, 2)));
+    }
+
+
 
     private void initPrimMST(ImageMat img) {
         for (int i = 0; i < chromosome.length; i++) chromosome[i] = i;
@@ -503,7 +547,7 @@ public class Chromosome {
     }
 
     public static void main(String[] args) {
-        ImageMat loadImg = new ImageMat("216066");
+        ImageMat loadImg = new ImageMat("860168");
         Chromosome.img = loadImg;
         Chromosome test = new Chromosome(50000);
         test.mergeAllSmallerThanN(3000, 0);

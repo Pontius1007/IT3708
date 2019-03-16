@@ -8,7 +8,7 @@ public class NSGAII {
     //Real number is 2x
     private int populationNumber = 25;
     private int childPopulationNumber = 25;
-    private double mutationRate = 0.05;
+    private double mutationRate = 0.005;
     private int maxGenerationNumber = 200;
     private int minSegmentSize = 400;
     private int runMinSegmentSize = 30;
