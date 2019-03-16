@@ -214,7 +214,7 @@ public class Chromosome {
                 toMerge.add(i);
             }
         }
-        System.out.println(toMerge.size());
+        //System.out.println(toMerge.size());
         if(lastMergeSize == toMerge.size()) counter++;
         if(toMerge.size() == 0 || counter > 20) return;
         for(int segId: toMerge){
@@ -501,14 +501,11 @@ public class Chromosome {
     }
 
     public static void main(String[] args) {
-        ImageMat loadImg = new ImageMat("160068");
+        ImageMat loadImg = new ImageMat("216066");
         Chromosome.img = loadImg;
         Chromosome test = new Chromosome(50000);
-        test.mergeAllSmallerThanN(1000, 0);
-
-        for(List<Integer> seg: test.getSegmentMatrix()){
-            System.out.println(seg.size());
-        }
+        test.mergeAllSmallerThanN(3000, 0);
+        loadImg.saveAsBlackAndWhite("testimage", test);
 
         Chromosome.img.saveAsGreen("blablalbal", test);
         Chromosome.img.saveAsBlackAndWhite("bnw", test);
