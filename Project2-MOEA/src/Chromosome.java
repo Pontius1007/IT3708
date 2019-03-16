@@ -160,12 +160,14 @@ public class Chromosome {
         }*/
     }
 
+
     public void mergeAllSmallerThanN(int n){
         int[] segmentcount = new int[numberOfSegments];
+        //counting size if each segment
         for(int segId: segementDivision){
             segmentcount[segId]++;
         }
-
+        //Storing semgent indexes that is too small
         List<Integer> toMerge = new ArrayList<>();
         for(int i = 0; i < segmentcount.length; i++){
             if(segmentcount[i] < n){
@@ -173,11 +175,14 @@ public class Chromosome {
             }
         }
         System.out.println(toMerge.size());
+        //returns from the recursive calls if there are no more to merge
         if(toMerge.size() == 0) return;
         for(int segId: toMerge){
             Edge bestEdge = findBestEdgeFromSegment(segId);
+            //connects segment to best neighbour segment
             chromosome[bestEdge.getFrom()] = bestEdge.getTo();
         }
+        //updates segmentation and recursivly finds new segments that are too small
         findSegments();
         mergeAllSmallerThanN(n);
     }
@@ -458,9 +463,9 @@ public class Chromosome {
     }
 
     public static void main(String[] args) {
-        ImageMat loadImg = new ImageMat("160068");
+        ImageMat loadImg = new ImageMat("176035");
         Chromosome.img = loadImg;
-        Chromosome test = new Chromosome(50000);
+        Chromosome test = new Chromosome(10000);
         test.mergeAllSmallerThanN(500);
 
         for(List<Integer> seg: test.getSegmentMatrix()){
@@ -468,6 +473,7 @@ public class Chromosome {
         }
 
         Chromosome.img.saveAsGreen("blablalbal", test);
+        Chromosome.img.saveAsBlackAndWhite("bnw", test);
 
     }
 }
