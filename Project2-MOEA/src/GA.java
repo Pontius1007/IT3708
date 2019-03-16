@@ -9,7 +9,7 @@ public class GA {
     private int populationSize = 5;
     private double crossoverRate = 1;
     private double mutationRate = 0.01;
-    private int maxGenerationNumber = 100;
+    private int maxGenerationNumber = 50;
     private int elites = 2;
     private int tournamentSize = 2;
     private int generationNumber = 0;

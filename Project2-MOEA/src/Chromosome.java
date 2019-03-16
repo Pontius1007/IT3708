@@ -36,14 +36,28 @@ public class Chromosome {
         for (int x = 0; x < chromosome.length; x++) {
             chromosome[x] = c2.chromosome[x];
         }
-        for (int i = 0; i < chromosome.length; i++) {
-            if (new SplittableRandom().nextInt(0, 100) < mutationRate * 100) {
-                mutateRandomEdge(i);
-            }
-        }
+        mutate(mutationRate);
         findSegments();
         this.deviation = overallDeviation();
         this.connectivity = overallConnectivity();
+    }
+
+    public void mutate(double mutationRate){
+        if(new SplittableRandom().nextInt(0, 100) < 20) {
+            mutateMergeTwoRandomSegments();
+        }
+        else{
+            for(int pixelId: this.chromosome){
+                if(new SplittableRandom().nextInt(0, 100) < mutationRate*100){
+                    if(new SplittableRandom().nextInt(0, 100) < 50){
+                        mutateRandomEdge(pixelId);
+                    }
+                    else{
+                        mutateBestEdge(pixelId);
+                    }
+                }
+            }
+        }
     }
 
 
@@ -59,11 +73,7 @@ public class Chromosome {
                 chromosome[i] = mother.chromosome[i];
             }
         }
-        for (int i = 0; i < chromosome.length; i++) {
-            if (new SplittableRandom().nextInt(0, 100) < mutationRate * 100) {
-                mutateRandomEdge(i);
-            }
-        }
+        mutate(mutationRate);
         findSegments();
         this.deviation = overallDeviation();
         this.connectivity = overallConnectivity();
@@ -73,6 +83,36 @@ public class Chromosome {
         List<Integer> neigbours = getNeighbours(pixelIndex);
         //change edge to a random possible edge for the pixel
         chromosome[pixelIndex] = neigbours.get(new SplittableRandom().nextInt(0, neigbours.size()));
+    }
+
+    public void mutateBestEdge(int pixelIndex){
+        double bestDist = Double.MAX_VALUE;
+        Edge bestEdge = new Edge(0, 0);
+
+        for(int neighbourIdx: getNeighbours(pixelIndex)){
+            if(segementDivision[pixelIndex] != segementDivision[neighbourIdx]){
+                Edge currentEdge = new Edge(getPixelonIndex(pixelIndex), getPixelonIndex(neighbourIdx));
+                if(currentEdge.getDistance() < bestDist){
+                    bestDist = currentEdge.getDistance();
+                    bestEdge = currentEdge;
+                }
+            }
+        }
+        chromosome[bestEdge.getFrom()] = bestEdge.getTo();
+    }
+
+
+    public void mutateMergeTwoRandomSegments(){
+        List<Edge> connectingEdges = new ArrayList<>();
+        for(int pixel = 0; pixel < chromosome.length; pixel++){
+            for(int neighB: getNeighbours(pixel)){
+                if(segementDivision[pixel] != segementDivision[neighB]){
+                    connectingEdges.add(new Edge(pixel, neighB));
+                }
+            }
+        }
+        Edge toConnect = connectingEdges.get(new SplittableRandom().nextInt(0, connectingEdges.size()));
+        chromosome[toConnect.getFrom()] = toConnect.getTo();
     }
 
     private void initPrimMST(ImageMat img) {
@@ -468,6 +508,7 @@ public class Chromosome {
         loadImg.saveAsBlackAndWhite("testimage", test);
 
         Chromosome.img.saveAsGreen("blablalbal", test);
+        Chromosome.img.saveAsBlackAndWhite("bnw", test);
 
     }
 }
