@@ -19,6 +19,8 @@ public class Chromosome {
     //Used for normal GA
     private double weightedSum = Integer.MAX_VALUE;
 
+    private int lastMergeSize = -1;
+
     public Chromosome(int numberOfSegments) {
         chromosome = new int[img.getHeight() * img.getWidth()];
         this.numberOfSegments = numberOfSegments;
@@ -160,7 +162,7 @@ public class Chromosome {
         }*/
     }
 
-    public void mergeAllSmallerThanN(int n){
+    public void mergeAllSmallerThanN(int n, int counter){
         int[] segmentcount = new int[numberOfSegments];
         for(int segId: segementDivision){
             segmentcount[segId]++;
@@ -173,13 +175,15 @@ public class Chromosome {
             }
         }
         System.out.println(toMerge.size());
-        if(toMerge.size() == 0) return;
+        if(lastMergeSize == toMerge.size()) counter++;
+        if(toMerge.size() == 0 || counter > 20) return;
         for(int segId: toMerge){
             Edge bestEdge = findBestEdgeFromSegment(segId);
             chromosome[bestEdge.getFrom()] = bestEdge.getTo();
         }
+        lastMergeSize = toMerge.size();
         findSegments();
-        mergeAllSmallerThanN(n);
+        mergeAllSmallerThanN(n, counter);
     }
 
     public Edge findBestEdgeFromSegment(int segIdx){
@@ -460,7 +464,7 @@ public class Chromosome {
         ImageMat loadImg = new ImageMat("160068");
         Chromosome.img = loadImg;
         Chromosome test = new Chromosome(50000);
-        test.mergeAllSmallerThanN(500);
+        test.mergeAllSmallerThanN(500, 0);
 
         for(List<Integer> seg: test.getSegmentMatrix()){
             System.out.println(seg.size());

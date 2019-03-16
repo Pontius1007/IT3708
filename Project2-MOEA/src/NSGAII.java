@@ -90,7 +90,7 @@ public class NSGAII {
             //executorService.execute(() -> {
             System.out.println("Created individual numbered: " + i);
             Chromosome temp = new Chromosome(ThreadLocalRandom.current().nextInt(10, 1000));
-            temp.mergeAllSmallerThanN(this.runMinSegmentSize);
+            temp.mergeAllSmallerThanN(this.runMinSegmentSize, 0);
             populationInProgress.add(temp);
             //});
         }
@@ -129,7 +129,7 @@ public class NSGAII {
             Chromosome father = selectParent();
             Chromosome mother = selectParent();
             Chromosome child = new Chromosome(father, mother, mutationRate);
-            child.mergeAllSmallerThanN(this.runMinSegmentSize);
+            child.mergeAllSmallerThanN(this.runMinSegmentSize, 0);
             children.add(child);
             //});
         }
@@ -207,7 +207,7 @@ public class NSGAII {
         System.out.println("Number of members in rank 1: " + rankedPopulation.get(0).size());
         for (Chromosome contestant : rankedPopulation.get(0)) {
             System.out.println("Merging for member: " + number);
-            contestant.mergeAllSmallerThanN(this.minSegmentSize);
+            contestant.mergeAllSmallerThanN(this.minSegmentSize, 0);
             loadImg.saveAsBlackAndWhite("testimage" + number, contestant);
             number ++;
         }
