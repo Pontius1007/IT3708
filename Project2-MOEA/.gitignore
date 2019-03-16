@@ -1,8 +1,11 @@
 # Compiled class file
 *.class
 out/
-Segmentation_Evaluation/
-Segmentation Evaluation/
+Segmentation_Evaluation/Optimal_Segmentation_Files/*
+Segmentation_Evaluation/Student_Segmentation_Files/*
+!Segmentation_Evaluation/Optimal_Segmentation_Files/.gitkeep.txt
+!Segmentation_Evaluation/Student_Segmentation_Files/.gitkeep.txt
+
 
 # Log file
 *.log
