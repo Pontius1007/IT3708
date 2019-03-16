@@ -8,11 +8,13 @@ public class GA {
     //Settings
     private int populationSize = 5;
     private double crossoverRate = 1;
-    private double mutationRate = 1;
+    private double mutationRate = 0.01;
     private int maxGenerationNumber = 100;
     private int elites = 2;
     private int tournamentSize = 2;
     private int generationNumber = 0;
+    private int startingSegments = 500;
+    private int mergeSmallerThan = 5;
     private int startingSegments = 3;
 
     private List<Chromosome> population = new ArrayList<>(this.populationSize);
@@ -22,6 +24,7 @@ public class GA {
         for (int i = 0; i < this.populationSize; i++) {
             System.out.println("Created individual numbered: " + i);
             Chromosome populationMember = new Chromosome(this.startingSegments);
+            populationMember.mergeAllSmallerThanN(mergeSmallerThan);
             //TODO: mergeSmallerThanKSegments();
             populationMember.setWeightedSum();
             this.population.add(populationMember);
@@ -47,20 +50,20 @@ public class GA {
             Chromosome mother = tournamentWinner(this.tournamentSize);
             if (crossoverRateCheck < this.crossoverRate) {
                 Chromosome child = new Chromosome(father, mother, this.mutationRate);
+                child.mergeAllSmallerThanN(mergeSmallerThan);
                 child.setWeightedSum();
-                //TODO: mergeSmallerThanKSegments();
                 children.add(child);
             } else {
                 int randomNum = ThreadLocalRandom.current().nextInt(0, 2);
                 if (randomNum == 1) {
                     Chromosome child = new Chromosome(father, this.mutationRate);
+                    child.mergeAllSmallerThanN(mergeSmallerThan);
                     child.setWeightedSum();
-                    //TODO: mergeSmallerThanKSegments();
                     children.add(child);
                 } else {
                     Chromosome child = new Chromosome(mother, this.mutationRate);
+                    child.mergeAllSmallerThanN(mergeSmallerThan);
                     child.setWeightedSum();
-                    //TODO: mergeSmallerThanKSegments();
                     children.add(child);
                 }
             }
@@ -104,6 +107,4 @@ public class GA {
         GA run = new GA();
         run.geneticAlgorithm("2");
     }
-
-
 }

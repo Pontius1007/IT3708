@@ -160,6 +160,53 @@ public class Chromosome {
         }*/
     }
 
+    public void mergeAllSmallerThanN(int n){
+        int[] segmentcount = new int[numberOfSegments];
+        for(int segId: segementDivision){
+            segmentcount[segId]++;
+        }
+
+        List<Integer> toMerge = new ArrayList<>();
+        for(int i = 0; i < segmentcount.length; i++){
+            if(segmentcount[i] < n){
+                toMerge.add(i);
+            }
+        }
+        System.out.println(toMerge.size());
+        if(toMerge.size() == 0) return;
+        for(int segId: toMerge){
+            Edge bestEdge = findBestEdgeFromSegment(segId);
+            chromosome[bestEdge.getFrom()] = bestEdge.getTo();
+        }
+        findSegments();
+        mergeAllSmallerThanN(n);
+    }
+
+    public Edge findBestEdgeFromSegment(int segIdx){
+        List<Integer> seg = getSegmentMatrix().get(segIdx);
+        double bestDist = Double.MAX_VALUE;
+        Edge bestEdge = new Edge(getPixelonIndex(0), getPixelonIndex(0));
+        for(int pixelIdx: seg){
+            for(int neighbourIdx: getNeighbours(pixelIdx)){
+                if(segementDivision[pixelIdx] != segementDivision[neighbourIdx]){
+                    Edge currentEdge = new Edge(getPixelonIndex(pixelIdx), getPixelonIndex(neighbourIdx));
+                    if(currentEdge.getDistance() < bestDist){
+                        bestDist = currentEdge.getDistance();
+                        bestEdge = currentEdge;
+                    }
+                }
+            }
+        }
+        return bestEdge;
+    }
+
+    public void mergeNsmallestSegments(int n){
+        int[] segmentcount = new int[numberOfSegments];
+        for(int segId: segementDivision){
+            segmentcount[segId]++;
+        }
+    }
+
     private void addToWorst(Edge e, List<Edge> worstEdges) {
         //replace the best edge in worstedges if needed
         worstEdges.add(e);
@@ -344,6 +391,9 @@ public class Chromosome {
 
     //TODO: Needs optimalization
     public void setWeightedSum() {
+        findSegments();
+        this.deviation = overallDeviation();
+        this.connectivity = overallConnectivity();
         this.weightedSum = this.connectivity*8 + this.deviation;
     }
 
@@ -407,19 +457,16 @@ public class Chromosome {
     }
 
     public static void main(String[] args) {
-        ImageMat loadImg = new ImageMat("2");
+        ImageMat loadImg = new ImageMat("160068");
         Chromosome.img = loadImg;
-        Chromosome test = new Chromosome(3);
-        List<Integer> segment0 = test.getSegmentMatrix().get(0);
-        for (List<Integer> segment : test.getSegmentMatrix()) {
-            System.out.println(segment.size());
-        }
-        for (int index : segment0) {
-            Pixel p = test.getPixelonIndex(index);
-            Chromosome.img.getPixels()[p.getRowIdx()][p.getColIdx()].color = Color.green;
+        Chromosome test = new Chromosome(50000);
+        test.mergeAllSmallerThanN(500);
 
+        for(List<Integer> seg: test.getSegmentMatrix()){
+            System.out.println(seg.size());
         }
-        Chromosome.img.saveAs("blablalbal.jpg");
+
+        Chromosome.img.saveAsGreen("blablalbal", test);
 
     }
 }
