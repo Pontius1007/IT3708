@@ -8,8 +8,8 @@ public class NSGAII {
     private int populationNumber = 20;
     private int childPopulationNumber = 20;
     private double mutationRate = 0.05;
-    private int maxGenerationNumber = 150;
-    private int minSegmentSize = 1500;
+    private int maxGenerationNumber = 200;
+    private int minSegmentSize = 2000;
     private int runMinSegmentSize = 30;
     private List<Chromosome> population = new ArrayList<>();
     private ArrayList<ArrayList<Chromosome>> rankedPopulation = new ArrayList<>();
@@ -78,21 +78,22 @@ public class NSGAII {
     private void initializePopulation(ImageMat loadImg) {
 
         Chromosome.img = loadImg;
-        //List<Chromosome> populationInProgress = Collections.synchronizedList(new ArrayList<>(this.populationNumber * 2));
-        List<Chromosome> populationInProgress = new ArrayList<>(this.populationNumber * 2);
+        List<Chromosome> populationInProgress = Collections.synchronizedList(new ArrayList<>(this.populationNumber * 2));
+        //List<Chromosome> populationInProgress = new ArrayList<>(this.populationNumber * 2);
 
-        //final ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        final ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
         for (int i = 0; i < this.populationNumber * 2; i++) {
-            //executorService.execute(() -> {
-            System.out.println("Created individual numbered: " + i);
-            Chromosome temp = new Chromosome(ThreadLocalRandom.current().nextInt(2000, 20000));
-            //temp.mergeAllSmallerThanN(this.runMinSegmentSize, 0);
-            populationInProgress.add(temp);
-            //});
+            final int index = i;
+            executorService.execute(() -> {
+                System.out.println("Created individual numbered: " + index);
+                Chromosome temp = new Chromosome(ThreadLocalRandom.current().nextInt(10, 100));
+                temp.mergeAllSmallerThanN(this.runMinSegmentSize, 0);
+                populationInProgress.add(temp);
+            });
         }
-        //executorService.shutdown();
-        //while (!executorService.isTerminated()) ;
+        executorService.shutdown();
+        while (!executorService.isTerminated()) ;
         this.population.addAll(populationInProgress);
     }
 
@@ -116,22 +117,24 @@ public class NSGAII {
 
     private List<Chromosome> createChildren(boolean generationZero) {
         int multiplier = (generationZero) ? 2 : 1;
-        //List<Chromosome> children = Collections.synchronizedList(new ArrayList<>(this.childPopulationNumber));
-        List<Chromosome> children = new ArrayList<>(this.childPopulationNumber);
+        List<Chromosome> children = Collections.synchronizedList(new ArrayList<>(this.childPopulationNumber));
+        //List<Chromosome> children = new ArrayList<>(this.childPopulationNumber);
 
-        //final ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        final ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
         for (int i = 0; i < this.childPopulationNumber * multiplier; i++) {
-            //executorService.execute(() -> {
-            Chromosome father = selectParent();
-            Chromosome mother = selectParent();
-            Chromosome child = new Chromosome(father, mother, mutationRate);
-            //child.mergeAllSmallerThanN(this.runMinSegmentSize, 0);
-            children.add(child);
-            //});
+            final int index = i;
+            executorService.execute(() -> {
+                System.out.println("Creating children number: " + index);
+                Chromosome father = selectParent();
+                Chromosome mother = selectParent();
+                Chromosome child = new Chromosome(father, mother, mutationRate);
+                //child.mergeAllSmallerThanN(this.runMinSegmentSize, 0);
+                children.add(child);
+            });
         }
-        //executorService.shutdown();
-        //while (!executorService.isTerminated()) ;
+        executorService.shutdown();
+        while (!executorService.isTerminated()) ;
         return children;
     }
 
