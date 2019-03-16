@@ -13,6 +13,11 @@ public class Edge implements Comparable<Edge>{
         this.distance = dist(from, to);
     }
 
+    public Edge(int from, int to){
+        this.from = from;
+        this.to = to;
+    }
+
     //Calculates the Euclidean distance by using RGB
     public static double dist(Pixel FromPixel, Pixel toPixel) {
         double deltaRed = FromPixel.getRed() - toPixel.getRed();

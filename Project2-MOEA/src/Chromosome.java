@@ -75,6 +75,13 @@ public class Chromosome {
         chromosome[pixelIndex] = neigbours.get(new SplittableRandom().nextInt(0, neigbours.size()));
     }
 
+    public void mutateBestEdge(int )
+
+    public void mutateMergeTwoRandomSegments(){
+        List<Edge> connectingEdges = new ArrayList<>();
+        for(int pixel = 0; pixel < chromosome.length; pixe)
+    }
+
     private void initPrimMST(ImageMat img) {
         for (int i = 0; i < chromosome.length; i++) chromosome[i] = i;
         HashSet<Integer> visited = new HashSet<>(img.getWidth() * img.getWidth());
@@ -464,13 +471,14 @@ public class Chromosome {
         ImageMat loadImg = new ImageMat("160068");
         Chromosome.img = loadImg;
         Chromosome test = new Chromosome(50000);
-        test.mergeAllSmallerThanN(500, 0);
+        test.mergeAllSmallerThanN(1000, 0);
 
         for(List<Integer> seg: test.getSegmentMatrix()){
             System.out.println(seg.size());
         }
 
         Chromosome.img.saveAsGreen("blablalbal", test);
+        Chromosome.img.saveAsBlackAndWhite("bnw", test);
 
     }
 }
