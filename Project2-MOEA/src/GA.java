@@ -8,15 +8,15 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class GA {
     //Settings
-    private int populationSize = 30;
+    private int populationSize = 15;
     private double crossoverRate = 0.6;
-    private double mutationRate = 0.01;
+    private double mutationRate = 0.005;
     private int maxGenerationNumber = 150;
     private int elites = 8;
     private int tournamentSize = 5;
     private int generationNumber = 0;
     private int startingSegments = 500;
-    private int mergeSmallerThan = 100;
+    private int mergeSmallerThan = 20;
 
     private List<Chromosome> population = new ArrayList<>(this.populationSize);
 
@@ -25,7 +25,7 @@ public class GA {
         for (int i = 0; i < this.populationSize; i++) {
             System.out.println("Created individual numbered: " + i);
             Chromosome populationMember = new Chromosome(this.startingSegments);
-            //populationMember.mergeAllSmallerThanN(mergeSmallerThan, 0);
+            populationMember.mergeAllSmallerThanN(mergeSmallerThan, 0);
             populationMember.setWeightedSum();
             this.population.add(populationMember);
         }

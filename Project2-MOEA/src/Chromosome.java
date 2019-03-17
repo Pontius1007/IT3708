@@ -114,7 +114,7 @@ public class Chromosome {
         }
         if (connectingEdges.size() > 0) {
             Edge toConnect = connectingEdges.get(new SplittableRandom().nextInt(0, connectingEdges.size()));
-            mergeSegments(toConnect);
+            chromosome[toConnect.getFrom()] = toConnect.getTo();
         }
     }
 
@@ -148,7 +148,7 @@ public class Chromosome {
                     bestEdge = currentEdge;
                 }
             }
-            mergeSegments(bestEdge);
+            chromosome[bestEdge.getFrom()] = bestEdge.getTo();
         }
     }
 
@@ -577,13 +577,10 @@ public class Chromosome {
     }
 
     public static void main(String[] args) {
-        ImageMat loadImg = new ImageMat("176035");
-        Chromosome.img = loadImg;
-        Chromosome test = new Chromosome(50000);
-        test.mergeAllSmallerThanN(2000, 0);
+        ImageMat loadImg = new ImageMat("0");
+        //loadImg.getPixels()[0][0].color = Color.green;
 
-        Chromosome.img.saveAsGreen("blablalbal", test);
-        Chromosome.img.saveAsBlackAndWhite("bnw", test);
+        loadImg.saveAs("test.jpg");
 
     }
 }
