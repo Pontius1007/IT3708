@@ -9,8 +9,8 @@ public class Chromosome {
 
     public int[] segementDivision;
 
-    private double deviation;
-    private double connectivity;
+    public double deviation;
+    public double connectivity;
     private double crowding_distance;
     private boolean useDeviation = true; //0
     private boolean useConnectivity = true; //1
@@ -416,7 +416,7 @@ public class Chromosome {
     }
 
     //Evaluates the degree to which neighbouring pixels have been placed in the same segment
-    private double overallConnectivity() {
+    public double overallConnectivity() {
         double connectiviy = 0;
         Pixel[][] imageMat = img.getPixels();
         for (List<Integer> segment : this.getSegmentMatrix()) {
@@ -466,7 +466,7 @@ public class Chromosome {
 
     // measure of the ‘similarity’ (homogeneity) of pixels in the same segment
     // Assumes a 2D list in the form of [[1,52,23]] where the numbers are pixelnumbers
-    private double overallDeviation() {
+    public double overallDeviation() {
         double deviation = 0;
         //Change when we have 2d list
         for (List<Integer> segment : getSegmentMatrix()) {
@@ -509,7 +509,6 @@ public class Chromosome {
         return img.getPixels()[rowIndex][colIndex];
     }
 
-    //TODO: Needs optimalization
     public void setWeightedSum() {
         findSegments();
         this.deviation = overallDeviation();
