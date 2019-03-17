@@ -6,11 +6,11 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class NSGAII {
     //Real number is 2x
-    private int populationNumber = 25;
-    private int childPopulationNumber = 25;
+    private int populationNumber = 40;
+    private int childPopulationNumber = 40;
     private double mutationRate = 0.005;
-    private int maxGenerationNumber = 200;
-    private int minSegmentSize = 400;
+    private int maxGenerationNumber = 100;
+    private int minSegmentSize = 100;
     private int runMinSegmentSize = 30;
     private List<Chromosome> population = new ArrayList<>();
     private ArrayList<ArrayList<Chromosome>> rankedPopulation = new ArrayList<>();
@@ -116,6 +116,7 @@ public class NSGAII {
         }
     }
 
+
     private List<Chromosome> createChildren(boolean generationZero) {
         int multiplier = (generationZero) ? 2 : 1;
         List<Chromosome> children = Collections.synchronizedList(new ArrayList<>(this.childPopulationNumber));
@@ -213,7 +214,7 @@ public class NSGAII {
             if (!file.isDirectory())
                 file.delete();
 
-        for (int i = 0; i < rankedPopulation.get(0).size(); i++) {
+        for (int i = 0; i < rankedPopulation.get(0).size()-10; i++) {
             final int index = i;
             System.out.println("Merging for member: " + index);
 
@@ -226,24 +227,10 @@ public class NSGAII {
         }
         executorService.shutdown();
         while (!executorService.isTerminated()) ;
-
-
-
-
-        /*for (Chromosome contestant : rankedPopulation.get(0)) {
-            System.out.println("Merging for member: " + number);
-            executorService.execute(() -> {
-                contestant.mergeAllSmallerThanN(this.minSegmentSize, 0);
-            });
-            executorService.shutdown();
-            while (!executorService.isTerminated()) ;
-            loadImg.saveAsBlackAndWhite("testimage" + number, contestant);
-            number++;
-        }*/
     }
 
     public static void main(String[] args) {
         NSGAII run = new NSGAII();
-        run.runMainLoop("216066");
+        run.runMainLoop("176035");
     }
 }

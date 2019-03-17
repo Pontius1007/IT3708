@@ -1,3 +1,5 @@
+import com.sun.jdi.CharType;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -6,15 +8,15 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class GA {
     //Settings
-    private int populationSize = 5;
-    private double crossoverRate = 1;
+    private int populationSize = 30;
+    private double crossoverRate = 0.6;
     private double mutationRate = 0.01;
-    private int maxGenerationNumber = 50;
-    private int elites = 2;
-    private int tournamentSize = 2;
+    private int maxGenerationNumber = 150;
+    private int elites = 8;
+    private int tournamentSize = 5;
     private int generationNumber = 0;
     private int startingSegments = 500;
-    private int mergeSmallerThan = 5;
+    private int mergeSmallerThan = 100;
 
     private List<Chromosome> population = new ArrayList<>(this.populationSize);
 
@@ -23,8 +25,7 @@ public class GA {
         for (int i = 0; i < this.populationSize; i++) {
             System.out.println("Created individual numbered: " + i);
             Chromosome populationMember = new Chromosome(this.startingSegments);
-            populationMember.mergeAllSmallerThanN(mergeSmallerThan, 0);
-            //TODO: mergeSmallerThanKSegments();
+            //populationMember.mergeAllSmallerThanN(mergeSmallerThan, 0);
             populationMember.setWeightedSum();
             this.population.add(populationMember);
         }
@@ -49,19 +50,19 @@ public class GA {
             Chromosome mother = tournamentWinner(this.tournamentSize);
             if (crossoverRateCheck < this.crossoverRate) {
                 Chromosome child = new Chromosome(father, mother, this.mutationRate);
-                child.mergeAllSmallerThanN(mergeSmallerThan, 0);
+                //child.mergeAllSmallerThanN(mergeSmallerThan, 0);
                 child.setWeightedSum();
                 children.add(child);
             } else {
                 int randomNum = ThreadLocalRandom.current().nextInt(0, 2);
                 if (randomNum == 1) {
                     Chromosome child = new Chromosome(father, this.mutationRate);
-                    child.mergeAllSmallerThanN(mergeSmallerThan, 0);
+                    //child.mergeAllSmallerThanN(mergeSmallerThan, 0);
                     child.setWeightedSum();
                     children.add(child);
                 } else {
                     Chromosome child = new Chromosome(mother, this.mutationRate);
-                    child.mergeAllSmallerThanN(mergeSmallerThan, 0);
+                    //child.mergeAllSmallerThanN(mergeSmallerThan, 0);
                     child.setWeightedSum();
                     children.add(child);
                 }
@@ -104,6 +105,11 @@ public class GA {
 
     public static void main(String[] args) {
         GA run = new GA();
-        run.geneticAlgorithm("2");
+        run.geneticAlgorithm("216066");
+        run.population.sort(Chromosome.weightedSumComparator());
+        int i = 0;
+        for(Chromosome c: run.population){
+            Chromosome.img.saveAsBlackAndWhite("bnw"+i, run.population.get(i++));
+        }
     }
 }

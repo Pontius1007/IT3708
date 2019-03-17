@@ -13,6 +13,7 @@ public class Edge implements Comparable<Edge>{
         this.distance = dist(from, to);
     }
 
+    // used to save some calculations when not needing the distance
     public Edge(int from, int to){
         this.from = from;
         this.to = to;

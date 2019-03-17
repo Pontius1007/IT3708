@@ -5,7 +5,7 @@ import java.util.*;
 public class Chromosome {
     public int[] chromosome;
     public static ImageMat img;
-    private int numberOfSegments;
+    public int numberOfSegments;
 
     public int[] segementDivision;
 
@@ -63,7 +63,7 @@ public class Chromosome {
 
     public void mutate(double mutationRate) {
         if (segementDivision == null) findSegments();
-        if (new SplittableRandom().nextInt(0, 100) < 20) {
+        if (new SplittableRandom().nextInt(0, 100) < 10) {
             mutateMergeTwoRandomSegments();
         } else if (new SplittableRandom().nextInt(0, 100) < 70) {
             mutateMergeTwoClosestSegments();
@@ -114,11 +114,12 @@ public class Chromosome {
         }
         if (connectingEdges.size() > 0) {
             Edge toConnect = connectingEdges.get(new SplittableRandom().nextInt(0, connectingEdges.size()));
-            chromosome[toConnect.getFrom()] = toConnect.getTo();
+            mergeSegments(toConnect);
         }
     }
 
     public void mutateMergeTwoClosestSegments() {
+        if(segementDivision == null) findSegments();
         List<Edge> connectingEdges = new ArrayList<>();
         for (int pixel = 0; pixel < chromosome.length; pixel++) {
             for (int neighB : getNeighbours(pixel)) {
@@ -135,6 +136,7 @@ public class Chromosome {
                 centroids[i] = getSegmentCentroid(segments.get(i));
             }
 
+
             Edge bestEdge = connectingEdges.get(0);
             // dist between centroids of the the segments connected by the edge
             double bestDist = colordist(centroids[segementDivision[bestEdge.getFrom()]], centroids[segementDivision[bestEdge.getTo()]]);
@@ -146,8 +148,38 @@ public class Chromosome {
                     bestEdge = currentEdge;
                 }
             }
+            mergeSegments(bestEdge);
+        }
+    }
 
-            chromosome[bestEdge.getFrom()] = bestEdge.getTo();
+    public void mergeSegments(Edge connectingEdge){
+        int newCorePixel = connectingEdge.getFrom();
+        int segid1 = segementDivision[connectingEdge.getFrom()];
+        int segid2 = segementDivision[connectingEdge.getTo()];
+
+        List<Integer> seg1Idxes = new ArrayList<>();
+        for(int i = 0; i < segementDivision.length; i++){
+            if(segementDivision[i] == segid1){
+                seg1Idxes.add(i);
+            }
+        }
+        Set<Integer> nextMerge = new HashSet<>();
+        // connects the connecting edge between the to segments
+        chromosome[newCorePixel] = connectingEdge.getTo();
+        segementDivision[newCorePixel] = segid2;
+        nextMerge.add(newCorePixel);
+        // loops through the segment and points towards the pixel that connected the segments
+        while(nextMerge.size() > 0){
+            for(int current: nextMerge){
+                for(int nb: getNeighbours(current)){
+                    if(segementDivision[nb] == segid1){
+                        chromosome[nb] = current;
+                        segementDivision[nb] = segid2;
+                        nextMerge.add(nb);
+                    }
+                }
+                nextMerge.remove(current);
+            }
         }
     }
 
@@ -205,7 +237,7 @@ public class Chromosome {
         return segmentMat;
     }
 
-    private void findSegments() {
+    public void findSegments() {
         //roots is all pixels representing one segment. (pointing to itself)
         segementDivision = new int[chromosome.length];
         Arrays.fill(segementDivision, -1);
@@ -545,11 +577,10 @@ public class Chromosome {
     }
 
     public static void main(String[] args) {
-        ImageMat loadImg = new ImageMat("860168");
+        ImageMat loadImg = new ImageMat("176035");
         Chromosome.img = loadImg;
         Chromosome test = new Chromosome(50000);
-        test.mergeAllSmallerThanN(3000, 0);
-        loadImg.saveAsBlackAndWhite("testimage", test);
+        test.mergeAllSmallerThanN(2000, 0);
 
         Chromosome.img.saveAsGreen("blablalbal", test);
         Chromosome.img.saveAsBlackAndWhite("bnw", test);
