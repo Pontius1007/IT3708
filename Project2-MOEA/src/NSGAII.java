@@ -1,3 +1,4 @@
+import javax.swing.*;
 import java.io.File;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -6,12 +7,13 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class NSGAII {
     //Real number is 2x
-    private int populationNumber = 25;
-    private int childPopulationNumber = 25;
+    private int populationNumber = 15;
+    private int childPopulationNumber = 15;
     private double mutationRate = 0.005;
-    private int maxGenerationNumber = 200;
+    private int maxGenerationNumber = 10;
     private int minSegmentSize = 400;
     private int runMinSegmentSize = 30;
+    private boolean toPlotOrNotToPlot = true;
     private List<Chromosome> population = new ArrayList<>();
     private ArrayList<ArrayList<Chromosome>> rankedPopulation = new ArrayList<>();
 
@@ -179,6 +181,16 @@ public class NSGAII {
         System.out.println("The number of members in the best front is: " + this.rankedPopulation.get(0).size());
     }
 
+    private void plottPareto() {
+        SwingUtilities.invokeLater(() -> {
+            ScatterPlot plot = new ScatterPlot(rankedPopulation.get(0));
+            plot.setSize(1000, 600);
+            plot.setLocationRelativeTo(null);
+            plot.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+            plot.setVisible(true);
+        });
+    }
+
     private void runMainLoop(String imageFile) {
         ImageMat loadImg = new ImageMat(imageFile);
         initializePopulation(loadImg);
@@ -207,9 +219,14 @@ public class NSGAII {
 
         System.out.println("Number of members in rank 1: " + rankedPopulation.get(0).size());
         System.out.println("Number of pareto fronts: " + rankedPopulation.size());
+        System.out.println("Plotting the pareto front");
+        if (this.toPlotOrNotToPlot) {
+            plottPareto();
+        }
+
         final ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
-        for(File file: Objects.requireNonNull(new File("Segmentation_Evaluation/Student_Segmentation_Files/").listFiles()))
+        for (File file : Objects.requireNonNull(new File("Segmentation_Evaluation/Student_Segmentation_Files/").listFiles()))
             if (!file.isDirectory())
                 file.delete();
 
@@ -226,24 +243,10 @@ public class NSGAII {
         }
         executorService.shutdown();
         while (!executorService.isTerminated()) ;
-
-
-
-
-        /*for (Chromosome contestant : rankedPopulation.get(0)) {
-            System.out.println("Merging for member: " + number);
-            executorService.execute(() -> {
-                contestant.mergeAllSmallerThanN(this.minSegmentSize, 0);
-            });
-            executorService.shutdown();
-            while (!executorService.isTerminated()) ;
-            loadImg.saveAsBlackAndWhite("testimage" + number, contestant);
-            number++;
-        }*/
     }
 
     public static void main(String[] args) {
         NSGAII run = new NSGAII();
-        run.runMainLoop("216066");
+        run.runMainLoop("86016");
     }
 }
