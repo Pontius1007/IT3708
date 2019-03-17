@@ -13,14 +13,14 @@ import java.util.ArrayList;
 
 public class ScatterPlot extends JFrame {
 
-    public ScatterPlot(ArrayList<Chromosome> paretoFront) {
+    public ScatterPlot(ArrayList<Chromosome> paretoFront, String tittel) {
 
         //Create dataset
         XYDataset dataset = createDataset(paretoFront);
 
         //Create chart
         JFreeChart chart = ChartFactory.createScatterPlot(
-                "Scatter plot for pareto front", "Connectivity",
+                "Scatter plot for pareto front " + tittel , "Connectivity",
                 "Deviation", dataset);
 
         XYPlot plot = (XYPlot) chart.getPlot();
@@ -37,7 +37,6 @@ public class ScatterPlot extends JFrame {
         //Adds the deviation and connectivity for each member in the pareto front
 
         XYSeries series1 = new XYSeries("Rank 1 Pareto");
-
         for (Chromosome member : paretoFront) {
             series1.add(member.getConnectivity(), member.getDeviation());
         }

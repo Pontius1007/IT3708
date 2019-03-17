@@ -7,8 +7,8 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class NSGAII {
     //Real number is 2x
-    private int populationNumber = 15;
-    private int childPopulationNumber = 15;
+    private int populationNumber = 5;
+    private int childPopulationNumber = 5;
     private double mutationRate = 0.005;
     private int maxGenerationNumber = 10;
     private int minSegmentSize = 400;
@@ -182,9 +182,9 @@ public class NSGAII {
         System.out.println("The number of members in the best front is: " + this.rankedPopulation.get(0).size());
     }
 
-    private void plottPareto() {
+    private void plottPareto(String tittelAddOn) {
         SwingUtilities.invokeLater(() -> {
-            ScatterPlot plot = new ScatterPlot(rankedPopulation.get(0));
+            ScatterPlot plot = new ScatterPlot(rankedPopulation.get(0), tittelAddOn);
             plot.setSize(1000, 600);
             plot.setLocationRelativeTo(null);
             plot.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -211,7 +211,6 @@ public class NSGAII {
             List<Chromosome> children = createChildren(false);
             population.addAll(children);
             rankPopulation();
-            System.out.println("Creating new population");
             createNewPopulationBasedOnRank();
             //Should be use selection, crossover and mutation to create a new population of size N here?
             generation++;
@@ -222,7 +221,7 @@ public class NSGAII {
         System.out.println("Number of pareto fronts: " + rankedPopulation.size());
         System.out.println("Plotting the pareto front");
         if (this.toPlotOrNotToPlot) {
-            plottPareto();
+            plottPareto("before merge");
         }
 
         final ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
@@ -231,19 +230,34 @@ public class NSGAII {
             if (!file.isDirectory())
                 file.delete();
 
-        for (int i = 0; i < rankedPopulation.get(0).size()-10; i++) {
+        for (File file : Objects.requireNonNull(new File("Segmentation_Evaluation/Student_Segmentation_Files_Green/").listFiles()))
+            if (!file.isDirectory())
+                file.delete();
+
+        for (int i = 0; i < rankedPopulation.get(0).size(); i++) {
             final int index = i;
             System.out.println("Merging for member: " + index);
 
             Chromosome contestant = rankedPopulation.get(0).get(index);
             executorService.execute(() -> {
                 contestant.mergeAllSmallerThanN(this.minSegmentSize, 0);
-                loadImg.saveAsBlackAndWhite("Segmentation_Evaluation/Student_Segmentation_Files/testimage" + index, contestant);
+                loadImg.saveAsBlackAndWhite("Segmentation_Evaluation/Student_Segmentation_Files/testimage" + index +
+                        "Deviation" + contestant.getDeviation() + "Connectivity" + contestant.getConnectivity(), contestant);
+                loadImg.saveAsGreen("Segmentation_Evaluation/Student_Segmentation_Files_Green/testimage" + index +
+                        "Deviation" + contestant.getDeviation() + "Connectivity" + contestant.getConnectivity(), contestant);
+                contestant.findSegments();
+                contestant.deviation = contestant.overallDeviation();
+                contestant.connectivity = contestant.overallConnectivity();
                 System.out.println("Finished writing number: " + index);
+
             });
         }
         executorService.shutdown();
         while (!executorService.isTerminated()) ;
+        if (this.toPlotOrNotToPlot) {
+            plottPareto("after merge");
+        }
+
     }
 
     public static void main(String[] args) {
