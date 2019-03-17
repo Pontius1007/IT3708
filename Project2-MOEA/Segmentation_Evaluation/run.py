@@ -11,14 +11,16 @@ checkEightSurroundingPixels = True
 
 def readFilesFromFolder(directory):
 	allFiles = []
+	filenames = []
 	for filename in os.listdir(directory):
 	    if filename.endswith(".jpg") or filename.endswith(".png"): 
 	    	filename = os.path.join(directory, filename)
 	    	allFiles.append(readImage(filename))
+	    	filenames.append(filename)
 	    elif filename.endswith(".txt"):
 	    	filename = os.path.join(directory, filename)
 	    	allFiles.append(readTextFile(filename))
-	return allFiles
+	return allFiles, filenames
 
 
 def comparePics(studentPic, optimalSegmentPic):
@@ -59,19 +61,22 @@ def comparePics(studentPic, optimalSegmentPic):
 
 
 def main():
-	optimalFiles = readFilesFromFolder(optimalFolder)
-	studentFiles = readFilesFromFolder(studentFolder)
+	optimalFiles, _ = readFilesFromFolder(optimalFolder)
+	studentFiles, fileNames = readFilesFromFolder(studentFolder)
 	totalScore = 0
+	i = 0
 	for student in studentFiles:
 		highestScore = 0
 		for opt in optimalFiles:
 			result1 = comparePics(opt,student)
 			result2 = comparePics(student,opt)
-			result = min(result1,result2)
+			result = min(result1, result2)
 			highestScore = max(highestScore,result)
 		totalScore += highestScore
 		a = highestScore*100
+		print(fileNames[i])
 		print("Score: %.2f" % a + "%")
+		i+=1
 	a = totalScore/len(studentFiles)*100
 	print("Total Average Score: %.2f" % a + "%")
 	
