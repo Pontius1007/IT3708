@@ -61,20 +61,18 @@ public class Chromosome {
         this.connectivity = overallConnectivity();
     }
 
-    public void mutate(double mutationRate){
-        if(new SplittableRandom().nextInt(0, 100) < 10) {
-            //mutateMergeTwoRandomSegments();
-        }
-        else if(new SplittableRandom().nextInt(0, 100) < 60){
+    public void mutate(double mutationRate) {
+        if (segementDivision == null) findSegments();
+        if (new SplittableRandom().nextInt(0, 100) < 20) {
+            mutateMergeTwoRandomSegments();
+        } else if (new SplittableRandom().nextInt(0, 100) < 70) {
             mutateMergeTwoClosestSegments();
-        }
-        else{
-            for(int pixelId: this.chromosome){
-                if(new SplittableRandom().nextInt(0, 100) < mutationRate*100){
-                    if(new SplittableRandom().nextInt(0, 100) < 50){
+        } else {
+            for (int pixelId : this.chromosome) {
+                if (new SplittableRandom().nextInt(0, 100) < mutationRate * 100) {
+                    if (new SplittableRandom().nextInt(0, 100) < 50) {
                         mutateRandomEdge(pixelId);
-                    }
-                    else{
+                    } else {
                         mutateBestEdge(pixelId);
                     }
                 }
@@ -88,14 +86,14 @@ public class Chromosome {
         chromosome[pixelIndex] = neigbours.get(new SplittableRandom().nextInt(0, neigbours.size()));
     }
 
-    public void mutateBestEdge(int pixelIndex){
+    public void mutateBestEdge(int pixelIndex) {
         double bestDist = Double.MAX_VALUE;
         Edge bestEdge = new Edge(0, 0);
 
-        for(int neighbourIdx: getNeighbours(pixelIndex)){
-            if(segementDivision[pixelIndex] != segementDivision[neighbourIdx]){
+        for (int neighbourIdx : getNeighbours(pixelIndex)) {
+            if (segementDivision[pixelIndex] != segementDivision[neighbourIdx]) {
                 Edge currentEdge = new Edge(getPixelonIndex(pixelIndex), getPixelonIndex(neighbourIdx));
-                if(currentEdge.getDistance() < bestDist){
+                if (currentEdge.getDistance() < bestDist) {
                     bestDist = currentEdge.getDistance();
                     bestEdge = currentEdge;
                 }
@@ -105,11 +103,11 @@ public class Chromosome {
     }
 
 
-    public void mutateMergeTwoRandomSegments(){
+    public void mutateMergeTwoRandomSegments() {
         List<Edge> connectingEdges = new ArrayList<>();
-        for(int pixel = 0; pixel < chromosome.length; pixel++){
-            for(int neighB: getNeighbours(pixel)){
-                if(segementDivision[pixel] != segementDivision[neighB]){
+        for (int pixel = 0; pixel < chromosome.length; pixel++) {
+            for (int neighB : getNeighbours(pixel)) {
+                if (segementDivision[pixel] != segementDivision[neighB]) {
                     connectingEdges.add(new Edge(pixel, neighB));
                 }
             }
@@ -120,11 +118,11 @@ public class Chromosome {
         }
     }
 
-    public void mutateMergeTwoClosestSegments(){
+    public void mutateMergeTwoClosestSegments() {
         List<Edge> connectingEdges = new ArrayList<>();
-        for(int pixel = 0; pixel < chromosome.length; pixel++){
-            for(int neighB: getNeighbours(pixel)){
-                if(segementDivision[pixel] != segementDivision[neighB]){
+        for (int pixel = 0; pixel < chromosome.length; pixel++) {
+            for (int neighB : getNeighbours(pixel)) {
+                if (segementDivision[pixel] != segementDivision[neighB]) {
                     connectingEdges.add(new Edge(pixel, neighB));
                 }
             }
@@ -133,16 +131,17 @@ public class Chromosome {
         if (connectingEdges.size() > 0) {
             Color[] centroids = new Color[this.numberOfSegments];
             List<List<Integer>> segments = getSegmentMatrix();
-            for(int i = 0; i < numberOfSegments; i++){
+            for (int i = 0; i < numberOfSegments; i++) {
                 centroids[i] = getSegmentCentroid(segments.get(i));
             }
 
             Edge bestEdge = connectingEdges.get(0);
-            double bestDist = colordist(centroids[connectingEdges.get(0).getFrom()], centroids[connectingEdges.get(0).getTo()]);
-            for(int i = 1; i < connectingEdges.size(); i++){
+            // dist between centroids of the the segments connected by the edge
+            double bestDist = colordist(centroids[segementDivision[bestEdge.getFrom()]], centroids[segementDivision[bestEdge.getTo()]]);
+            for (int i = 1; i < connectingEdges.size(); i++) {
                 Edge currentEdge = connectingEdges.get(i);
-                double currentDist = colordist(centroids[currentEdge.getFrom()], centroids[currentEdge.getTo()]);
-                if(currentDist < bestDist){
+                double currentDist = colordist(centroids[segementDivision[currentEdge.getFrom()]], centroids[segementDivision[currentEdge.getTo()]]);
+                if (currentDist < bestDist) {
                     bestDist = currentDist;
                     bestEdge = currentEdge;
                 }
@@ -158,7 +157,6 @@ public class Chromosome {
         double deltaBlue = FromPixel.getBlue() - toPixel.getBlue();
         return Math.sqrt((Math.pow(deltaRed, 2)) + (Math.pow(deltaGreen, 2)) + (Math.pow(deltaBlue, 2)));
     }
-
 
 
     private void initPrimMST(ImageMat img) {
@@ -190,7 +188,7 @@ public class Chromosome {
         Collections.sort(worstEdges);
         Collections.reverse(worstEdges);
 
-        for (int i = 0; i <numberOfSegments-1; i++) {
+        for (int i = 0; i < numberOfSegments - 1; i++) {
             Edge removeEdge = worstEdges.get(i);
             this.chromosome[removeEdge.getFrom()] = removeEdge.getFrom();
         }
@@ -248,22 +246,22 @@ public class Chromosome {
         }*/
     }
 
-    public void mergeAllSmallerThanN(int n, int counter){
+    public void mergeAllSmallerThanN(int n, int counter) {
         int[] segmentcount = new int[numberOfSegments];
-        for(int segId: segementDivision){
+        for (int segId : segementDivision) {
             segmentcount[segId]++;
         }
 
         List<Integer> toMerge = new ArrayList<>();
-        for(int i = 0; i < segmentcount.length; i++){
-            if(segmentcount[i] < n){
+        for (int i = 0; i < segmentcount.length; i++) {
+            if (segmentcount[i] < n) {
                 toMerge.add(i);
             }
         }
         //System.out.println(toMerge.size());
-        if(lastMergeSize == toMerge.size()) counter++;
-        if(toMerge.size() == 0 || counter > 20) return;
-        for(int segId: toMerge){
+        if (lastMergeSize == toMerge.size()) counter++;
+        if (toMerge.size() == 0 || counter > 20) return;
+        for (int segId : toMerge) {
             Edge bestEdge = findBestEdgeFromSegment(segId);
             chromosome[bestEdge.getFrom()] = bestEdge.getTo();
         }
@@ -272,15 +270,15 @@ public class Chromosome {
         mergeAllSmallerThanN(n, counter);
     }
 
-    public Edge findBestEdgeFromSegment(int segIdx){
+    public Edge findBestEdgeFromSegment(int segIdx) {
         List<Integer> seg = getSegmentMatrix().get(segIdx);
         double bestDist = Double.MAX_VALUE;
         Edge bestEdge = new Edge(getPixelonIndex(0), getPixelonIndex(0));
-        for(int pixelIdx: seg){
-            for(int neighbourIdx: getNeighbours(pixelIdx)){
-                if(segementDivision[pixelIdx] != segementDivision[neighbourIdx]){
+        for (int pixelIdx : seg) {
+            for (int neighbourIdx : getNeighbours(pixelIdx)) {
+                if (segementDivision[pixelIdx] != segementDivision[neighbourIdx]) {
                     Edge currentEdge = new Edge(getPixelonIndex(pixelIdx), getPixelonIndex(neighbourIdx));
-                    if(currentEdge.getDistance() < bestDist){
+                    if (currentEdge.getDistance() < bestDist) {
                         bestDist = currentEdge.getDistance();
                         bestEdge = currentEdge;
                     }
@@ -290,9 +288,9 @@ public class Chromosome {
         return bestEdge;
     }
 
-    public void mergeNsmallestSegments(int n){
+    public void mergeNsmallestSegments(int n) {
         int[] segmentcount = new int[numberOfSegments];
-        for(int segId: segementDivision){
+        for (int segId : segementDivision) {
             segmentcount[segId]++;
         }
     }
@@ -484,7 +482,7 @@ public class Chromosome {
         findSegments();
         this.deviation = overallDeviation();
         this.connectivity = overallConnectivity();
-        this.weightedSum = this.connectivity*8 + this.deviation;
+        this.weightedSum = this.connectivity * 8000 + this.deviation;
     }
 
     double getDeviation() {
