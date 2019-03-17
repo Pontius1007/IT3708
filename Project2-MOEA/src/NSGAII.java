@@ -118,6 +118,7 @@ public class NSGAII {
         }
     }
 
+
     private List<Chromosome> createChildren(boolean generationZero) {
         int multiplier = (generationZero) ? 2 : 1;
         List<Chromosome> children = Collections.synchronizedList(new ArrayList<>(this.childPopulationNumber));
@@ -230,7 +231,7 @@ public class NSGAII {
             if (!file.isDirectory())
                 file.delete();
 
-        for (int i = 0; i < rankedPopulation.get(0).size(); i++) {
+        for (int i = 0; i < rankedPopulation.get(0).size()-10; i++) {
             final int index = i;
             System.out.println("Merging for member: " + index);
 
