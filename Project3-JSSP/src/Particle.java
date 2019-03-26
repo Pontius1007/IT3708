@@ -5,7 +5,7 @@ public class Particle {
 
     public Particle localBest;
 
-    // copying particle
+    // copying particle constructor
     public Particle(Particle cloneParticle) {
         particle = new Operation[LookupTable.numberOfJobs*LookupTable.numberOfMachines];
         for(int job = 0; job < LookupTable.numberOfJobs*LookupTable.numberOfMachines; job ++){
@@ -17,6 +17,8 @@ public class Particle {
 
     public Particle() {
         particle = new Operation[LookupTable.numberOfJobs*LookupTable.numberOfMachines];
+
+        // adds all the operations to the particle with random position and velocity vectors
         for(int jobIdx = 0; jobIdx < LookupTable.numberOfJobs; jobIdx++){
             for(int machineIdx = 0; machineIdx < LookupTable.numberOfMachines; machineIdx++){
                 particle[jobIdx*LookupTable.numberOfJobs+machineIdx] = new Operation(jobIdx, machineIdx,
@@ -24,6 +26,7 @@ public class Particle {
                         getRandomDoubleBetweenRange(Settings.vmin, Settings.vmax));
             }
         }
+        this.localBest = new Particle(this);
         updateMakespan();
     }
 
@@ -34,10 +37,12 @@ public class Particle {
             Operation currentParticle = particle[jobIndex];
             Operation localParticle = localBest.particle[jobIndex];
             Operation globalParticle = globalBest.particle[jobIndex];
+
             // updates velocity and position
             currentParticle.velocity = currentParticle.velocity
                     + Settings.c1*Math.random()*(localParticle.position - currentParticle.position)
                     + Settings.c2*Math.random()*(globalParticle.position - currentParticle.position);
+
             currentParticle.position += currentParticle.velocity;
         }
 
@@ -49,12 +54,11 @@ public class Particle {
     }
 
     public void updateMakespan(){
-        this.makespan = 0;
+        Schedule s = new Schedule(particle);
+        this.makespan = s.makespan;
     }
 
     public static double getRandomDoubleBetweenRange(double min, double max){
         return (Math.random()*((max-min)+1))+min;
     }
-
-
 }
