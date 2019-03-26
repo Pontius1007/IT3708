@@ -1,10 +1,7 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -13,6 +10,9 @@ public class LookupTable {
     public static int numberOfJobs;
     public static int numberOfMachines;
 
+
+    public static int[][] durations;
+    public static List<Map<Integer, Integer>> previousMachine;
 
     public LookupTable() {}
 
@@ -35,9 +35,22 @@ public class LookupTable {
                 Collection<List<String>> jobAs2D = partition(readLinesAsList, 2);
                 jobSchedule.add(convertToInt(jobAs2D));
             }
-
         }
         finally {
+            previousMachine = new ArrayList<>();
+            durations = new int[numberOfJobs][numberOfMachines];
+            for(int jobId = 0; jobId  < numberOfJobs; jobId++){
+                Map<Integer, Integer> currentJob = new HashMap<>();
+                List<List<Integer>> row = jobSchedule.get(jobId);
+                int previous = -1;
+                for(int machineId = 0; machineId < numberOfMachines; machineId++){
+                    List<Integer> tuple = row.get(machineId);
+                    currentJob.put(tuple.get(0), previous);
+                    previous = tuple.get(0);
+                    durations[jobId][tuple.get(0)] = tuple.get(1);
+                }
+                previousMachine.add(currentJob);
+            }
             br.close();
         }
 
@@ -70,5 +83,4 @@ public class LookupTable {
             System.out.println(temp);
         }
     }
-
 }
