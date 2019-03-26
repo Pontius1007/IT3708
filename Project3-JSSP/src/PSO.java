@@ -44,6 +44,9 @@ public class PSO {
                 System.out.println(" ");
                 System.out.println(" ");
             }
+
+            if(Settings.inertiaWeight > Settings.inertiaWeightLowerBound)
+            Settings.inertiaWeight *= Settings.inertiaWeightDecrementFactor;
         }
 
         Schedule bestSchedule = new Schedule(globalBest.particle);
