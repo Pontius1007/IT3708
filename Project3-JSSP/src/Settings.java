@@ -1,7 +1,7 @@
 public class Settings {
     // init
     public static final double xmin = 0;
-    public static final double max = 4;
+    public static final double xmax = 4;
     public static final double vmin = -4;
     public static final double vmax = 4;
 
@@ -14,8 +14,8 @@ public class Settings {
     public static final double inertiaWeightLowerBound = 0.4;
 
     // PSO parameters
-    public static final int swarmSize = 500;
-    public static final int numberOfGenerations = 600;
+    public static final int swarmSize = 800;
+    public static final int numberOfGenerations = 1200;
     public static final String testData = "1";
 
     public static final boolean verbose = true;
