@@ -1,0 +1,123 @@
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ScheduledExecutorService;
+
+public class BA {
+
+    Bee[] scoutBees;
+    Bee queenBee;
+
+
+    public BA() {
+        LookupTable table = new LookupTable();
+        try {
+            table.readFile(Settings.testData);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println(LookupTable.numberOfJobs);
+        scoutBees = new Bee[Settings.numberOfScoutBees];
+    }
+
+    public void run(){
+        // initiate scout bees
+        for (int i = 0; i < scoutBees.length; i++) {
+            scoutBees[i] = new Bee();
+        }
+
+        Arrays.sort(scoutBees);
+        queenBee = new Bee(scoutBees[0]);
+
+        for (int generation = 0; generation < Settings.numberOfGenerations; generation++) {
+
+            if (Settings.verbose) {
+                System.out.println(" ");
+                System.out.println(" ");
+                System.out.println("Generation nr. " + generation);
+                System.out.println("Best makespan: " + queenBee.makespan);
+                System.out.println(" ");
+                System.out.println(" ");
+            }
+
+            if (termination()) {
+                break;
+            }
+
+            // Local Search
+
+            // Abandon patch if stuck for N repetitions
+            for(int i = 0; i < Settings.numberOfBestPatches; i++){
+                if (++scoutBees[i].repetitions > Settings.repetitionsForSiteAbandonment) {
+                    scoutBees[i] = new Bee();
+                }
+            }
+
+            // find best solution from each elite patch
+            for (int i = 0; i < Settings.numberOfElitePatches; i++) {
+                Bee scoutBee = scoutBees[i];
+                for (int j = 0; j < Settings.nRecruitedBeesElite; j++) {
+                    Bee recruit = new Bee(scoutBee, Settings.neighbourhoodSize);
+                    if (recruit.makespan < scoutBees[i].makespan) {
+                        scoutBees[i] = recruit;
+                    }
+                }
+            }
+
+            // find best solution from non elite patch
+            for (int i = Settings.numberOfElitePatches; i < Settings.numberOfBestPatches; i++) {
+                Bee scoutBee = scoutBees[i];
+                for (int j = 0; j < Settings.nRecruitedBeesNonElite; j++) {
+                    Bee recruit = new Bee(scoutBee, Settings.neighbourhoodSize);
+                    if (recruit.makespan < scoutBees[i].makespan) {
+                        scoutBees[i] = recruit;
+                    }
+                }
+            }
+
+            if (termination()) {
+                break;
+            }
+            // Global Search
+
+            for (int i = Settings.numberOfBestPatches; i < scoutBees.length; i++) {
+                scoutBees[i] = new Bee();
+            }
+
+        }
+
+        // print final best solution
+        System.out.println(" ");
+        System.out.println(" ");
+        System.out.println("Final Solution");
+        System.out.println("Final makespan: " + queenBee.makespan);
+        System.out.println(" ");
+        System.out.println(" ");
+    Schedule bestSchedule = new Schedule(queenBee.particle);
+        for (List<Integer> machine : bestSchedule.schedule) {
+            System.out.println(machine);
+        }
+    }
+
+    public boolean termination() {
+        Arrays.sort(scoutBees);
+        if (scoutBees[0].makespan < queenBee.makespan) {
+            queenBee = new Bee(scoutBees[0]);
+        }
+        if (!Settings.earlyStopping || queenBee.makespan > Settings.earlyBreak){
+            return false;
+        }
+        return true;
+    }
+
+    public static void main(String[] args) {
+
+        final long startTime = System.currentTimeMillis();
+        BA test = new BA();
+        test.run();
+        final long endTime = System.currentTimeMillis();
+        System.out.println("Execution time: " + (endTime - startTime));
+
+    }
+}
