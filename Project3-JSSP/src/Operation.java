@@ -9,11 +9,6 @@ public class Operation implements Comparable<Operation> {
         this.velocity = velocity;
     }
 
-    public Operation(int jobId, double position) {
-        this.jobId = jobId;
-        this.position = position;
-    }
-
     @Override
     public int compareTo(Operation o) {
         if (this.position < o.position) return -1;
