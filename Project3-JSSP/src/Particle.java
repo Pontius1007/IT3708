@@ -1,7 +1,6 @@
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 public class Particle {
 
@@ -15,7 +14,7 @@ public class Particle {
         particle = new Operation[LookupTable.numberOfJobs * LookupTable.numberOfMachines];
         for (int job = 0; job < LookupTable.numberOfJobs * LookupTable.numberOfMachines; job++) {
             Operation cloneOperation = cloneParticle.particle[job];
-            particle[job] = new Operation(cloneOperation.jobId, cloneOperation.machineId, cloneOperation.position, cloneOperation.velocity);
+            particle[job] = new Operation(cloneOperation.jobId, cloneOperation.position, cloneOperation.velocity);
         }
         this.makespan = cloneParticle.makespan;
     }
@@ -26,7 +25,7 @@ public class Particle {
         // adds all the operations to the particle with random position and velocity vectors
         for (int jobIdx = 0; jobIdx < LookupTable.numberOfJobs; jobIdx++) {
             for (int machineIdx = 0; machineIdx < LookupTable.numberOfMachines; machineIdx++) {
-                particle[jobIdx * LookupTable.numberOfJobs + machineIdx] = new Operation(jobIdx, machineIdx,
+                particle[jobIdx * LookupTable.numberOfMachines + machineIdx] = new Operation(jobIdx,
                         getRandomDoubleBetweenRange(Settings.xmin, Settings.xmax),
                         getRandomDoubleBetweenRange(Settings.vmin, Settings.vmax));
             }
@@ -35,6 +34,9 @@ public class Particle {
         updateMakespan();
     }
 
+    public static double getRandomDoubleBetweenRange(double min, double max) {
+        return (Math.random() * ((max - min) + 1)) + min;
+    }
 
     public void updateParticle(Particle globalBest) {
         for (int jobIndex = 0; jobIndex < LookupTable.numberOfJobs * LookupTable.numberOfMachines; jobIndex++) {
@@ -44,7 +46,7 @@ public class Particle {
             Operation globalParticle = globalBest.particle[jobIndex];
 
             // updates velocity and position
-            currentParticle.velocity = currentParticle.velocity
+            currentParticle.velocity = Settings.inertiaWeight*currentParticle.velocity
                     + Settings.c1 * Math.random() * (localParticle.position - currentParticle.position)
                     + Settings.c2 * Math.random() * (globalParticle.position - currentParticle.position);
 
@@ -62,11 +64,11 @@ public class Particle {
 
         /*Schedule s = new Schedule(particle);
         this.makespan = s.makespan;*/
-
         updateMakeSpan2();
     }
 
 
+    // good speedup calculating makespan without creating the arraylist for the schedule
     public void updateMakeSpan2() {
         // making a copy of particle before sorting
         List<Operation> copy = new ArrayList<>(particle.length);
@@ -75,47 +77,39 @@ public class Particle {
         }
         Collections.sort(copy);
 
-        // lastOperation keeps track of last machine executing each job
+        // lastOperation keeps track of last time a machine is executing each job
         int[] lastOperation = new int[LookupTable.numberOfJobs];
+        // machineNumber keeps track of the current machineNumber doing the specified job
+        int[] machineNumber = new int[LookupTable.numberOfJobs];
+
         for (int i = 0; i < LookupTable.numberOfJobs; i++) lastOperation[i] = -1;
 
-        // lastJob keeps track of the last timeunit that job was executed
-        int[] lastJob = new int[LookupTable.numberOfJobs];
-
+        // machineDurations keeps track of the time used to execute all jobs for each machine
         int[] machineDurations = new int[LookupTable.numberOfMachines];
 
-        while (copy.size() > 0) {
-            // finds the best legal operation to add
-            Operation bestOp = copy.get(0);
-            for (Operation o : copy) {
-                int requiredPrevious = LookupTable.previousMachine.get(o.jobId).get(o.machineId);
-                if (requiredPrevious == -1 || requiredPrevious == lastOperation[o.jobId]) {
-                    bestOp = o;
-                    break;
-                }
+        for(Operation o: copy){
+            int jobId = o.jobId;
+            int machineId = LookupTable.jobOrder[jobId][machineNumber[jobId]++];
+
+            // the end time of that job on another machine (possible start time for this job)
+            int startTime = lastOperation[jobId];
+
+            if(startTime > machineDurations[machineId]){
+                machineDurations[machineId] = startTime + LookupTable.durations[o.jobId][machineId];
             }
-            int lastUsed = lastJob[bestOp.jobId];
-            // if machine needs to wait for job to finnish on another machine
-            if (lastUsed > machineDurations[bestOp.machineId]) {
-                machineDurations[bestOp.machineId] = lastUsed + LookupTable.durations[bestOp.jobId][bestOp.machineId];
-            } else {
-                machineDurations[bestOp.machineId] += LookupTable.durations[bestOp.jobId][bestOp.machineId];
+            else{
+                machineDurations[machineId] += LookupTable.durations[o.jobId][machineId];
             }
-            if (machineDurations[bestOp.machineId] > lastJob[bestOp.jobId]) {
-                lastJob[bestOp.jobId] = machineDurations[bestOp.machineId];
+            if (machineDurations[machineId] > lastOperation[o.jobId]) {
+                lastOperation[o.jobId] = machineDurations[machineId];
             }
-            lastOperation[bestOp.jobId] = bestOp.machineId;
-            copy.remove(bestOp);
         }
+        // update makespan
         makespan = 0;
         for (int duration : machineDurations) {
             if (duration > makespan) {
                 makespan = duration;
             }
         }
-    }
-
-    public static double getRandomDoubleBetweenRange(double min, double max) {
-        return (Math.random() * ((max - min) + 1)) + min;
     }
 }

@@ -12,10 +12,26 @@ public class LookupTable {
 
 
     public static int[][] durations;
-    public static List<Map<Integer, Integer>> previousMachine;
+    public static int[][] jobOrder;
 
-    public LookupTable() {}
+    public LookupTable() {
+    }
 
+    private static <T> Collection<List<T>> partition(List<T> list, int size) {
+        final AtomicInteger counter = new AtomicInteger(0);
+
+        return list.stream()
+                .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / size))
+                .values();
+    }
+
+    public static void main(String[] args) throws IOException {
+        LookupTable test = new LookupTable();
+        test.readFile("1");
+        for (List<List<Integer>> temp : jobSchedule) {
+            System.out.println(temp);
+        }
+    }
 
     public void readFile(String fileName) throws IOException {
         String fileNameCorrect = "Test Data/" + fileName + ".txt";
@@ -35,21 +51,17 @@ public class LookupTable {
                 Collection<List<String>> jobAs2D = partition(readLinesAsList, 2);
                 jobSchedule.add(convertToInt(jobAs2D));
             }
-        }
-        finally {
-            previousMachine = new ArrayList<>();
+        } finally {
             durations = new int[numberOfJobs][numberOfMachines];
-            for(int jobId = 0; jobId  < numberOfJobs; jobId++){
-                Map<Integer, Integer> currentJob = new HashMap<>();
+            jobOrder = new int[numberOfJobs][numberOfMachines];
+            for (int jobId = 0; jobId < numberOfJobs; jobId++) {
                 List<List<Integer>> row = jobSchedule.get(jobId);
-                int previous = -1;
-                for(int machineId = 0; machineId < numberOfMachines; machineId++){
+                for (int machineId = 0; machineId < numberOfMachines; machineId++) {
                     List<Integer> tuple = row.get(machineId);
-                    currentJob.put(tuple.get(0), previous);
-                    previous = tuple.get(0);
                     durations[jobId][tuple.get(0)] = tuple.get(1);
+                    jobOrder[jobId][machineId] = tuple.get(0);
+
                 }
-                previousMachine.add(currentJob);
             }
             br.close();
         }
@@ -58,29 +70,13 @@ public class LookupTable {
 
     private List<List<Integer>> convertToInt(Collection<List<String>> toBeConverted) {
         List<List<Integer>> converted = new ArrayList<>();
-        for(List<String> couple : toBeConverted) {
+        for (List<String> couple : toBeConverted) {
             List<Integer> temp = new ArrayList<>();
-            for(String value : couple) {
+            for (String value : couple) {
                 temp.add(Integer.parseInt(value));
             }
             converted.add(temp);
         }
         return converted;
-    }
-
-    private static  <T> Collection<List<T>> partition(List<T> list, int size) {
-        final AtomicInteger counter = new AtomicInteger(0);
-
-        return list.stream()
-                .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / size))
-                .values();
-    }
-
-    public static void main(String[] args) throws IOException {
-        LookupTable test = new LookupTable();
-        test.readFile("1");
-        for(List<List<Integer>> temp : test.jobSchedule) {
-            System.out.println(temp);
-        }
     }
 }

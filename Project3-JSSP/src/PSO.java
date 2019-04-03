@@ -1,12 +1,13 @@
 import java.io.IOException;
-import java.sql.SQLOutput;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class PSO {
 
     public Particle globalBest;
     public Particle[] swarm;
+    private boolean threads = false;
 
     public PSO() {
         LookupTable table = new LookupTable();
@@ -20,12 +21,22 @@ public class PSO {
     public void run() {
         // initiate swarm
         swarm = new Particle[Settings.swarmSize];
+        final ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         for (int i = 0; i < Settings.swarmSize; i++) {
-            swarm[i] = new Particle();
+            final int index = i;
+            executorService.execute(() -> {
+                swarm[index] = new Particle();
+            });
         }
+        executorService.shutdown();
+        while (!executorService.isTerminated()) ;
+
         globalBest = swarm[0];
 
         for (int generation = 0; generation < Settings.numberOfGenerations; generation++) {
+            if (globalBest.makespan < Settings.earlyBreak && Settings.earlyStopping) {
+                break;
+            }
             // update global best particle
             for (Particle p : swarm) {
                 if (p.makespan < globalBest.makespan) {
@@ -33,9 +44,8 @@ public class PSO {
                 }
             }
             // update particle position and velocities
-            for (Particle p : swarm) {
-                p.updateParticle(globalBest);
-            }
+            updateParticles();
+
             if (Settings.verbose) {
                 System.out.println(" ");
                 System.out.println(" ");
@@ -54,6 +64,17 @@ public class PSO {
             System.out.println(machine);
         }
 
+    }
+
+    public void updateParticles(){
+        final ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        for (Particle p : swarm) {
+            executorService.execute(() -> {
+                p.updateParticle(globalBest);
+            });
+        }
+        executorService.shutdown();
+        while (!executorService.isTerminated()) ;
     }
 
     public static void main(String[] args) {

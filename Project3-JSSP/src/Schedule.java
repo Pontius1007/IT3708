@@ -1,28 +1,34 @@
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 public class Schedule {
     // Schedule is one row for each machine, 1 element is one time unit
     // -1 if the machine is waiting, and number of job being executed if working.
     public List<List<Integer>> schedule;
     public int makespan = 0;
-    public int[] lastOperation;
+    private int[] lastOperation;
+    private int[] machineNumber;
 
     public Schedule(Operation[] particle) {
         schedule = new ArrayList<>();
+        // lastOperation keeps track of last time a machine is executing each job
         lastOperation = new int[LookupTable.numberOfJobs];
-        // lastOperation for tracking the last machine that did job(i)
+        // machineNumber keeps track of the current machineNumber doing the specified job
+        machineNumber = new int[LookupTable.numberOfJobs];
+        // lastOperation for tracking the last time a machine did job(i)
         for (int i = 0; i < LookupTable.numberOfJobs; i++) lastOperation[i] = -1;
         for (int i = 0; i < LookupTable.numberOfMachines; i++) {
             schedule.add(new ArrayList<>());
         }
+
         // copying the particle array to not fuck up references when sorting
-        List operations = particleCopy(particle);
+        List<Operation> operations = particleCopy(particle);
         Collections.sort(operations);
         // add all operations to the schedule
-        while (operations.size() > 0) {
-            Operation best = bestlegal(operations);
-            addOperationToSchedule(best);
-            operations.remove(best);
+        for(Operation o: operations){
+            addOperationToSchedule(o);
         }
         // find the longest time a machine uses, and use it as makespan
         for (int machineId = 0; machineId < LookupTable.numberOfMachines; machineId++) {
@@ -31,35 +37,23 @@ public class Schedule {
                 makespan = size;
             }
         }
-    }
-
-    // finds the first operation that can be inserted with the constrains of machine ordering
-    private Operation bestlegal(List<Operation> operations) throws IllegalStateException {
-        List<Map<Integer, Integer>> previousMachine = LookupTable.previousMachine;
-        for (Operation o : operations) {
-            int requiredPrevious = previousMachine.get(o.jobId).get(o.machineId);
-            if (requiredPrevious == -1 || requiredPrevious == lastOperation[o.jobId]) {
-                return o;
+        for(List<Integer> machine: schedule){
+            for(int i = 0; i < machine.size(); i++){
+                machine.set(i, machine.get(i)+1);
             }
         }
-        throw new IllegalStateException("Not possible to add any Operations");
     }
+
 
     // if the job is currently being done by another machine, the machine waits for it to be done, and then executes
     private void addOperationToSchedule(Operation operation) {
         int jobId = operation.jobId;
-        int machineId = operation.machineId;
-        int startTime = 0;
-        // finds the latest time that the job was executed
-        for (List<Integer> machine : schedule) {
-            for (int time = 0; time < machine.size(); time++) {
-                if (machine.get(time) == jobId && time + 1 > startTime) {
-                    startTime = time + 1;
-                }
-            }
-        }
-        // adds -1s to wait for the last time the job was executed by another machine
-        for (int i = schedule.get(machineId).size(); i < startTime; i++) {
+        int machineId = LookupTable.jobOrder[jobId][machineNumber[jobId]++];
+
+        int startTime = lastOperation[jobId];
+
+        // waits for the job to finnish on the other machine
+        for(int waitingTime = schedule.get(machineId).size(); waitingTime < startTime; waitingTime ++){
             schedule.get(machineId).add(-1);
         }
         // then adds the current job with respective duration to the machine
@@ -67,7 +61,7 @@ public class Schedule {
         for (int i = 0; i < joblen; i++) {
             schedule.get(machineId).add(jobId);
         }
-        lastOperation[jobId] = machineId;
+        lastOperation[jobId] = schedule.get(machineId).size();
     }
 
     private List<Operation> particleCopy(Operation[] particle) {
