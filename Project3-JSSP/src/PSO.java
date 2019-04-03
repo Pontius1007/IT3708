@@ -7,7 +7,6 @@ public class PSO {
 
     public Particle globalBest;
     public Particle[] swarm;
-    private boolean threads = false;
 
     public PSO() {
         LookupTable table = new LookupTable();
@@ -18,15 +17,21 @@ public class PSO {
         }
     }
 
+    public static void main(String[] args) {
+        final long startTime = System.currentTimeMillis();
+        PSO test = new PSO();
+        test.run();
+        final long endTime = System.currentTimeMillis();
+        System.out.println("Execution time: " + (endTime - startTime));
+    }
+
     public void run() {
         // initiate swarm
         swarm = new Particle[Settings.swarmSize];
         final ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         for (int i = 0; i < Settings.swarmSize; i++) {
             final int index = i;
-            executorService.execute(() -> {
-                swarm[index] = new Particle();
-            });
+            executorService.execute(() -> swarm[index] = new Particle());
         }
         executorService.shutdown();
         while (!executorService.isTerminated()) ;
@@ -66,22 +71,12 @@ public class PSO {
 
     }
 
-    public void updateParticles(){
+    public void updateParticles() {
         final ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         for (Particle p : swarm) {
-            executorService.execute(() -> {
-                p.updateParticle(globalBest);
-            });
+            executorService.execute(() -> p.updateParticle(globalBest));
         }
         executorService.shutdown();
         while (!executorService.isTerminated()) ;
-    }
-
-    public static void main(String[] args) {
-        final long startTime = System.currentTimeMillis();
-        PSO test = new PSO();
-        test.run();
-        final long endTime = System.currentTimeMillis();
-        System.out.println("Execution time: " + (endTime - startTime));
     }
 }
