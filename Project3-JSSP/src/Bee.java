@@ -2,13 +2,13 @@ public class Bee extends Particle {
 
     public int repetitions;
 
-    public Bee(Particle cloneParticle, double neighbourDistance) {
+    public Bee(Bee cloneParticle, Bee randNeighbour) {
         super(cloneParticle);
         this.repetitions = 0;
-        randomNeighbourhood(neighbourDistance);
+        randomNeighbourhood(randNeighbour);
     }
 
-    public Bee(Particle cloneParticle) {
+    public Bee(Bee cloneParticle) {
         super(cloneParticle);
         this.repetitions = 0;
     }
@@ -18,9 +18,10 @@ public class Bee extends Particle {
         this.repetitions = 0;
     }
 
-    public void randomNeighbourhood(double neighbourDistance){
+    public void randomNeighbourhood(Bee randNeighbour){
         for(int i = 0; i < this.particle.length; i++){
-            this.particle[i].position += this.getRandomDoubleBetweenRange(-neighbourDistance/2, neighbourDistance/2);
+            this.particle[i].position += this.getRandomDoubleBetweenRange(-Settings.neighbourhoodSize, Settings.neighbourhoodSize)
+            * (this.particle[i].position-randNeighbour.particle[i].position);
         }
     }
 }

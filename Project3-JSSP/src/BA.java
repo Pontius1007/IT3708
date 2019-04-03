@@ -1,8 +1,7 @@
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.SplittableRandom;
 
 public class BA {
 
@@ -57,8 +56,9 @@ public class BA {
             // find best solution from each elite patch
             for (int i = 0; i < Settings.numberOfElitePatches; i++) {
                 Bee scoutBee = scoutBees[i];
+                int randIndex = new SplittableRandom().nextInt(0, scoutBees.length);
                 for (int j = 0; j < Settings.nRecruitedBeesElite; j++) {
-                    Bee recruit = new Bee(scoutBee, Settings.neighbourhoodSize);
+                    Bee recruit = new Bee(scoutBee, scoutBees[randIndex]);
                     if (recruit.makespan < scoutBees[i].makespan) {
                         scoutBees[i] = recruit;
                     }
@@ -68,8 +68,9 @@ public class BA {
             // find best solution from non elite patch
             for (int i = Settings.numberOfElitePatches; i < Settings.numberOfBestPatches; i++) {
                 Bee scoutBee = scoutBees[i];
+                int randIndex = new SplittableRandom().nextInt(0, scoutBees.length);
                 for (int j = 0; j < Settings.nRecruitedBeesNonElite; j++) {
-                    Bee recruit = new Bee(scoutBee, Settings.neighbourhoodSize);
+                    Bee recruit = new Bee(scoutBee, scoutBees[randIndex]);
                     if (recruit.makespan < scoutBees[i].makespan) {
                         scoutBees[i] = recruit;
                     }
