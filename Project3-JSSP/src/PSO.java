@@ -1,3 +1,4 @@
+import javax.swing.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -68,7 +69,19 @@ public class PSO {
         for (List<Integer> machine : bestSchedule.schedule) {
             System.out.println(machine);
         }
+        plottGantt("Testing", bestSchedule);
 
+
+    }
+
+    private void plottGantt(String title, Schedule ganttSchedule) {
+        SwingUtilities.invokeLater(() -> {
+            Visualizer plot = new Visualizer(title, ganttSchedule);
+            plot.setSize(1000, 600);
+            plot.setLocationRelativeTo(null);
+            plot.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+            plot.setVisible(true);
+        });
     }
 
     public void updateParticles() {
