@@ -1,3 +1,5 @@
+import org.jfree.ui.RefineryUtilities;
+
 import javax.swing.*;
 import java.io.IOException;
 import java.util.List;
@@ -75,13 +77,10 @@ public class PSO {
     }
 
     private void plottGantt(String title, Schedule ganttSchedule) {
-        SwingUtilities.invokeLater(() -> {
-            Visualizer plot = new Visualizer(title, ganttSchedule);
-            plot.setSize(1000, 600);
-            plot.setLocationRelativeTo(null);
-            plot.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-            plot.setVisible(true);
-        });
+        final Visualizer gantt = new Visualizer(title, ganttSchedule);
+        gantt.pack();
+        RefineryUtilities.centerFrameOnScreen(gantt);
+        gantt.setVisible(true);
     }
 
     public void updateParticles() {
