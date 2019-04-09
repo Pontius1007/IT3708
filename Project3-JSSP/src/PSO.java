@@ -71,13 +71,13 @@ public class PSO {
         for (List<Integer> machine : bestSchedule.schedule) {
             System.out.println(machine);
         }
-        plottGantt("Testing", bestSchedule);
+        plottGantt("Testing", bestSchedule, globalBest.makespan);
 
 
     }
 
-    private void plottGantt(String title, Schedule ganttSchedule) {
-        final Visualizer gantt = new Visualizer(title, ganttSchedule);
+    private void plottGantt(String title, Schedule ganttSchedule, Double makespan) {
+        final Visualizer gantt = new Visualizer(title, ganttSchedule, makespan);
         gantt.pack();
         RefineryUtilities.centerFrameOnScreen(gantt);
         gantt.setVisible(true);
