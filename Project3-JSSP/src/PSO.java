@@ -56,14 +56,7 @@ public class PSO {
             // update particle position and velocities
             updateParticles();
 
-            if (Settings.verbose) {
-                System.out.println(" ");
-                System.out.println(" ");
-                System.out.println("Generation nr. " + generation);
-                System.out.println("Best makespan: " + globalBest.makespan);
-                System.out.println(" ");
-                System.out.println(" ");
-            }
+            BA.printStatus(generation, globalBest);
 
             if (Settings.inertiaWeight > Settings.inertiaWeightLowerBound)
                 Settings.inertiaWeight *= Settings.inertiaWeightDecrementFactor;
@@ -73,7 +66,7 @@ public class PSO {
         for (List<Integer> machine : bestSchedule.schedule) {
             System.out.println(machine);
         }
-        plottGantt("Schedule for file " + Settings.testData, bestSchedule, globalBest.makespan);
+        plottGantt("PSO Schedule for file " + Settings.testData, bestSchedule, globalBest.makespan);
 
 
     }
