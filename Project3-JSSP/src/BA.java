@@ -31,14 +31,7 @@ public class BA {
 
         for (int generation = 0; generation < Settings.numberOfGenerations; generation++) {
 
-            if (Settings.verbose) {
-                System.out.println(" ");
-                System.out.println(" ");
-                System.out.println("Generation nr. " + generation);
-                System.out.println("Best makespan: " + queenBee.makespan);
-                System.out.println(" ");
-                System.out.println(" ");
-            }
+            printStatus(generation, queenBee);
 
             if (termination()) {
                 break;
@@ -98,6 +91,17 @@ public class BA {
     Schedule bestSchedule = new Schedule(queenBee.particle);
         for (List<Integer> machine : bestSchedule.schedule) {
             System.out.println(machine);
+        }
+    }
+
+    static void printStatus(int generation, Particle queenBee) {
+        if (Settings.verbose) {
+            System.out.println(" ");
+            System.out.println(" ");
+            System.out.println("Generation nr. " + generation);
+            System.out.println("Best makespan: " + queenBee.makespan);
+            System.out.println(" ");
+            System.out.println(" ");
         }
     }
 
