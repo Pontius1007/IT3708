@@ -134,8 +134,8 @@ class Visualizer extends JFrame {
             for (int i = 0; i < machine.size(); i++) {
                 if (machine.get(i) != 0) {
                     if (machine.get(i) != startJobNumber) {
-                        if (duration > 1) {
-                            job.addSubtask(new Task("" + startJobNumber, new SimpleTimePeriod(start, start + duration)));
+                        if (startJobNumber != 0) {
+                            job.addSubtask(new Task("" + (startJobNumber), new SimpleTimePeriod(start, start + duration)));
                         }
                         startJobNumber = machine.get(i);
                         duration = 1;
@@ -147,9 +147,9 @@ class Visualizer extends JFrame {
                 }
             }
             //Adds the last job
-            if (duration > 1) {
+            if (startJobNumber != 0) {
                 //System.out.println("Start: " + start + " duration: " + duration);
-                job.addSubtask(new Task("" + startJobNumber, new SimpleTimePeriod(start, start + duration)));
+                job.addSubtask(new Task("" + (startJobNumber), new SimpleTimePeriod(start, start + duration)));
             }
             series1.add(job);
             machineNumber++;

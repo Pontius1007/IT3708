@@ -71,7 +71,7 @@ public class PSO {
         for (List<Integer> machine : bestSchedule.schedule) {
             System.out.println(machine);
         }
-        plottGantt("Testing", bestSchedule, globalBest.makespan);
+        plottGantt("Schedule for file " + Settings.testData, bestSchedule, globalBest.makespan);
 
 
     }
