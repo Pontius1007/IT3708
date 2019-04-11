@@ -1,8 +1,9 @@
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
-public class Particle {
+public class Particle implements Comparable<Particle> {
 
     public Operation[] particle;
     public double makespan;
@@ -21,7 +22,6 @@ public class Particle {
 
     public Particle() {
         particle = new Operation[LookupTable.numberOfJobs * LookupTable.numberOfMachines];
-
         // adds all the operations to the particle with random position and velocity vectors
         for (int jobIdx = 0; jobIdx < LookupTable.numberOfJobs; jobIdx++) {
             for (int machineIdx = 0; machineIdx < LookupTable.numberOfMachines; machineIdx++) {
@@ -111,5 +111,12 @@ public class Particle {
                 makespan = duration;
             }
         }
+    }
+
+    @Override
+    public int compareTo(Particle o) {
+        if (this.makespan > o.makespan) return 1;
+        if (this.makespan < o.makespan) return -1;
+        return 0;
     }
 }
