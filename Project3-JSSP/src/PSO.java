@@ -77,7 +77,7 @@ public class PSO {
     }
 
     private void plottGantt(String title, Schedule ganttSchedule, Double makespan) {
-        final Visualizer gantt = new Visualizer(title, ganttSchedule, makespan);
+        final Visualizer gantt = new Visualizer(title, ganttSchedule, makespan, LookupTable.numberOfJobs);
         gantt.pack();
         RefineryUtilities.centerFrameOnScreen(gantt);
         gantt.setVisible(true);
