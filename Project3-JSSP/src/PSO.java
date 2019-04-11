@@ -1,3 +1,6 @@
+import org.jfree.ui.RefineryUtilities;
+
+import javax.swing.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -68,7 +71,16 @@ public class PSO {
         for (List<Integer> machine : bestSchedule.schedule) {
             System.out.println(machine);
         }
+        plottGantt("Testing", bestSchedule, globalBest.makespan);
 
+
+    }
+
+    private void plottGantt(String title, Schedule ganttSchedule, Double makespan) {
+        final Visualizer gantt = new Visualizer(title, ganttSchedule, makespan);
+        gantt.pack();
+        RefineryUtilities.centerFrameOnScreen(gantt);
+        gantt.setVisible(true);
     }
 
     public void updateParticles() {
