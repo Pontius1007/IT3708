@@ -16,16 +16,16 @@ public class BA {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println(LookupTable.numberOfJobs);
-        scoutBees = new Bee[Settings.numberOfScoutBees];
     }
 
     public void run(){
-        // initiate scout bees
+        // initiate scout bees (Step 1)
+        scoutBees = new Bee[Settings.numberOfScoutBees];
         for (int i = 0; i < scoutBees.length; i++) {
             scoutBees[i] = new Bee();
         }
 
+        // Step 2
         Arrays.sort(scoutBees);
         queenBee = new Bee(scoutBees[0]);
 
@@ -49,9 +49,8 @@ public class BA {
             // find best solution from each elite patch
             for (int i = 0; i < Settings.numberOfElitePatches; i++) {
                 Bee scoutBee = scoutBees[i];
-                int randIndex = new SplittableRandom().nextInt(0, scoutBees.length);
                 for (int j = 0; j < Settings.nRecruitedBeesElite; j++) {
-                    Bee recruit = new Bee(scoutBee, scoutBees[randIndex]);
+                    Bee recruit = new Bee(scoutBee, true);
                     if (recruit.makespan < scoutBees[i].makespan) {
                         scoutBees[i] = recruit;
                     }
@@ -61,9 +60,8 @@ public class BA {
             // find best solution from non elite patch
             for (int i = Settings.numberOfElitePatches; i < Settings.numberOfBestPatches; i++) {
                 Bee scoutBee = scoutBees[i];
-                int randIndex = new SplittableRandom().nextInt(0, scoutBees.length);
                 for (int j = 0; j < Settings.nRecruitedBeesNonElite; j++) {
-                    Bee recruit = new Bee(scoutBee, scoutBees[randIndex]);
+                    Bee recruit = new Bee(scoutBee, true);
                     if (recruit.makespan < scoutBees[i].makespan) {
                         scoutBees[i] = recruit;
                     }
@@ -88,7 +86,8 @@ public class BA {
         System.out.println("Final makespan: " + queenBee.makespan);
         System.out.println(" ");
         System.out.println(" ");
-    Schedule bestSchedule = new Schedule(queenBee.particle);
+        Schedule bestSchedule = new Schedule(queenBee.particle);
+        PSO.plottGantt("BA Schedule for file " + Settings.testData, bestSchedule, queenBee.makespan);
         for (List<Integer> machine : bestSchedule.schedule) {
             System.out.println(machine);
         }
@@ -106,7 +105,9 @@ public class BA {
     }
 
     public boolean termination() {
+        // step 2
         Arrays.sort(scoutBees);
+        // step 3
         if (scoutBees[0].makespan < queenBee.makespan) {
             queenBee = new Bee(scoutBees[0]);
         }
