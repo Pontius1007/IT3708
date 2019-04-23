@@ -46,11 +46,17 @@ public class Particle implements Comparable<Particle> {
             Operation globalParticle = globalBest.particle[jobIndex];
 
             // updates velocity and position
-            currentParticle.velocity = Settings.inertiaWeight*currentParticle.velocity
+            currentParticle.velocity = Settings.inertiaWeight * currentParticle.velocity
                     + Settings.c1 * Math.random() * (localParticle.position - currentParticle.position)
                     + Settings.c2 * Math.random() * (globalParticle.position - currentParticle.position);
 
+            if (currentParticle.velocity > Settings.vmax) currentParticle.velocity = Settings.vmax;
+            else if (currentParticle.velocity < Settings.vmin) currentParticle.velocity = Settings.vmin;
+
+
             currentParticle.position += currentParticle.velocity;
+            if (currentParticle.position < 0) currentParticle.position = 0;
+            else if (currentParticle.position > Settings.xmax) currentParticle.position = Settings.xmax;
         }
 
         updateMakespan();
@@ -59,6 +65,7 @@ public class Particle implements Comparable<Particle> {
             localBest = new Particle(this);
         }
     }
+
 
     public void updateMakespan() {
 
@@ -87,17 +94,16 @@ public class Particle implements Comparable<Particle> {
         // machineDurations keeps track of the time used to execute all jobs for each machine
         int[] machineDurations = new int[LookupTable.numberOfMachines];
 
-        for(Operation o: copy){
+        for (Operation o : copy) {
             int jobId = o.jobId;
             int machineId = LookupTable.jobOrder[jobId][machineNumber[jobId]++];
 
             // the end time of that job on another machine (possible start time for this job)
             int startTime = lastOperation[jobId];
 
-            if(startTime > machineDurations[machineId]){
+            if (startTime > machineDurations[machineId]) {
                 machineDurations[machineId] = startTime + LookupTable.durations[o.jobId][machineId];
-            }
-            else{
+            } else {
                 machineDurations[machineId] += LookupTable.durations[o.jobId][machineId];
             }
             if (machineDurations[machineId] > lastOperation[o.jobId]) {

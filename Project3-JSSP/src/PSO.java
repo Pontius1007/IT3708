@@ -1,6 +1,5 @@
 import org.jfree.ui.RefineryUtilities;
 
-import javax.swing.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -19,7 +18,6 @@ public class PSO {
             e.printStackTrace();
         }
     }
-
 
 
     public static void main(String[] args) {
@@ -56,10 +54,11 @@ public class PSO {
             // update particle position and velocities
             updateParticles();
 
-            BA.printStatus(generation, globalBest);
+            if (generation % Settings.printEachGeneration == 0 && Settings.verbose) BA.printStatus(generation, globalBest);
 
-            if (Settings.inertiaWeight > Settings.inertiaWeightLowerBound)
-                Settings.inertiaWeight *= Settings.inertiaWeightDecrementFactor;
+            //if (Settings.inertiaWeight > Settings.inertiaWeightLowerBound)
+            //   Settings.inertiaWeight *= Settings.inertiaWeightDecrementFactor;
+            Settings.inertiaWeight = inertiaWeight(generation + 1);
         }
 
         Schedule bestSchedule = new Schedule(globalBest.particle);
@@ -70,6 +69,11 @@ public class PSO {
 
 
     }
+
+    public double inertiaWeight(int iteration) {
+        return (Settings.inertiaWeightHigherBound - (Settings.inertiaWeightHigherBound - Settings.inertiaWeightLowerBound) / Settings.numberOfGenerations * iteration);
+    }
+
 
     private void plottGantt(String title, Schedule ganttSchedule, Double makespan) {
         final Visualizer gantt = new Visualizer(title, ganttSchedule, makespan, LookupTable.numberOfJobs);

@@ -15,13 +15,13 @@ public class Settings {
     // exploration exploitation
     public static final double c1 = 2;
     public static final double c2 = 2;
-    public static double inertiaWeight = 0.9;
-    public static final double inertiaWeightDecrementFactor = 0.975;
+    public static double inertiaWeightHigherBound = 1.2;
+    public static double inertiaWeight;
     public static final double inertiaWeightLowerBound = 0.4;
 
 
     // PSO parameters
-    public static final int swarmSize = 40;
+    public static final int swarmSize = 500;
 
 
 
@@ -34,10 +34,12 @@ public class Settings {
     public static final int nRecruitedBeesElite = 120; // nep
     public static final int nRecruitedBeesNonElite = 80; // nsp
     public static final int neighbourhoodSize = 1; // ngh
+    //Not used
     public static final double differenceFistAndLastIteration = 0.001;
     public static final int shrinkingConstant = 2; // sc
     public static final int repetitionsForShrinking = 10; // ngh
     public static final int repetitionsForEnhancements = 25; // ngh
+    //
     public static final int repetitionsForSiteAbandonment = 100; // ngh
 
 
@@ -53,10 +55,11 @@ public class Settings {
         put("6", 979);
     }};
 
-    public static final int numberOfGenerations = 100000; // ma
-    public static final String testData = "2";
+    public static final int numberOfGenerations = 10000; // ma
+    public static final String testData = "3";
     public static final boolean earlyStopping = true;
     public static final boolean verbose = true;
+    public static final int printEachGeneration = 50;
 
     // Helping parameters
     public static final double earlyBreak = (1.1 * Settings.acceptable.get(testData));
