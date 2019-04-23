@@ -9,6 +9,7 @@ public class PSO {
 
     public Particle globalBest;
     public Particle[] swarm;
+    public int breakgen = Settings.numberOfGenerations;
 
     public PSO() {
         LookupTable table = new LookupTable();
@@ -43,16 +44,19 @@ public class PSO {
 
         for (int generation = 0; generation < Settings.numberOfGenerations; generation++) {
             if (globalBest.makespan < Settings.earlyBreak && Settings.earlyStopping) {
+                breakgen = generation;
                 break;
             }
+
+            // update particle position and velocities
+            updateParticles();
+
             // update global best particle
             for (Particle p : swarm) {
                 if (p.makespan < globalBest.makespan) {
                     globalBest = new Particle(p);
                 }
             }
-            // update particle position and velocities
-            updateParticles();
 
             if (Settings.verbose && generation % Settings.printEachGeneration == 0) {
                 BA.printStatus(generation, globalBest);
@@ -67,7 +71,7 @@ public class PSO {
         for (List<Integer> machine : bestSchedule.schedule) {
             System.out.println(machine);
         }
-        BA.printStatus(Settings.numberOfGenerations, globalBest);
+        BA.printStatus(breakgen, globalBest);
         plottGantt("PSO Schedule for file " + Settings.testData, bestSchedule, globalBest.makespan);
 
 

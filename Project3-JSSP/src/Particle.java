@@ -30,8 +30,8 @@ public class Particle implements Comparable<Particle> {
                         getRandomDoubleBetweenRange(Settings.vmin, Settings.vmax));
             }
         }
-        this.localBest = new Particle(this);
         updateMakespan();
+        this.localBest = new Particle(this);
     }
 
     public static double getRandomDoubleBetweenRange(double min, double max) {

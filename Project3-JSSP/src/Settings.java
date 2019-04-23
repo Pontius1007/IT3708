@@ -56,7 +56,7 @@ public class Settings {
 
     public static final int numberOfGenerations = 10000; // ma
     public static final String testData = "3";
-    public static final boolean earlyStopping = true;
+    public static final boolean earlyStopping = false;
     public static final boolean verbose = true;
     public static final int printEachGeneration = 50;
 
