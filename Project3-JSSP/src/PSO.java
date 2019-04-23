@@ -68,9 +68,6 @@ public class PSO {
         }
 
         Schedule bestSchedule = new Schedule(globalBest.particle);
-        for (List<Integer> machine : bestSchedule.schedule) {
-            System.out.println(machine);
-        }
         BA.printStatus(breakgen, globalBest);
         plottGantt("PSO Schedule for file " + Settings.testData, bestSchedule, globalBest.makespan);
 

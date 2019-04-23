@@ -93,9 +93,6 @@ public class BA {
         System.out.println(" ");
         Schedule bestSchedule = new Schedule(queenBee.particle);
         PSO.plottGantt("BA Schedule for file " + Settings.testData, bestSchedule, queenBee.makespan);
-        for (List<Integer> machine : bestSchedule.schedule) {
-            System.out.println(machine);
-        }
     }
 
     static void printStatus(int generation, Particle queenBee) {
