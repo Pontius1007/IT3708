@@ -54,7 +54,7 @@ public class PSO {
             // update particle position and velocities
             updateParticles();
 
-            if (Settings.verbose && generation % 200 == 0) {
+            if (Settings.verbose && generation % Settings.printEachGeneration == 0) {
                 BA.printStatus(generation, globalBest);
             }
 
