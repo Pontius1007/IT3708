@@ -35,7 +35,7 @@ public class Particle implements Comparable<Particle> {
     }
 
     public static double getRandomDoubleBetweenRange(double min, double max) {
-        return (Math.random() * ((max - min) + 1)) + min;
+        return (Math.random() * ((max - min))) + min;
     }
 
     public void updateParticle(Particle globalBest) {
@@ -50,13 +50,13 @@ public class Particle implements Comparable<Particle> {
                     + Settings.c1 * Math.random() * (localParticle.position - currentParticle.position)
                     + Settings.c2 * Math.random() * (globalParticle.position - currentParticle.position);
 
-            if (currentParticle.velocity > Settings.vmax) currentParticle.velocity = Settings.vmax;
-            else if (currentParticle.velocity < Settings.vmin) currentParticle.velocity = Settings.vmin;
-
 
             currentParticle.position += currentParticle.velocity;
-            if (currentParticle.position < 0) currentParticle.position = 0;
-            else if (currentParticle.position > Settings.xmax) currentParticle.position = Settings.xmax;
+
+            if (currentParticle.position < Settings.xmin) currentParticle.position = Settings.xmin;
+            if (currentParticle.position > Settings.xmax) currentParticle.position = Settings.xmax;
+            if (currentParticle.velocity < Settings.vmin) currentParticle.velocity = Settings.vmin;
+            if (currentParticle.velocity > Settings.vmax) currentParticle.velocity = Settings.vmax;
         }
 
         updateMakespan();

@@ -15,14 +15,13 @@ public class Settings {
     // exploration exploitation
     public static final double c1 = 2;
     public static final double c2 = 2;
-    public static double inertiaWeightHigherBound = 1.2;
-    public static double inertiaWeight;
-    public static final double inertiaWeightLowerBound = 0.4;
+    public static double inertiaWeight = 0.9;
+    public static final double inertiaWeightHigherBound = 0.6;
+    public static final double inertiaWeightLowerBound = 0.2;
 
 
     // PSO parameters
-    public static final int swarmSize = 500;
-
+    public static final int swarmSize = 1000;
 
 
     // ************************* BA PARAMETERS *****************************
@@ -46,7 +45,7 @@ public class Settings {
     // ************************* SHARED PARAMETERS ***************************
 
     // acceptable values for test data
-    public static Map<String, Integer> acceptable = new HashMap<>(){{
+    public static Map<String, Integer> acceptable = new HashMap<>() {{
         put("1", 56);
         put("2", 1059);
         put("3", 1276);
