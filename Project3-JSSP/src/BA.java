@@ -7,6 +7,7 @@ public class BA {
 
     Bee[] scoutBees;
     Bee queenBee;
+    int endGeneration;
 
 
     public BA() {
@@ -30,10 +31,12 @@ public class BA {
         queenBee = new Bee(scoutBees[0]);
 
         for (int generation = 0; generation < Settings.numberOfGenerations; generation++) {
-
-            printStatus(generation, queenBee);
+            if (generation % Settings.printEachGeneration == 0 && Settings.verbose) {
+                printStatus(generation, queenBee);
+            }
 
             if (termination()) {
+                endGeneration = generation;
                 break;
             }
 
@@ -69,6 +72,7 @@ public class BA {
             }
 
             if (termination()) {
+                endGeneration = generation;
                 break;
             }
             // Global Search
@@ -84,6 +88,7 @@ public class BA {
         System.out.println(" ");
         System.out.println("Final Solution");
         System.out.println("Final makespan: " + queenBee.makespan);
+        System.out.println("Final generation: " + endGeneration);
         System.out.println(" ");
         System.out.println(" ");
         Schedule bestSchedule = new Schedule(queenBee.particle);

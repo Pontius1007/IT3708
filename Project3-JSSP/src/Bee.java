@@ -21,9 +21,12 @@ public class Bee extends Particle {
     }
 
     public void randomNeighbourhood(){
-        for (int i = 0; i < this.particle.length; i++) {
-            this.particle[i].position += (new SplittableRandom().nextInt(0, 100)-50)/50;
-        }
+        int pos1 = new SplittableRandom().nextInt(0, this.particle.length);
+        int pos2 = new SplittableRandom().nextInt(0, this.particle.length);
+        double cache1 = this.particle[pos1].position;
+        this.particle[pos1].position = this.particle[pos2].position;
+        this.particle[pos2].position = cache1;
+
         this.updateMakespan();
     }
 }
