@@ -27,17 +27,11 @@ public class Settings {
     // ************************* BA PARAMETERS *****************************
 
 
-    public static final int numberOfScoutBees = 500; // n
-    public static final int numberOfBestPatches = 150; // m
-    public static final int numberOfElitePatches = 30; // e
-    public static final int nRecruitedBeesElite = 120; // nep
-    public static final int nRecruitedBeesNonElite = 80; // nsp
-    public static final int neighbourhoodSize = 1; // ngh
-    //Not used
-    public static final double differenceFistAndLastIteration = 0.001;
-    public static final int shrinkingConstant = 2; // sc
-    public static final int repetitionsForShrinking = 10; // ngh
-    public static final int repetitionsForEnhancements = 25; // ngh
+    public static final int numberOfScoutBees = 50; // n
+    public static final int numberOfBestPatches = 15; // m
+    public static final int numberOfElitePatches = 3; // e
+    public static final int nRecruitedBeesElite = 12; // nep
+    public static final int nRecruitedBeesNonElite = 8; // nsp
     //
     public static final int repetitionsForSiteAbandonment = 100; // ngh
 
@@ -55,8 +49,8 @@ public class Settings {
     }};
 
     public static final int numberOfGenerations = 10000; // ma
-    public static final String testData = "3";
-    public static final boolean earlyStopping = false;
+    public static final String testData = "5";
+    public static final boolean earlyStopping = true;
     public static final boolean verbose = true;
     public static final int printEachGeneration = 50;
 
