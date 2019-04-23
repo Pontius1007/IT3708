@@ -16,12 +16,12 @@ public class Settings {
     public static final double c1 = 2;
     public static final double c2 = 2;
     public static double inertiaWeight = 0.9;
-    public static final double inertiaWeightDecrementFactor = 0.975;
-    public static final double inertiaWeightLowerBound = 0.4;
+    public static final double inertiaWeightHigherBound = 0.6;
+    public static final double inertiaWeightLowerBound = 0.2;
 
 
     // PSO parameters
-    public static final int swarmSize = 40;
+    public static final int swarmSize = 1000;
 
 
 
@@ -53,8 +53,8 @@ public class Settings {
         put("6", 979);
     }};
 
-    public static final int numberOfGenerations = 100000; // ma
-    public static final String testData = "2";
+    public static final int numberOfGenerations = 10000; // ma
+    public static final String testData = "3";
     public static final boolean earlyStopping = true;
     public static final boolean verbose = true;
 
